@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { HeroGallery } from "@/components/home/HeroGallery";
+import { SiteHeader } from "@/components/layout/SiteHeader";
 
 export const metadata: Metadata = {
   title: "NYES NECK",
@@ -7,8 +8,11 @@ export const metadata: Metadata = {
 
 export default function HomePage() {
   return (
-    <main className="site-main h-[100svh] overflow-hidden md:h-[100dvh]">
-      <HeroGallery />
-    </main>
+    <>
+      <SiteHeader />
+      <main className="site-main h-[100svh] overflow-hidden md:h-[100dvh]">
+        <HeroGallery />
+      </main>
+    </>
   );
 }

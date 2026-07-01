@@ -26,7 +26,7 @@ export function ContactForm() {
         Message
         <textarea className={`${fieldClass} min-h-40 resize-y`} name="message" />
       </label>
-      <button type="button" disabled className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#161616] px-6 font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
+      <button type="button" disabled className="mt-7 inline-flex min-h-12 w-full items-center justify-center rounded-full bg-[#161616] px-6 text-lg font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50">
         Send inquiry
       </button>
       <p id="form-status" className="mt-3 text-center text-sm text-black/55">Online inquiries will be available soon.</p>

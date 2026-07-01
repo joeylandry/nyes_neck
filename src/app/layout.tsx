@@ -1,17 +1,11 @@
 import type { Metadata } from "next";
-import { Manrope, Montserrat } from "next/font/google";
-import { SiteHeader } from "@/components/layout/SiteHeader";
+import { Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 
-const manrope = Manrope({
-  variable: "--font-manrope",
+const cormorantGaramond = Cormorant_Garamond({
+  variable: "--font-cormorant-garamond",
   subsets: ["latin"],
-  display: "swap",
-});
-
-const montserrat = Montserrat({
-  variable: "--font-montserrat",
-  subsets: ["latin"],
+  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
@@ -23,9 +17,8 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${manrope.variable} ${montserrat.variable}`}>
+    <html lang="en" className={cormorantGaramond.variable}>
       <body>
-        <SiteHeader />
         {children}
       </body>
     </html>

@@ -7,21 +7,39 @@ export type HeroImage = {
 
 export const heroImages: HeroImage[] = [
   {
-    src: "/images/hero/dune-path.webp",
-    alt: "A sandy path through beach grass toward calm Cape Cod water",
-    desktopPosition: "center 54%",
+    src: "/images/hero/nyes-neck-sunset.webp",
+    alt: "A weathered fence and stone jetty overlooking Nyes Neck at sunset",
+    desktopPosition: "center center",
+    mobilePosition: "56% center",
+  },
+  {
+    src: "/images/hero/rocky-shore-sunset.webp",
+    alt: "The setting sun reflecting across the water beside the rocky Nyes Neck shore",
+    desktopPosition: "center center",
     mobilePosition: "center center",
   },
   {
-    src: "/images/hero/weathered-dock.webp",
-    alt: "A weathered cedar dock beside a quiet Upper Cape tidal cove",
-    desktopPosition: "center 64%",
-    mobilePosition: "57% center",
+    src: "/images/hero/stormy-shore-sunset.webp",
+    alt: "Storm clouds above a coral sunset and the rocky Nyes Neck shoreline",
+    desktopPosition: "center center",
+    mobilePosition: "58% center",
   },
   {
-    src: "/images/hero/hydrangea-lane.webp",
-    alt: "Blue hydrangeas beside weathered Cape Cod cedar shingles",
+    src: "/images/hero/coastal-homes-sunset.webp",
+    alt: "Warm evening sun reflecting across Nyes Neck water beside coastal homes",
     desktopPosition: "center center",
-    mobilePosition: "66% center",
+    mobilePosition: "52% center",
+  },
+  {
+    src: "/images/hero/harbor-dock-sunset.webp",
+    alt: "A centered harbor dock leading toward anchored boats beneath a Cape Cod sunset",
+    desktopPosition: "center center",
+    mobilePosition: "center center",
+  },
+  {
+    src: "/images/hero/golden-dock-sunset.webp",
+    alt: "A quiet dock and stone jetty leading toward a golden Nyes Neck sunset",
+    desktopPosition: "center center",
+    mobilePosition: "58% center",
   },
 ];

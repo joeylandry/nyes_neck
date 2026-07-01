@@ -10,35 +10,27 @@ import { useCrossfadeCarousel } from "./useCrossfadeCarousel";
 const heroPaths = heroImages.map((image) => image.src);
 
 export function HeroGallery() {
-  const { activeIndex, incomingIndex, incomingVisible } = useCrossfadeCarousel(heroPaths);
-  const active = heroImages[activeIndex];
-  const incoming = incomingIndex === null ? null : heroImages[incomingIndex];
+  const activeIndex = useCrossfadeCarousel(heroPaths);
   const imagePosition = (mobile?: string, desktop?: string) =>
     ({ "--mobile-position": mobile, "--desktop-position": desktop } as CSSProperties);
 
   return (
     <section className="hero-height relative isolate w-full overflow-hidden" aria-label="NYES NECK introduction">
       <div className="absolute inset-0">
-        <Image
-          src={active.src}
-          alt={active.alt}
-          fill
-          priority
-          sizes="100vw"
-          className="hero-image object-cover"
-          style={imagePosition(active.mobilePosition, active.desktopPosition)}
-        />
-        {incoming ? (
+        {heroImages.map((image, index) => (
           <Image
-            src={incoming.src}
-            alt=""
+            key={image.src}
+            src={image.src}
+            alt={index === activeIndex ? image.alt : ""}
             fill
-            loading="eager"
+            priority={index === 0}
+            loading={index === 0 ? undefined : "eager"}
             sizes="100vw"
-            className={`hero-image object-cover transition-opacity duration-[1200ms] ease-in-out motion-reduce:transition-none ${incomingVisible ? "opacity-100" : "opacity-0"}`}
-            style={imagePosition(incoming.mobilePosition, incoming.desktopPosition)}
+            aria-hidden={index !== activeIndex}
+            className={`hero-image object-cover transition-opacity duration-[1200ms] ease-in-out motion-reduce:transition-none ${index === activeIndex ? "opacity-100" : "opacity-0"}`}
+            style={imagePosition(image.mobilePosition, image.desktopPosition)}
           />
-        ) : null}
+        ))}
       </div>
       <div className="absolute inset-0 bg-black/35" />
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/12 to-black/20" />
@@ -51,10 +43,10 @@ export function HeroGallery() {
             Rooted in Nyes Neck. Made for life on the Cape.
           </p>
           <div className="mt-6 grid w-full max-w-[27rem] grid-cols-2 gap-3">
-            <Button href="/shop" className="px-4 py-3 text-base tracking-normal shadow-md">
+            <Button href="/shop" className="px-4 py-3 text-lg tracking-normal shadow-md">
               Explore Products
             </Button>
-            <Button href="/about" variant="secondary" className="px-4 py-3 text-base tracking-normal">
+            <Button href="/about" variant="secondary" className="px-4 py-3 text-lg tracking-normal">
               Learn More
             </Button>
           </div>

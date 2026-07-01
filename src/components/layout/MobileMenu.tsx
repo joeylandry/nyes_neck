@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { Wordmark } from "@/components/brand/Wordmark";
+import { CartLink } from "@/components/shop/CartLink";
 
 type NavLink = { href: string; label: string };
 
@@ -33,22 +34,25 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
     <div className="md:hidden">
       <div className="fixed inset-x-0 top-0 z-50 flex h-[76px] items-center justify-between border-b border-black/10 bg-white px-4 shadow-sm">
         <Link href="/" aria-label="NYES NECK home">
-          <Wordmark className="text-[1rem]" />
+          <Wordmark className="text-[1.3rem]" />
         </Link>
-        <button
-          ref={triggerRef}
-          type="button"
-          className="flex min-h-11 min-w-11 items-center justify-center gap-2 text-sm font-medium"
-          aria-expanded={open}
-          aria-controls="mobile-navigation"
-          onClick={() => setOpen(true)}
-        >
-          Menu
-          <span className="flex w-5 flex-col gap-1.5" aria-hidden="true">
-            <span className="h-px w-full bg-black" />
-            <span className="h-px w-full bg-black" />
-          </span>
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            ref={triggerRef}
+            type="button"
+            className="flex min-h-11 min-w-11 items-center justify-center gap-2 px-2 text-base font-semibold"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+            onClick={() => setOpen(true)}
+          >
+            Menu
+            <span className="flex w-5 flex-col gap-1.5" aria-hidden="true">
+              <span className="h-px w-full bg-black" />
+              <span className="h-px w-full bg-black" />
+            </span>
+          </button>
+          <CartLink />
+        </div>
       </div>
 
       <div
@@ -66,7 +70,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
         className={`fixed right-0 top-0 z-[70] flex h-[100dvh] w-[min(20rem,82vw)] flex-col border-l border-black/10 bg-white p-5 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex min-h-12 items-center justify-between">
-          <Wordmark className="text-[0.95rem]" />
+          <Wordmark className="text-[1.25rem]" />
           <button
             ref={closeButtonRef}
             type="button"
@@ -82,7 +86,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
             <Link
               key={link.href}
               href={link.href}
-              className="flex min-h-14 items-center border-b border-black/10 text-lg"
+              className="flex min-h-14 items-center border-b border-black/10 text-xl font-semibold"
               onClick={() => setOpen(false)}
             >
               {link.label}

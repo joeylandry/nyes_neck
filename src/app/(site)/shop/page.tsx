@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { ProductGrid } from "@/components/shop/ProductGrid";
+import Link from "next/link";
+import { ProductReel } from "@/components/shop/ProductReel";
+import { ShopBrowseSections } from "@/components/shop/ShopBrowseSections";
 import { PageHeader } from "@/components/ui/PageHeader";
-import { categoryLabels } from "@/data/products";
-import { getProducts } from "@/lib/products";
+import { getFeaturedShopProducts, getShopSettings } from "@/lib/products";
 
 export const metadata: Metadata = {
   title: "Shop | NYES NECK",
@@ -10,34 +11,29 @@ export const metadata: Metadata = {
 };
 
 export default async function ShopPage() {
-  const products = await getProducts();
+  const settings = await getShopSettings();
+  const featuredProducts = await getFeaturedShopProducts(settings);
+  const featuredCategory = settings.featuredCategory;
 
   return (
     <main>
       <PageHeader title="Shop" tone="blue" />
-      <div className="mx-auto max-w-6xl px-5 py-12 md:px-6 md:py-16">
-        <div className="max-w-2xl">
-          <p className="text-xl leading-8 text-black/70 md:text-2xl md:leading-9">
-            The first NYES NECK collection is taking shape—enduring apparel and useful coastal goods, designed with the Upper Cape in mind.
-          </p>
-          <p className="mt-5 text-sm font-semibold uppercase tracking-[0.16em] text-[#183247]">
-            Products and pricing coming soon
-          </p>
-        </div>
+      <div className="mx-auto max-w-6xl px-5 py-9 md:px-6 md:py-12">
+        <section aria-labelledby="featured-heading">
+          <div className="mb-5 flex items-end justify-between gap-5">
+            <h2 id="featured-heading" className="font-heading text-2xl font-semibold tracking-[-0.04em] sm:text-3xl md:text-4xl">
+              {settings.featuredLabel}{featuredCategory ? `: ${featuredCategory.label}` : ""}
+            </h2>
+            {featuredCategory ? (
+              <Link href={`/shop/category/${featuredCategory.slug}`} className="hidden shrink-0 text-base font-semibold text-black/60 hover:text-black sm:inline-flex">
+                View all <span className="ml-2" aria-hidden="true">→</span>
+              </Link>
+            ) : null}
+          </div>
+          <ProductReel products={featuredProducts} />
+        </section>
 
-        <nav aria-label="Product collections" className="my-10 flex gap-2 overflow-x-auto pb-2 md:flex-wrap md:overflow-visible">
-          {Object.entries(categoryLabels).map(([slug, label]) => (
-            <a
-              key={slug}
-              href={`#${slug}`}
-              className="inline-flex min-h-11 shrink-0 items-center rounded-full border border-black/10 bg-white px-4 text-sm transition hover:border-black/30"
-            >
-              {label}
-            </a>
-          ))}
-        </nav>
-
-        <ProductGrid products={products} />
+        <ShopBrowseSections settings={settings} className="mt-10 md:mt-14" />
       </div>
     </main>
   );

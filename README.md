@@ -51,13 +51,17 @@ Add optimized local images to `public/images/hero/`, then edit `src/data/hero-im
 
 ### Product photography and products
 
-Replace `public/images/products/product-placeholder.svg` and update image paths in `src/data/products.ts`. Final product names, copy, variants, availability, and integer-cent prices also live in that file for this starter phase.
+Products, product types, collections, featured category, prices, variants, availability, and photography are managed in Sanity. Product-type and collection documents automatically become shop tiles and each document owns its tile image and 4:3 crop. Local records in `src/data/products.ts` are used only when Sanity is not configured; a configured storefront lists only published Sanity product types and collections.
 
-## Replacing local products with Sanity
+## Sanity setup
 
-The pages do not import the raw product array. They call the async functions in `src/lib/products.ts`. Keep the centralized types in `src/types/product.ts`, create Sanity schemas and queries, then replace the bodies of `getProducts`, `getFeaturedProducts`, and `getProductBySlug`.
+1. Copy `.env.example` to `.env.local` and enter the Sanity project ID and dataset.
+2. Add `http://localhost:3000` as a CORS origin in the Sanity project settings.
+3. Run `npm run dev` and open `/studio`, or run `npm run studio` for the standalone Studio.
+4. Create product types and collections and upload/crop the tile image on each entry, then configure the featured category in the singleton **Shop page** document.
+5. Add products. Each product requires exactly one Main image, permits one Hover image, and accepts any number of Gallery images.
 
-Likely schemas include Product, Product Variant, Category or Collection, Product Image, Featured Product Ordering, Availability, Product Copy, and SEO Metadata. Add Sanity image mapping at the data boundary so visual components continue receiving the existing `ProductImage` shape.
+Product media uses a 4:5 crop preview. Shop tiles use a 4:3 crop preview. Sanity stores the selected crop and hotspot; the storefront image pipeline applies both automatically.
 
 ## Future cart and checkout
 

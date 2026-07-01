@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function AboutPage() {
   return (
     <main>
-      <PageHeader title="About" eyebrow="OUR STORY" />
+      <PageHeader title="About" />
       <div className="mx-auto max-w-6xl px-5 py-14 md:px-6 md:py-20">
         <section className="grid gap-8 border-b border-black/10 pb-14 md:grid-cols-[0.8fr_1.2fr] md:gap-16 md:pb-20">
           <h2 className="font-heading text-4xl font-semibold leading-[1.05] tracking-[-0.045em] md:text-5xl">

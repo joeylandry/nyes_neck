@@ -1,36 +1,66 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# NYES NECK
 
-## Getting Started
+A premium, responsive starter website for NYES NECK, a Cape Cod lifestyle apparel brand rooted in North Falmouth and the Upper Cape.
 
-First, run the development server:
+## Install and run
+
+Requirements: Node.js 20.9 or newer and npm.
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Open [http://localhost:3000](http://localhost:3000).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Production
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npm run lint
+npm run build
+npm start
+```
 
-## Learn More
+## Project structure
 
-To learn more about Next.js, take a look at the following resources:
+```text
+src/
+  app/                 App Router pages, layouts, metadata, and global CSS
+  components/
+    brand/             Replaceable text wordmark
+    contact/           Contact form presentation
+    home/              Hero gallery and crossfade hook
+    layout/            Header, mobile drawer, and footer
+    shop/              Product cards, grid, and purchase boundary
+    ui/                Shared button and page header
+  data/                Local hero and product records
+  lib/                 Product data-access functions and formatting
+  types/               Central product contracts
+public/images/         Local hero and product placeholders
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Replacing assets
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Logo
 
-## Deploy on Vercel
+The current logo is text-based. Replace the implementation in `src/components/brand/Wordmark.tsx` with `next/image` or an inline SVG while preserving the component props (`tone` and `className`). All placements will update together.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+### Hero photography
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Add optimized local images to `public/images/hero/`, then edit `src/data/hero-images.ts`. Each entry supports separate `desktopPosition` and `mobilePosition` values. The included WebP photographs are original generated placeholders; PNG source copies are also included.
+
+### Product photography and products
+
+Replace `public/images/products/product-placeholder.svg` and update image paths in `src/data/products.ts`. Final product names, copy, variants, availability, and integer-cent prices also live in that file for this starter phase.
+
+## Replacing local products with Sanity
+
+The pages do not import the raw product array. They call the async functions in `src/lib/products.ts`. Keep the centralized types in `src/types/product.ts`, create Sanity schemas and queries, then replace the bodies of `getProducts`, `getFeaturedProducts`, and `getProductBySlug`.
+
+Likely schemas include Product, Product Variant, Category or Collection, Product Image, Featured Product Ordering, Availability, Product Copy, and SEO Metadata. Add Sanity image mapping at the data boundary so visual components continue receiving the existing `ProductImage` shape.
+
+## Future cart and checkout
+
+`src/components/shop/PurchaseAction.tsx` is the future cart integration boundary. It already receives stable product and variant IDs, but is intentionally disabled. Add provider-neutral cart state near the root layout only after a commerce provider is selected. Provider-specific checkout and order-confirmation code should live in a dedicated `src/lib/commerce/` area and route handlers or server actions, not in product cards.
+
+The contact form in `src/components/contact/ContactForm.tsx` is also intentionally non-submitting until a destination or form provider is selected.

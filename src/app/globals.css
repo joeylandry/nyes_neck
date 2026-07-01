@@ -1,26 +1,121 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #faf8f3;
+  --surface: #ffffff;
+  --foreground: #161616;
+  --coastal-navy: #183247;
+  --atlantic-blue: #7899a8;
+  --sea-glass: #a8c2bc;
+  --dune: #d8c7a8;
+  --weathered-sand: #e9e1d3;
+  --desktop-header-height: 73px;
+  --mobile-header-height: 76px;
 }
 
 @theme inline {
   --color-background: var(--background);
+  --color-surface: var(--surface);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-coastal-navy: var(--coastal-navy);
+  --color-atlantic-blue: var(--atlantic-blue);
+  --color-sea-glass: var(--sea-glass);
+  --color-dune: var(--dune);
+  --color-weathered-sand: var(--weathered-sand);
+  --font-sans: "Manrope", "Manrope Fallback", system-ui, sans-serif;
+  --font-heading: "Montserrat", "Montserrat Fallback", system-ui, sans-serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+* {
+  box-sizing: border-box;
+}
+
+html {
+  overflow-x: hidden;
+  background: var(--background);
 }
 
 body {
+  margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-manrope), system-ui, sans-serif;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.button-primary {
+  color: #161616;
+}
+
+.button-secondary,
+.button-ink {
+  color: #ffffff;
+}
+
+.button-secondary:hover {
+  color: #161616;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+:where(a, button, input, select, textarea, [tabindex]:not([tabindex="-1"])):focus-visible {
+  outline: 2px solid var(--foreground);
+  outline-offset: 3px;
+  border-radius: 0.25rem;
+}
+
+.font-heading {
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+}
+
+.site-main {
+  padding-top: var(--mobile-header-height);
+}
+
+.hero-height {
+  height: calc(100svh - var(--mobile-header-height));
+}
+
+.hero-image {
+  object-position: var(--mobile-position, center);
+}
+
+.product-pattern {
+  background-image:
+    radial-gradient(circle at 24% 20%, rgb(255 255 255 / 48%), transparent 26%),
+    linear-gradient(145deg, transparent 44%, rgb(24 50 71 / 7%) 44%, rgb(24 50 71 / 7%) 56%, transparent 56%);
+}
+
+@media (min-width: 768px) {
+  .site-main {
+    padding-top: var(--desktop-header-height);
+  }
+
+  .hero-height {
+    height: calc(100dvh - var(--desktop-header-height));
+  }
+
+  .hero-image {
+    object-position: var(--desktop-position, center);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
 }

@@ -1,0 +1,8 @@
+<svg width="1200" height="1400" viewBox="0 0 1200 1400" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <rect width="1200" height="1400" fill="#E9E1D3"/>
+  <circle cx="190" cy="190" r="270" fill="#FAF8F3" fill-opacity=".72"/>
+  <path d="M321 467L480 350C521 383 559 400 600 400C641 400 679 383 720 350L879 467L792 632L735 596V1025H465V596L408 632L321 467Z" fill="#183247"/>
+  <path d="M482 351C514 422 686 422 718 351" stroke="#FAF8F3" stroke-width="18"/>
+  <text x="600" y="700" text-anchor="middle" fill="#FAF8F3" font-family="Arial, sans-serif" font-size="44" font-weight="700" letter-spacing="10">NYES NECK</text>
+  <text x="600" y="1195" text-anchor="middle" fill="#183247" fill-opacity=".58" font-family="Arial, sans-serif" font-size="24" font-weight="700" letter-spacing="8">PRODUCT STUDY</text>
+</svg>

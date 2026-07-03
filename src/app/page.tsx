@@ -14,7 +14,12 @@ export default function HomePage() {
       <SiteHeader />
       <main className="site-main">
         <HeroGallery />
-        <ShopStorefront showHeader={false} />
+        <div
+          id="mini-shop"
+          className="scroll-mt-[var(--mobile-header-height)] md:scroll-mt-[var(--desktop-header-height)]"
+        >
+          <ShopStorefront showHeader={false} />
+        </div>
       </main>
       <SiteFooter />
     </>

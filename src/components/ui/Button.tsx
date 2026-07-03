@@ -6,6 +6,7 @@ type ButtonProps = {
   children: React.ReactNode;
   className?: string;
   disabled?: boolean;
+  onClick?: React.MouseEventHandler<HTMLElement>;
 };
 
 export function Button({
@@ -14,6 +15,7 @@ export function Button({
   children,
   className = "",
   disabled = false,
+  onClick,
 }: ButtonProps) {
   const base =
     "inline-flex min-h-11 items-center justify-center rounded-full px-7 py-3.5 text-lg font-semibold tracking-wide transition duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 motion-reduce:transform-none";
@@ -32,6 +34,7 @@ export function Button({
         className={classes}
         style={{ color: variant === "primary" ? "#161616" : "#ffffff" }}
         aria-disabled={disabled || undefined}
+        onClick={onClick}
       >
         {children}
       </Link>
@@ -44,6 +47,7 @@ export function Button({
       disabled={disabled}
       className={classes}
       style={{ color: variant === "primary" ? "#161616" : "#ffffff" }}
+      onClick={onClick}
     >
       {children}
     </button>

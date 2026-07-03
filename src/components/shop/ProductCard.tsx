@@ -5,10 +5,12 @@ import type { Product } from "@/types/product";
 
 export function ProductCard({
   product,
+  returnTo,
   priority = false,
   compact = false,
 }: {
   product: Product;
+  returnTo: string;
   priority?: boolean;
   compact?: boolean;
 }) {
@@ -18,7 +20,7 @@ export function ProductCard({
   return (
     <article>
       <Link
-        href={`/shop/${product.slug}`}
+        href={{ pathname: `/shop/${product.slug}`, query: { from: returnTo } }}
         className={`group block ${compact ? "rounded-[20px] focus-visible:rounded-[20px]" : "rounded-[30px] focus-visible:rounded-[30px]"}`}
       >
         <div className={`product-pattern relative aspect-[4/5] overflow-hidden border border-black/10 bg-[#e9e1d3] ${compact ? "rounded-[20px] shadow-[0_8px_24px_rgba(22,22,22,0.05)]" : "rounded-[30px] shadow-[0_12px_35px_rgba(22,22,22,0.05)]"}`}>
@@ -46,8 +48,7 @@ export function ProductCard({
           ) : null}
         </div>
         <div className={`px-1 pb-2 ${compact ? "pt-3" : "pt-5"}`}>
-          <p className={`font-bold uppercase tracking-[0.14em] text-black/50 ${compact ? "text-xs" : "text-sm"}`}>{product.categoryLabel}</p>
-          <h2 className={`font-heading font-semibold leading-tight tracking-[-0.025em] ${compact ? "mt-1.5 text-base sm:text-lg" : "mt-2 text-xl"}`}>{product.name}</h2>
+          <h2 className={`font-heading font-semibold leading-tight tracking-[-0.025em] ${compact ? "text-base sm:text-lg" : "text-xl"}`}>{product.name}</h2>
           <p className={`text-black/55 ${compact ? "mt-1.5 text-sm" : "mt-2 text-base"}`}>
             {product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}
           </p>

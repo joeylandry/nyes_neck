@@ -7,6 +7,13 @@ export const collection = defineType({
   fields: [
     defineField({ name: "title", title: "Name", type: "string", validation: (Rule) => Rule.required() }),
     defineField({ name: "slug", title: "Slug", type: "slug", options: { source: "title", maxLength: 96 }, validation: (Rule) => Rule.required() }),
+    defineField({
+      name: "active",
+      title: "Active",
+      description: "When off, this collection appears as Coming soon and customers cannot open it.",
+      type: "boolean",
+      initialValue: true,
+    }),
     defineField({ name: "description", title: "Description", type: "text", rows: 3, validation: (Rule) => Rule.required() }),
     defineField({
       name: "tileImage",

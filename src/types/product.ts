@@ -26,12 +26,14 @@ export type ShopTile = {
   id: string;
   name: string;
   href: string;
+  comingSoon?: boolean;
   image?: { src: string; alt: string };
 };
 
 export type ShopSettings = {
   featuredLabel: string;
   featuredCategory?: ShopCategory;
+  featuredProductOrder: string[];
   productTiles: ShopTile[];
   collectionTiles: ShopTile[];
 };

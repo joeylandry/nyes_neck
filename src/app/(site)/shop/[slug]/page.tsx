@@ -1,12 +1,17 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { PurchaseAction } from "@/components/shop/PurchaseAction";
 import { ProductGallery } from "@/components/shop/ProductGallery";
+import { ProductReel } from "@/components/shop/ProductReel";
+import { ShopBackLink } from "@/components/shop/ShopBackLink";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { getProductBySlug, getProducts } from "@/lib/products";
+import { getProductBySlug, getProducts, getShopCategories } from "@/lib/products";
+import { collectionPageLabel } from "@/lib/shopLabels";
 
-type ProductPageProps = { params: Promise<{ slug: string }> };
+type ProductPageProps = {
+  params: Promise<{ slug: string }>;
+  searchParams: Promise<{ from?: string | string[] }>;
+};
 
 export async function generateStaticParams() {
   const products = await getProducts();
@@ -20,23 +25,40 @@ export async function generateMetadata({ params }: ProductPageProps): Promise<Me
   return { title: `${product.name} | NYES NECK`, description: product.shortDescription };
 }
 
-export default async function ProductPage({ params }: ProductPageProps) {
+export default async function ProductPage({ params, searchParams }: ProductPageProps) {
   const { slug } = await params;
-  const product = await getProductBySlug(slug);
+  const { from } = await searchParams;
+  const [products, categories] = await Promise.all([getProducts(), getShopCategories()]);
+  const product = products.find((item) => item.slug === slug);
   if (!product) notFound();
+
+  const source = typeof from === "string" ? from : undefined;
+  const sourceCategory = categories.find((category) => category.slug === source);
+  const fallbackCategory = categories.find((category) => category.slug === product.category);
+  const backCategory = sourceCategory ?? fallbackCategory;
+  const backHref = source === "shop" || !backCategory ? "/shop" : `/shop/category/${backCategory.slug}`;
+  const backLabel = source === "shop" || !backCategory
+    ? "Shop"
+    : backCategory.kind === "collection"
+      ? collectionPageLabel(backCategory.label)
+      : backCategory.label;
+  const relatedProducts = products.filter(
+    (candidate) => candidate.id !== product.id
+      && candidate.collections.some((collection) => product.collections.includes(collection)),
+  );
+  const relatedCollection = categories.find(
+    (category) => category.kind === "collection" && product.collections.includes(category.value),
+  );
 
   return (
     <main className="mx-auto max-w-6xl px-5 py-9 md:px-6 md:py-14">
-      <Link href={`/shop/category/${product.category}`} className="inline-flex min-h-11 items-center text-base font-semibold text-black/60 hover:text-black">
-        <span aria-hidden="true">←</span><span className="ml-2">Back to {product.categoryLabel}</span>
-      </Link>
+      <ShopBackLink href={backHref} label={backLabel} />
 
       <div className="mt-6 grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-14 lg:gap-20">
         <ProductGallery images={product.images} productName={product.name} />
 
         <div className="md:pt-5">
-          <p className="text-sm font-bold uppercase tracking-[0.16em] text-[#183247]">{product.categoryLabel}</p>
-          <h1 className="font-heading mt-4 text-5xl font-semibold leading-[1.02] tracking-[-0.055em] md:text-7xl">{product.name}</h1>
+          <h1 className="font-heading text-5xl font-semibold leading-[1.02] tracking-[-0.055em] md:text-7xl">{product.name}</h1>
           <p className="mt-5 text-xl leading-8 text-black/65">{product.description}</p>
           <p className="mt-6 text-xl font-semibold">
             {product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}
@@ -66,6 +88,23 @@ export default async function ProductPage({ params }: ProductPageProps) {
           </div>
         </div>
       </div>
+
+      <section className="mt-16 border-t border-black/10 pt-12 md:mt-24 md:pt-16" aria-labelledby="related-products-heading">
+        <h2 id="related-products-heading" className="font-heading text-4xl font-semibold tracking-[-0.045em] md:text-5xl">
+          You may also like
+        </h2>
+        {relatedProducts.length ? (
+          <div className="mt-7">
+            <ProductReel
+              products={relatedProducts}
+              returnTo={relatedCollection?.slug ?? "shop"}
+              prioritizeFirst={false}
+            />
+          </div>
+        ) : (
+          <p className="mt-4 text-lg text-black/60">More from this collection is coming soon.</p>
+        )}
+      </section>
     </main>
   );
 }

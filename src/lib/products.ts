@@ -1,4 +1,5 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
+import { collectionTileLabel } from "@/lib/shopLabels";
 import { getSanityClient } from "@/sanity/client";
 import { sanityImageUrl } from "@/sanity/image";
 import type {
@@ -25,6 +26,7 @@ type SanityTaxonomy = {
   title: string;
   slug: string;
   description: string;
+  active?: boolean;
   tileImage?: { asset?: { _ref?: string }; crop?: unknown; hotspot?: unknown };
   tileImageAlt?: string;
 };
@@ -51,6 +53,9 @@ type SanityProduct = {
 type SanityShopSettings = {
   featuredLabel?: string;
   featuredCategory?: SanityTaxonomy;
+  featuredProductOrder?: string[];
+  productTileOrder?: string[];
+  collectionTileOrder?: string[];
 };
 
 const productQuery = `*[_type == "product" && defined(slug.current)] | order(title asc) {
@@ -74,14 +79,32 @@ const productQuery = `*[_type == "product" && defined(slug.current)] | order(tit
 
 const taxonomyQuery = `*[_type in ["productType", "collection"] && defined(slug.current)] | order(title asc) {
   _id, _type, title, "slug": slug.current, description,
+  active,
   tileImage{asset, crop, hotspot},
   tileImageAlt
 }`;
 
 const shopSettingsQuery = `*[_type == "shopSettings"][0] {
   featuredLabel,
-  "featuredCategory": featuredCategory->{_id, _type, title, "slug": slug.current, description}
+  "featuredCategory": featuredCategory->{_id, _type, title, "slug": slug.current, description},
+  "featuredProductOrder": featuredProductOrder[]._ref,
+  "productTileOrder": productTileOrder[]._ref,
+  "collectionTileOrder": collectionTileOrder[]._ref
 }`;
+
+function orderByIds<T>(items: T[], ids: string[], getId: (item: T) => string): T[] {
+  if (!ids.length) return items;
+  const positions = new Map(ids.map((id, index) => [id, index]));
+  return items
+    .map((item, index) => ({ item, index, position: positions.get(getId(item)) }))
+    .sort((a, b) => {
+      if (a.position === undefined && b.position === undefined) return a.index - b.index;
+      if (a.position === undefined) return 1;
+      if (b.position === undefined) return -1;
+      return a.position - b.position;
+    })
+    .map(({ item }) => item);
+}
 
 function mapProduct(record: SanityProduct): Product | null {
   if (!record.productType?.slug) return null;
@@ -146,8 +169,9 @@ function taxonomyToTile(item: SanityTaxonomy): ShopTile {
   const src = item.tileImage ? sanityImageUrl(item.tileImage, 1200, 900) : undefined;
   return {
     id: item._id,
-    name: item.title,
+    name: item._type === "collection" ? collectionTileLabel(item.title) : item.title,
     href: `/shop/category/${category.slug}`,
+    comingSoon: item._type === "collection" && item.active === false,
     image: src ? { src, alt: item.tileImageAlt ?? item.title } : undefined,
   };
 }
@@ -155,7 +179,7 @@ function taxonomyToTile(item: SanityTaxonomy): ShopTile {
 function fallbackTiles(categories: ShopCategory[]): ShopTile[] {
   return categories.map((category) => ({
     id: category.slug,
-    name: category.label,
+    name: category.kind === "collection" ? collectionTileLabel(category.label) : category.label,
     href: `/shop/category/${category.slug}`,
   }));
 }
@@ -201,6 +225,7 @@ export async function getShopSettings(): Promise<ShopSettings> {
     return {
       featuredLabel: "Featured",
       featuredCategory: localShopCategories.find((category) => category.slug === "nyes-neck-collection"),
+      featuredProductOrder: [],
       productTiles: fallbackTiles(productTypeCategories),
       collectionTiles: fallbackTiles(collectionCategories),
     };
@@ -209,18 +234,23 @@ export async function getShopSettings(): Promise<ShopSettings> {
     client.fetch<SanityShopSettings | null>(shopSettingsQuery, {}, { next: { revalidate: 60, tags: ["shopSettings"] } }),
     client.fetch<SanityTaxonomy[]>(taxonomyQuery, {}, { next: { revalidate: 60, tags: ["productType", "collection"] } }),
   ]);
+  const productTiles = taxonomies.filter((item) => item._type === "productType").map(taxonomyToTile);
+  const collectionTiles = taxonomies.filter((item) => item._type === "collection").map(taxonomyToTile);
   return {
     featuredLabel: settings?.featuredLabel ?? "Featured",
     featuredCategory: settings?.featuredCategory ? taxonomyToCategory(settings.featuredCategory) : undefined,
-    productTiles: taxonomies.filter((item) => item._type === "productType").map(taxonomyToTile),
-    collectionTiles: taxonomies.filter((item) => item._type === "collection").map(taxonomyToTile),
+    featuredProductOrder: settings?.featuredProductOrder ?? [],
+    productTiles: orderByIds(productTiles, settings?.productTileOrder ?? [], (tile) => tile.id),
+    collectionTiles: orderByIds(collectionTiles, settings?.collectionTileOrder ?? [], (tile) => tile.id),
   };
 }
 
 export async function getFeaturedShopProducts(settings: ShopSettings): Promise<Product[]> {
   const category = settings.featuredCategory;
-  if (!category) return getFeaturedProducts();
-  return category.kind === "collection"
+  const products = !category
+    ? await getFeaturedProducts()
+    : category.kind === "collection"
     ? getProductsByCollection(category.value)
     : getProductsByCategory(category.value);
+  return orderByIds(await products, settings.featuredProductOrder, (product) => product.id);
 }

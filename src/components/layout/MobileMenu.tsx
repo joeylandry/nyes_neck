@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { HeaderBrand } from "@/components/brand/HeaderBrand";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CartLink } from "@/components/shop/CartLink";
 
@@ -34,7 +35,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
     <div className="md:hidden">
       <div className="fixed inset-x-0 top-0 z-50 flex h-[76px] items-center justify-between border-b border-black/10 bg-white px-4 shadow-sm">
         <Link href="/" aria-label="NYES NECK home">
-          <Wordmark className="text-[1.3rem]" />
+          <HeaderBrand compact wordmarkClassName="text-[1.3rem]" />
         </Link>
         <div className="flex items-center gap-1">
           <button

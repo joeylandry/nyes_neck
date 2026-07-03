@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { ProductGrid } from "@/components/shop/ProductGrid";
+import { ShopBackLink } from "@/components/shop/ShopBackLink";
 import { ShopBrowseSections } from "@/components/shop/ShopBrowseSections";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { getProductsByCategory, getProductsByCollection, getShopCategories, getShopSettings } from "@/lib/products";
+import { collectionPageLabel } from "@/lib/shopLabels";
 
 type CategoryPageProps = { params: Promise<{ category: string }> };
 
@@ -36,21 +38,22 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     ? await getProductsByCollection(category.value)
     : await getProductsByCategory(category.value);
   const settings = await getShopSettings();
+  const pageTitle = category.kind === "collection" ? collectionPageLabel(category.label) : category.label;
 
   return (
     <main>
-      <PageHeader title={category.label} tone="blue" />
+      <PageHeader title={pageTitle} tone="blue" />
       <div className="mx-auto max-w-6xl px-5 py-12 md:px-6 md:py-16">
-        <p className="mb-10 max-w-2xl text-2xl leading-8 text-black/70 md:text-3xl md:leading-9">
-          {category.description}
-        </p>
+        <div className="mb-10">
+          <ShopBackLink href="/shop" label="Shop" />
+        </div>
         {products.length ? (
-          <ProductGrid products={products} />
+          <ProductGrid products={products} returnTo={category.slug} />
         ) : (
           <div className="rounded-[22px] border border-black/10 bg-white px-6 py-14 text-center shadow-[0_10px_28px_rgba(22,22,22,0.04)]">
             <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Collection items coming soon</h2>
             <p className="mx-auto mt-3 max-w-md text-lg leading-7 text-black/60">
-              New pieces for the {category.label} are currently taking shape.
+              New pieces for the {pageTitle} are currently taking shape.
             </p>
           </div>
         )}

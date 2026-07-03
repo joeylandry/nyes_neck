@@ -39,6 +39,13 @@ export function HeroGallery() {
       <div className="relative z-10 flex h-full items-center justify-center px-5 text-center md:px-6">
         <div className="flex max-w-3xl flex-col items-center">
           <Wordmark tone="light" className="text-[clamp(2.2rem,10.5vw,5.2rem)] tracking-[0.13em] drop-shadow-sm" />
+          <div className="mt-3 flex w-full max-w-[20rem] items-center gap-3 text-white sm:max-w-[24rem] sm:gap-4">
+            <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
+            <p className="shrink-0 text-[1.05rem] font-semibold leading-none tracking-[0.08em] drop-shadow-sm sm:text-[1.175rem]">
+              Apparel and Clothing
+            </p>
+            <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
+          </div>
           <p className="mt-4 max-w-2xl text-[clamp(1.12rem,3.1vw,2rem)] font-semibold leading-tight tracking-[0.02em] text-white drop-shadow-sm md:mt-5">
             Rooted in Nyes Neck. Made for life on the Cape.
           </p>

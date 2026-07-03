@@ -33,15 +33,15 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
 
   return (
     <div className="md:hidden">
-      <div className="fixed inset-x-0 top-0 z-50 flex h-[76px] items-center justify-between border-b border-black/10 bg-white px-4 shadow-sm">
+      <div className="fixed inset-x-0 top-0 z-50 flex h-[var(--mobile-header-height)] items-center justify-between border-b border-black/10 bg-white px-3 shadow-sm">
         <Link href="/" aria-label="NYES NECK home">
-          <HeaderBrand compact wordmarkClassName="text-[1.3rem]" />
+          <HeaderBrand compact wordmarkClassName="text-[1.08rem] min-[375px]:text-[1.16rem]" />
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center">
           <button
             ref={triggerRef}
             type="button"
-            className="flex min-h-11 min-w-11 items-center justify-center gap-2 px-2 text-base font-semibold"
+            className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-1.5 text-[0.95rem] font-semibold"
             aria-expanded={open}
             aria-controls="mobile-navigation"
             onClick={() => setOpen(true)}
@@ -68,7 +68,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
         aria-label="Mobile navigation"
         aria-hidden={!open}
         inert={!open}
-        className={`fixed right-0 top-0 z-[70] flex h-[100dvh] w-[min(20rem,82vw)] flex-col border-l border-black/10 bg-white p-5 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed right-0 top-0 z-[70] flex h-[100dvh] w-[min(20rem,86vw)] flex-col border-l border-black/10 bg-white p-4 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex min-h-12 items-center justify-between">
           <Wordmark className="text-[1.25rem]" />
@@ -82,12 +82,12 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
             ×
           </button>
         </div>
-        <nav aria-label="Mobile navigation" className="mt-10 flex flex-col">
+        <nav aria-label="Mobile navigation" className="mt-7 flex flex-col">
           {links.map((link) => (
             <Link
               key={link.href}
               href={link.href}
-              className="flex min-h-14 items-center border-b border-black/10 text-xl font-semibold"
+              className="flex min-h-14 items-center border-b border-black/10 text-[1.15rem] font-semibold"
               onClick={() => setOpen(false)}
             >
               {link.label}

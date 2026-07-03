@@ -10,7 +10,7 @@
   --dune: #d8c7a8;
   --weathered-sand: #e9e1d3;
   --desktop-header-height: 73px;
-  --mobile-header-height: 76px;
+  --mobile-header-height: 64px;
 }
 
 @theme inline {

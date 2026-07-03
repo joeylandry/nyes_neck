@@ -12,7 +12,7 @@ const tileColors = [
 
 export function CategoryGrid({ tiles, ariaLabel }: { tiles: ShopTile[]; ariaLabel: string }) {
   return (
-    <nav aria-label={ariaLabel} className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-5 lg:grid-cols-4">
+    <nav aria-label={ariaLabel} className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
       {tiles.map((tile, index) => {
         const content = (
           <>
@@ -27,7 +27,7 @@ export function CategoryGrid({ tiles, ariaLabel }: { tiles: ShopTile[]; ariaLabe
             ) : null}
             {tile.image ? <span className={`absolute inset-0 ${tile.comingSoon ? "bg-black/55" : "bg-gradient-to-t from-black/65 via-black/5 to-black/10"}`} aria-hidden="true" /> : null}
             <span className="relative z-10 flex flex-col gap-1.5">
-              <span className={`font-heading max-w-[12ch] text-xl font-semibold leading-[1.05] tracking-[-0.04em] sm:text-2xl ${tile.image ? "text-white" : ""}`}>
+              <span className={`font-heading max-w-[12ch] text-[1.15rem] font-semibold leading-[1.05] tracking-[-0.04em] md:text-2xl ${tile.image ? "text-white" : ""}`}>
                 {tile.name}
               </span>
               {tile.comingSoon ? (
@@ -39,14 +39,14 @@ export function CategoryGrid({ tiles, ariaLabel }: { tiles: ShopTile[]; ariaLabe
             {!tile.comingSoon ? (
               <span
                 aria-hidden="true"
-                className={`absolute right-4 top-4 z-10 text-xl transition-transform duration-300 group-hover:translate-x-1 sm:right-5 sm:top-5 ${tile.image ? "text-white" : ""}`}
+                className={`absolute right-3 top-3 z-10 text-lg transition-transform duration-300 group-hover:translate-x-1 md:right-5 md:top-5 md:text-xl ${tile.image ? "text-white" : ""}`}
               >
                 →
               </span>
             ) : null}
           </>
         );
-        const className = `group product-pattern relative flex aspect-[4/3] items-end overflow-hidden rounded-[22px] border border-black/10 p-4 shadow-[0_10px_28px_rgba(22,22,22,0.05)] sm:p-5 ${tileColors[index % tileColors.length]} ${tile.comingSoon ? "cursor-default" : "transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(22,22,22,0.12)]"}`;
+        const className = `group product-pattern relative flex aspect-[4/3] items-end overflow-hidden rounded-[17px] border border-black/10 p-3.5 shadow-[0_10px_28px_rgba(22,22,22,0.05)] md:rounded-[22px] md:p-5 ${tileColors[index % tileColors.length]} ${tile.comingSoon ? "cursor-default" : "transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(22,22,22,0.12)]"}`;
 
         return tile.comingSoon ? (
           <div key={tile.id} className={className} aria-label={`${tile.name}, coming soon`}>

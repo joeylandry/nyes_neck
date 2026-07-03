@@ -21,9 +21,9 @@ export function ProductCard({
     <article>
       <Link
         href={{ pathname: `/shop/${product.slug}`, query: { from: returnTo } }}
-        className={`group block ${compact ? "rounded-[20px] focus-visible:rounded-[20px]" : "rounded-[30px] focus-visible:rounded-[30px]"}`}
+        className={`group block ${compact ? "rounded-[16px] focus-visible:rounded-[16px] md:rounded-[20px] md:focus-visible:rounded-[20px]" : "rounded-[20px] focus-visible:rounded-[20px] md:rounded-[30px] md:focus-visible:rounded-[30px]"}`}
       >
-        <div className={`product-pattern relative aspect-[4/5] overflow-hidden border border-black/10 bg-[#e9e1d3] ${compact ? "rounded-[20px] shadow-[0_8px_24px_rgba(22,22,22,0.05)]" : "rounded-[30px] shadow-[0_12px_35px_rgba(22,22,22,0.05)]"}`}>
+        <div className={`product-pattern relative aspect-[4/5] overflow-hidden border border-black/10 bg-[#e9e1d3] ${compact ? "rounded-[16px] shadow-[0_8px_24px_rgba(22,22,22,0.05)] md:rounded-[20px]" : "rounded-[20px] shadow-[0_12px_35px_rgba(22,22,22,0.05)] md:rounded-[30px]"}`}>
           <Image
             src={mainImage.src}
             alt={mainImage.alt}
@@ -47,8 +47,8 @@ export function ProductCard({
             </span>
           ) : null}
         </div>
-        <div className={`px-1 pb-2 ${compact ? "pt-3" : "pt-5"}`}>
-          <h2 className={`font-heading font-semibold leading-tight tracking-[-0.025em] ${compact ? "text-base sm:text-lg" : "text-xl"}`}>{product.name}</h2>
+        <div className={`px-0.5 pb-2 md:px-1 ${compact ? "pt-2.5 md:pt-3" : "pt-3.5 md:pt-5"}`}>
+          <h2 className={`font-heading font-semibold leading-tight tracking-[-0.025em] ${compact ? "text-[0.95rem] md:text-lg" : "text-lg md:text-xl"}`}>{product.name}</h2>
           <p className={`text-black/55 ${compact ? "mt-1.5 text-sm" : "mt-2 text-base"}`}>
             {product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}
           </p>

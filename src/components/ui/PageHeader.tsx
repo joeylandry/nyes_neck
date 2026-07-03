@@ -12,12 +12,12 @@ export function PageHeader({ title, eyebrow, tone = "dune" }: PageHeaderProps) {
   };
 
   return (
-    <section className={`border-b border-black/10 px-5 pb-4 pt-3 md:px-6 md:pb-5 md:pt-4 ${backgrounds[tone]}`}>
+    <section className={`border-b border-black/10 px-4 pb-3 pt-2.5 md:px-6 md:pb-5 md:pt-4 ${backgrounds[tone]}`}>
       <div className="mx-auto max-w-6xl">
         {eyebrow ? (
           <p className="mb-2 text-sm font-bold tracking-[0.24em] text-black/65">{eyebrow}</p>
         ) : null}
-        <h1 className="font-heading text-[clamp(2.5rem,8vw,4.5rem)] font-bold leading-[0.92] tracking-[-0.055em]">
+        <h1 className="font-heading text-[2.25rem] font-bold leading-[0.92] tracking-[-0.055em] md:text-[clamp(2.5rem,8vw,4.5rem)]">
           {title}
         </h1>
       </div>

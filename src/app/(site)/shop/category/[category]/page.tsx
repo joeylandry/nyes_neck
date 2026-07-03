@@ -43,8 +43,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   return (
     <main>
       <PageHeader title={pageTitle} tone="blue" />
-      <div className="mx-auto max-w-6xl px-5 py-12 md:px-6 md:py-16">
-        <div className="mb-10">
+      <div className="mx-auto max-w-6xl px-4 py-9 md:px-6 md:py-16">
+        <div className="mb-7 md:mb-10">
           <ShopBackLink href="/shop" label="Shop" />
         </div>
         {products.length ? (
@@ -58,7 +58,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
           </div>
         )}
 
-        <ShopBrowseSections settings={settings} className="mt-14 border-t border-black/10 pt-14 md:mt-20 md:pt-20" />
+        <ShopBrowseSections settings={settings} className="mt-11 border-t border-black/10 pt-11 md:mt-20 md:pt-20" />
       </div>
     </main>
   );

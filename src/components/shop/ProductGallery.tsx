@@ -16,7 +16,7 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
 
   return (
     <section aria-label={`${productName} image gallery`}>
-      <div className="product-pattern relative aspect-[4/5] overflow-hidden rounded-[30px] border border-black/10 bg-[#e9e1d3] shadow-sm">
+      <div className="product-pattern relative aspect-[4/5] overflow-hidden rounded-[20px] border border-black/10 bg-[#e9e1d3] shadow-sm md:rounded-[30px]">
         <Image
           key={activeImage.id}
           src={activeImage.src}

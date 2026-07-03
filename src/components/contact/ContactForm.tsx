@@ -2,8 +2,8 @@ const fieldClass = "mt-2 min-h-12 w-full rounded-2xl border border-black/15 bg-w
 
 export function ContactForm() {
   return (
-    <form className="rounded-[30px] border border-black/10 bg-white p-6 shadow-sm md:p-9" aria-describedby="form-status">
-      <div className="grid gap-6 sm:grid-cols-2">
+    <form className="rounded-[22px] border border-black/10 bg-white p-5 shadow-sm md:rounded-[30px] md:p-9" aria-describedby="form-status">
+      <div className="grid gap-5 sm:grid-cols-2 md:gap-6">
         <label className="text-sm font-semibold">
           Name
           <input className={fieldClass} name="name" autoComplete="name" />

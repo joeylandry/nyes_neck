@@ -51,16 +51,16 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   );
 
   return (
-    <main className="mx-auto max-w-6xl px-5 py-9 md:px-6 md:py-14">
+    <main className="mx-auto max-w-6xl px-4 py-7 md:px-6 md:py-14">
       <ShopBackLink href={backHref} label={backLabel} />
 
-      <div className="mt-6 grid gap-10 md:grid-cols-[1.05fr_0.95fr] md:gap-14 lg:gap-20">
+      <div className="mt-5 grid gap-7 md:mt-6 md:grid-cols-[1.05fr_0.95fr] md:gap-14 lg:gap-20">
         <ProductGallery images={product.images} productName={product.name} />
 
         <div className="md:pt-5">
-          <h1 className="font-heading text-5xl font-semibold leading-[1.02] tracking-[-0.055em] md:text-7xl">{product.name}</h1>
-          <p className="mt-5 text-xl leading-8 text-black/65">{product.description}</p>
-          <p className="mt-6 text-xl font-semibold">
+          <h1 className="font-heading text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.055em] md:text-7xl">{product.name}</h1>
+          <p className="mt-4 text-base leading-7 text-black/65 md:mt-5 md:text-xl md:leading-8">{product.description}</p>
+          <p className="mt-5 text-lg font-semibold md:mt-6 md:text-xl">
             {product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}
           </p>
 
@@ -89,8 +89,8 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         </div>
       </div>
 
-      <section className="mt-16 border-t border-black/10 pt-12 md:mt-24 md:pt-16" aria-labelledby="related-products-heading">
-        <h2 id="related-products-heading" className="font-heading text-4xl font-semibold tracking-[-0.045em] md:text-5xl">
+      <section className="mt-12 border-t border-black/10 pt-9 md:mt-24 md:pt-16" aria-labelledby="related-products-heading">
+        <h2 id="related-products-heading" className="font-heading text-[2rem] font-semibold tracking-[-0.045em] md:text-5xl">
           You may also like
         </h2>
         {relatedProducts.length ? (

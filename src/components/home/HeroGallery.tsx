@@ -92,28 +92,28 @@ export function HeroGallery() {
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-black/12 to-black/20" />
       <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(255,255,255,0.08),transparent_44%)]" />
 
-      <div className="relative z-10 flex h-full items-center justify-center px-5 text-center md:px-6">
+      <div className="relative z-10 flex h-full items-center justify-center px-4 text-center md:px-6">
         <div className="flex max-w-3xl flex-col items-center">
-          <Wordmark tone="light" className="text-[clamp(2.2rem,10.5vw,5.2rem)] tracking-[0.13em] drop-shadow-sm" />
-          <div className="mt-3 flex w-full max-w-[20rem] items-center gap-3 text-white sm:max-w-[24rem] sm:gap-4">
+          <Wordmark tone="light" className="text-[clamp(2rem,9vw,3rem)] tracking-[0.13em] drop-shadow-sm md:text-[clamp(2.2rem,10.5vw,5.2rem)]" />
+          <div className="mt-2.5 flex w-full max-w-[19rem] items-center gap-2.5 text-white md:mt-3 md:max-w-[24rem] md:gap-4">
             <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
-            <p className="shrink-0 text-[1.05rem] font-semibold leading-none tracking-[0.08em] drop-shadow-sm sm:text-[1.175rem]">
+            <p className="shrink-0 text-[0.95rem] font-semibold leading-none tracking-[0.06em] drop-shadow-sm md:text-[1.175rem] md:tracking-[0.08em]">
               Apparel and Clothing
             </p>
             <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
           </div>
-          <p className="mt-4 max-w-2xl text-[clamp(1.12rem,3.1vw,2rem)] font-semibold leading-tight tracking-[0.02em] text-white drop-shadow-sm md:mt-5">
+          <p className="mt-3.5 max-w-[21rem] text-[1.02rem] font-semibold leading-snug tracking-[0.01em] text-white drop-shadow-sm md:mt-5 md:max-w-2xl md:text-[clamp(1.12rem,3.1vw,2rem)] md:leading-tight md:tracking-[0.02em]">
             Rooted in Nyes Neck. Made for life on the Cape.
           </p>
-          <div className="mt-6 grid w-full max-w-[27rem] grid-cols-2 gap-3">
+          <div className="mt-5 grid w-full max-w-[22rem] grid-cols-2 gap-2.5 md:mt-6 md:max-w-[27rem] md:gap-3">
             <Button
               href="#mini-shop"
-              className="px-4 py-3 text-lg tracking-normal shadow-md"
+              className="px-3 py-2.5 text-base tracking-normal shadow-md md:px-4 md:py-3 md:text-lg"
               onClick={scrollToMiniShop}
             >
               Explore Products
             </Button>
-            <Button href="/about" variant="secondary" className="px-4 py-3 text-lg tracking-normal">
+            <Button href="/about" variant="secondary" className="px-3 py-2.5 text-base tracking-normal md:px-4 md:py-3 md:text-lg">
               Learn More
             </Button>
           </div>

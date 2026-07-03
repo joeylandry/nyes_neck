@@ -12,10 +12,10 @@ export async function ShopStorefront({ showHeader = true }: { showHeader?: boole
   return (
     <>
       {showHeader ? <PageHeader title="Shop" tone="blue" /> : null}
-      <div className="mx-auto max-w-6xl px-5 py-9 md:px-6 md:py-12">
+      <div className="mx-auto max-w-6xl px-4 py-7 md:px-6 md:py-12">
         <section aria-labelledby="featured-heading">
-          <div className="mb-5 flex items-end justify-between gap-5">
-            <h2 id="featured-heading" className="font-heading text-2xl font-semibold tracking-[-0.04em] sm:text-3xl md:text-4xl">
+          <div className="mb-4 flex items-end justify-between gap-5 md:mb-5">
+            <h2 id="featured-heading" className="font-heading text-[1.45rem] font-semibold tracking-[-0.04em] md:text-4xl">
               {settings.featuredLabel}{featuredCategory ? `: ${featuredCategory.label}` : ""}
             </h2>
             {featuredCategory ? (
@@ -27,7 +27,7 @@ export async function ShopStorefront({ showHeader = true }: { showHeader?: boole
           <ProductReel products={featuredProducts} />
         </section>
 
-        <ShopBrowseSections settings={settings} className="mt-10 md:mt-14" />
+        <ShopBrowseSections settings={settings} className="mt-8 md:mt-14" />
       </div>
     </>
   );

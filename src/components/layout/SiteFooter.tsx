@@ -4,8 +4,8 @@ import { Wordmark } from "@/components/brand/Wordmark";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-black/10 bg-[#e9e1d3] px-5 py-10 md:px-6">
-      <div className="mx-auto flex max-w-6xl flex-col gap-8 md:flex-row md:items-end md:justify-between">
+    <footer className="border-t border-black/10 bg-[#e9e1d3] px-4 py-8 md:px-6 md:py-10">
+      <div className="mx-auto flex max-w-6xl flex-col gap-7 md:flex-row md:items-end md:justify-between md:gap-8">
         <div>
           <div className="inline-flex items-center gap-2">
             <Wordmark className="text-lg" />

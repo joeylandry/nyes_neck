@@ -65,11 +65,13 @@ Product media uses a 4:5 crop preview. Shop tiles use a 4:3 crop preview. Sanity
 
 ## Contact form
 
-The contact form posts to `/api/contact`, which forwards submissions to Formspree. Set `FORMSPREE_ENDPOINT` in `.env.local` and in production using the endpoint from the Formspree dashboard, for example:
+The contact form posts to `/api/contact`, which forwards submissions to Formspree. Set `CONTACT_FORM_ENDPOINT` in `.env.local` and in production using the endpoint from the Formspree dashboard, for example:
 
 ```bash
-FORMSPREE_ENDPOINT=https://formspree.io/f/your-form-id
+CONTACT_FORM_ENDPOINT=https://formspree.io/f/your-form-id
 ```
+
+`FORMSPREE_ENDPOINT` is still supported as a legacy alias.
 
 ## Future cart and checkout
 

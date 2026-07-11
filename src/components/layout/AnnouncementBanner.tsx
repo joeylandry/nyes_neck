@@ -47,7 +47,7 @@ export function AnnouncementBanner() {
       data-site-header-offset
       className="fixed inset-x-0 top-0 z-[55] flex h-[var(--announcement-height)] items-center justify-center bg-[#183247] px-12 text-center text-[0.98rem] font-semibold leading-tight text-white shadow-sm md:text-[1.05rem]"
     >
-      <p>Youth and children apparel coming soon</p>
+      <p>Youth and children apparel coming soon!</p>
       <button
         type="button"
         aria-label="Dismiss announcement"

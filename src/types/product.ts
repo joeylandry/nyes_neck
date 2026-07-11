@@ -54,6 +54,7 @@ export type Product = {
   category: ProductCategory;
   categoryLabel: string;
   collection: ProductCollection;
+  collectionLabel: string;
   collections: ProductCollection[];
   priceCents: number | null;
   currency: "USD";

@@ -109,6 +109,7 @@ function orderByIds<T>(items: T[], ids: string[], getId: (item: T) => string): T
 function mapProduct(record: SanityProduct): Product | null {
   if (!record.productType?.slug) return null;
   const collections = record.collections?.map((collection) => collection.slug).filter(Boolean) ?? [];
+  const primaryCollection = record.collections?.[0];
   const images: ProductImage[] = (record.images ?? []).flatMap((item, index) => {
     if (!item.image || !item.role) return [];
     const src = sanityImageUrl(item.image, 1200, 1500);
@@ -127,6 +128,7 @@ function mapProduct(record: SanityProduct): Product | null {
     category: record.productType.slug,
     categoryLabel: record.productType.title,
     collection: collections[0] ?? "",
+    collectionLabel: primaryCollection?.title ? collectionTileLabel(primaryCollection.title) : collections[0] ?? "",
     collections,
     priceCents: typeof record.price === "number" ? Math.round(record.price * 100) : null,
     currency: record.currency ?? "USD",

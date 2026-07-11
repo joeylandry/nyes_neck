@@ -1,4 +1,5 @@
 import type { Product, ProductCategory, ShopCategory } from "@/types/product";
+import { collectionTileLabel } from "@/lib/shopLabels";
 
 const image = (name: string) => [
   { id: `${name}-main`, src: "/images/products/product-placeholder.svg", alt: `${name} product placeholder`, role: "main" as const },
@@ -14,13 +15,19 @@ const variants = (id: string, sizes: string[], colors: string[]) =>
     })),
   );
 
-type ProductSeed = Omit<Product, "currency" | "images" | "variants" | "available" | "priceCents" | "categoryLabel" | "collections">;
+type ProductSeed = Omit<Product, "currency" | "images" | "variants" | "available" | "priceCents" | "categoryLabel" | "collectionLabel" | "collections">;
+
+function getCollectionLabel(collection: string) {
+  const label = collectionCategories.find((category) => category.value === collection)?.label ?? collection;
+  return collectionTileLabel(label);
+}
 
 function product(seed: ProductSeed): Product {
   return {
     ...seed,
     currency: "USD",
     categoryLabel: categoryLabels[seed.category],
+    collectionLabel: getCollectionLabel(seed.collection),
     collections: [seed.collection],
     priceCents: null,
     images: image(seed.name),

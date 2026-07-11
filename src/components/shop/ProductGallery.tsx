@@ -1,13 +1,29 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { ProductImage } from "@/types/product";
 
+const ROTATION_INTERVAL_MS = 4200;
+
 export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
-  const galleryImages = images.filter((image) => image.role !== "hover");
+  const galleryImages = images;
   const [activeIndex, setActiveIndex] = useState(0);
   const activeImage = galleryImages[activeIndex] ?? galleryImages[0];
+
+  useEffect(() => {
+    if (activeIndex < galleryImages.length) return;
+    setActiveIndex(0);
+  }, [activeIndex, galleryImages.length]);
+
+  useEffect(() => {
+    if (galleryImages.length <= 1) return;
+    const rotation = window.setInterval(() => {
+      setActiveIndex((index) => (index + 1) % galleryImages.length);
+    }, ROTATION_INTERVAL_MS);
+
+    return () => window.clearInterval(rotation);
+  }, [galleryImages.length]);
 
   if (!activeImage) return null;
 

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { ContactForm } from "@/components/contact/ContactForm";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
   title: "Contact | NYES NECK",
@@ -17,7 +17,7 @@ const topics = [
 export default function ContactPage() {
   return (
     <main>
-      <PageHeader title="Contact" tone="sand" />
+      <PageTitle title="Contact" />
       <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-20">
         <div className="grid gap-9 md:gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
           <div>

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { getFeaturedShopProducts, getShopSettings } from "@/lib/products";
-import { PageHeader } from "@/components/ui/PageHeader";
+import { PageTitle } from "@/components/ui/PageTitle";
 import { ProductReel } from "./ProductReel";
 import { ShopBrowseSections } from "./ShopBrowseSections";
 
@@ -11,7 +11,7 @@ export async function ShopStorefront({ showHeader = true }: { showHeader?: boole
 
   return (
     <>
-      {showHeader ? <PageHeader title="Shop" tone="blue" /> : null}
+      {showHeader ? <PageTitle title="Shop" /> : null}
       <div className="mx-auto max-w-6xl px-4 py-7 md:px-6 md:py-12">
         <section aria-labelledby="featured-heading">
           <div className="mb-4 flex items-end justify-between gap-5 md:mb-5">

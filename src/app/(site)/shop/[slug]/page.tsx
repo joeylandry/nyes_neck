@@ -58,6 +58,11 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
         <ProductGallery images={product.images} productName={product.name} />
 
         <div className="md:pt-5">
+          {product.collectionLabel ? (
+            <p className="mb-3 text-sm font-bold uppercase tracking-[0.16em] text-black/45 md:text-base">
+              {product.collectionLabel}
+            </p>
+          ) : null}
           <h1 className="font-heading text-[2.35rem] font-semibold leading-[1.02] tracking-[-0.055em] md:text-7xl">{product.name}</h1>
           <p className="mt-4 text-base leading-7 text-black/65 md:mt-5 md:text-xl md:leading-8">{product.description}</p>
           <p className="mt-5 text-lg font-semibold md:mt-6 md:text-xl">

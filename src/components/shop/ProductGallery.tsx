@@ -33,15 +33,18 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
   return (
     <section aria-label={`${productName} image gallery`}>
       <div className="product-pattern relative aspect-[4/5] overflow-hidden rounded-[20px] border border-black/10 bg-[#e9e1d3] shadow-sm md:rounded-[30px]">
-        <Image
-          key={activeImage.id}
-          src={activeImage.src}
-          alt={activeImage.alt}
-          fill
-          priority={activeIndex === 0}
-          sizes="(max-width: 768px) 100vw, 55vw"
-          className="object-cover"
-        />
+        {galleryImages.map((image, index) => (
+          <Image
+            key={image.id}
+            src={image.src}
+            alt={index === activeIndex ? image.alt : ""}
+            fill
+            priority={index === 0}
+            sizes="(max-width: 768px) 100vw, 55vw"
+            aria-hidden={index === activeIndex ? undefined : true}
+            className={`object-cover transition-opacity duration-700 ease-in-out motion-reduce:transition-none ${index === activeIndex ? "opacity-100" : "opacity-0"}`}
+          />
+        ))}
         {galleryImages.length > 1 ? (
           <>
             <button type="button" onClick={showPrevious} aria-label="Previous image" className="absolute left-4 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-xl shadow-sm backdrop-blur transition hover:bg-white">←</button>

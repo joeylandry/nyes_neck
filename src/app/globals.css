@@ -11,6 +11,9 @@
   --weathered-sand: #e9e1d3;
   --desktop-header-height: 73px;
   --mobile-header-height: 64px;
+  --announcement-height: 42px;
+  --announcement-offset: var(--announcement-height);
+  --site-header-height: calc(var(--mobile-header-height) + var(--announcement-offset));
 }
 
 @theme inline {
@@ -102,11 +105,11 @@ textarea {
 }
 
 .site-main {
-  padding-top: var(--mobile-header-height);
+  padding-top: var(--site-header-height);
 }
 
 .hero-height {
-  height: calc(100svh - var(--mobile-header-height));
+  height: calc(100svh - var(--site-header-height));
 }
 
 .hero-image {
@@ -120,12 +123,13 @@ textarea {
 }
 
 @media (min-width: 768px) {
-  .site-main {
-    padding-top: var(--desktop-header-height);
+  :root {
+    --announcement-height: 44px;
+    --site-header-height: calc(var(--desktop-header-height) + var(--announcement-offset));
   }
 
   .hero-height {
-    height: calc(100dvh - var(--desktop-header-height));
+    height: calc(100dvh - var(--site-header-height));
   }
 
   .hero-image {

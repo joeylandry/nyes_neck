@@ -21,7 +21,8 @@ export function SiteFooter() {
               />
             </span>
           </div>
-          <p className="mt-3 text-sm text-black/65">North Falmouth, Massachusetts</p>
+          <p className="mt-3 text-sm text-black/65">Nyes Neck Clothing and Apparel</p>
+          <p className="mt-1 text-sm text-black/65">North Falmouth, Massachusetts</p>
           <p className="mt-1 max-w-xs text-xs leading-5 text-black/55">
             Proceeds support St. Jude Children&apos;s Research Hospital
           </p>

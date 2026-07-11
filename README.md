@@ -63,8 +63,14 @@ Products, product types, collections, featured category, prices, variants, avail
 
 Product media uses a 4:5 crop preview. Shop tiles use a 4:3 crop preview. Sanity stores the selected crop and hotspot; the storefront image pipeline applies both automatically.
 
+## Contact form
+
+The contact form posts to `/api/contact`, which forwards submissions to Formspree. Set `FORMSPREE_ENDPOINT` in `.env.local` and in production using the endpoint from the Formspree dashboard, for example:
+
+```bash
+FORMSPREE_ENDPOINT=https://formspree.io/f/your-form-id
+```
+
 ## Future cart and checkout
 
 `src/components/shop/PurchaseAction.tsx` is the future cart integration boundary. It already receives stable product and variant IDs, but is intentionally disabled. Add provider-neutral cart state near the root layout only after a commerce provider is selected. Provider-specific checkout and order-confirmation code should live in a dedicated `src/lib/commerce/` area and route handlers or server actions, not in product cards.
-
-The contact form in `src/components/contact/ContactForm.tsx` is also intentionally non-submitting until a destination or form provider is selected.

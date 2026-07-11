@@ -24,11 +24,8 @@ function scrollToMiniShop(event: MouseEvent<HTMLElement>) {
   event.preventDefault();
 
   const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-  const desktop = window.matchMedia("(min-width: 768px)").matches;
-  const headerVariable = desktop ? "--desktop-header-height" : "--mobile-header-height";
-  const headerHeight = Number.parseFloat(
-    getComputedStyle(document.documentElement).getPropertyValue(headerVariable),
-  ) || 0;
+  const headerHeight = Array.from(document.querySelectorAll<HTMLElement>("[data-site-header-offset]"))
+    .reduce((height, element) => height + element.getBoundingClientRect().height, 0);
   const startPosition = window.scrollY;
   const targetPosition = Math.max(
     0,
@@ -98,7 +95,7 @@ export function HeroGallery() {
           <div className="mt-2.5 flex w-full max-w-[19rem] items-center gap-2.5 text-white md:mt-3 md:max-w-[24rem] md:gap-4">
             <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
             <p className="shrink-0 text-[1.08rem] font-semibold leading-none tracking-[0.06em] drop-shadow-sm md:text-[1.175rem] md:tracking-[0.08em]">
-              Apparel and Clothing
+              Clothing and Apparel
             </p>
             <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
           </div>

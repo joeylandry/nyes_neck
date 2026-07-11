@@ -16,7 +16,7 @@ export default function HomePage() {
         <HeroGallery />
         <div
           id="mini-shop"
-          className="scroll-mt-[var(--mobile-header-height)] md:scroll-mt-[var(--desktop-header-height)]"
+          className="scroll-mt-[var(--site-header-height)]"
         >
           <ShopStorefront showHeader={false} />
         </div>

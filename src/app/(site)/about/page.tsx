@@ -19,9 +19,9 @@ type StoryFeature = {
 
 const storyFeatures: StoryFeature[] = [
   {
-    title: "The first glimpse",
+    title: "My first fundraiser",
     body:
-      "When Joey Landry was nine, a neighbor's friend received a wish. That moment gave him his first glimpse of the joy Make-A-Wish brings to children with critical illnesses, and it inspired him to help from his own neighborhood.",
+      "When I was nine, I got my first glimpse of the joy Make-A-Wish brings to children with critical illnesses, and it inspired me to help from Nyes Neck. Pictured here is my first fundraiser, where I sold lemonade and iced tea to support that mission.",
     image: "/images/about/MAW_9.JPG",
     width: 3264,
     height: 2448,
@@ -29,9 +29,9 @@ const storyFeatures: StoryFeature[] = [
     imageSide: "right",
   },
   {
-    title: "From $250 to a tradition",
+    title: "A neighborhood tradition",
     body:
-      "His first project was a 2013 lemonade stand with bracelet sales in Nyes Neck. It raised $250, then grew over the next eight years into movie night gift bags, s'mores kits, apparel, and summer fundraisers.",
+      "My first project was a 2013 lemonade stand with bracelet sales in Nyes Neck. It raised $50, then grew over the next eight years into movie nights, raffles, apparel, and galas. Pictured here is my last fundraiser, a live music event after the annual meeting that helped push the total raised past $20,000.",
     image: "/images/about/MAW_18.JPG",
     width: 3784,
     height: 2838,
@@ -41,7 +41,7 @@ const storyFeatures: StoryFeature[] = [
   {
     title: "Over $20K for Make-A-Wish",
     body:
-      "The thank-you graphic marks the result of that work: Joey Landry raised more than $20,000 for Make-A-Wish Massachusetts and Rhode Island with support from the Nyes Neck community. That purpose now carries into NYES NECK.",
+      "I raised more than $20,000 for Make-A-Wish Massachusetts and Rhode Island with support from the Nyes Neck community. That same purpose now carries into Nyes Neck Clothing and Apparel.",
     image: "/images/about/Thank you graphic.png",
     width: 2000,
     height: 1428,
@@ -49,9 +49,6 @@ const storyFeatures: StoryFeature[] = [
     imageSide: "right",
   },
 ];
-
-const makeAWishPurpose =
-  'Reflecting on the work, Joey said, "I have been given an amazing opportunity to help provide life-changing experiences for wish children." That same purpose remains part of NYES NECK today.';
 
 function StoryFeatureRow({ feature }: { feature: StoryFeature }) {
   const imageFirst = feature.imageSide === "left";
@@ -90,11 +87,17 @@ export default function AboutPage() {
       <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-20">
         <section className="grid gap-5 border-b border-black/10 pb-10 md:grid-cols-[0.8fr_1.2fr] md:gap-16 md:pb-20">
           <h2 className="font-heading text-[2rem] font-semibold leading-[1.05] tracking-[-0.045em] md:text-5xl">
-            The fundraiser that grew
+            Continuing where I left off
           </h2>
           <div className="space-y-6 text-base leading-7 text-black/70 md:space-y-7 md:text-lg md:leading-8">
             <p>
-              Inspired to help, Joey started with a lemonade stand and bracelet sales in his Nyes Neck neighborhood. His first 2013 fundraiser brought in $250. Year after year, he kept going with movie night gift bags, s&apos;mores kits, apparel, and local community support.
+              Hi, I&apos;m Joey Landry. I started fundraising in Nyes Neck when I was nine, and over the years that work grew into more than $20,000 raised for Make-A-Wish Massachusetts and Rhode Island. I&apos;m carrying that same purpose into Nyes Neck Clothing and Apparel, with the goal of helping people affected by domestic violence and children in need.
+            </p>
+            <p>
+              My long-term goal is to build a nonprofit around this work. In the meantime, Nyes Neck Clothing and Apparel will continue giving back, including support for St. Jude Children&apos;s Research Hospital.
+            </p>
+            <p className="font-semibold text-[#183247]">
+              Reflecting on the work, I said, &quot;I have been given an amazing opportunity to help provide life-changing experiences for wish children.&quot; That same purpose remains part of Nyes Neck Clothing and Apparel today.
             </p>
           </div>
         </section>
@@ -105,12 +108,10 @@ export default function AboutPage() {
           ))}
         </section>
 
-        <section className="border-t border-black/10 pt-8 md:pt-12">
-          <div className="ml-auto max-w-3xl rounded-[22px] border border-black/10 bg-[#a8c2bc]/55 p-6 text-[#183247] shadow-sm md:rounded-[30px] md:p-9">
-            <p className="text-base font-semibold leading-8 md:text-xl md:leading-9">
-              {makeAWishPurpose}
-            </p>
-          </div>
+        <section className="border-t border-black/10 pt-8 text-center md:pt-12">
+          <p className="mx-auto max-w-3xl font-heading text-3xl font-semibold leading-tight text-[#183247] md:text-5xl">
+            Thank you to everyone who has supported Nyes Neck, Make-A-Wish, and every fundraiser along the way.
+          </p>
         </section>
       </div>
     </main>

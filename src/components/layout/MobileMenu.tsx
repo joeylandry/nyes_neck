@@ -33,7 +33,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
 
   return (
     <div className="md:hidden">
-      <div className="fixed inset-x-0 top-0 z-50 flex h-[var(--mobile-header-height)] items-center justify-between border-b border-black/10 bg-white px-3 shadow-sm">
+      <div data-site-header-offset className="fixed inset-x-0 top-[var(--announcement-offset)] z-50 flex h-[var(--mobile-header-height)] items-center justify-between border-b border-black/10 bg-white px-3 shadow-sm">
         <button
           ref={triggerRef}
           type="button"

@@ -6,7 +6,7 @@ import {
   sanityProjectId,
 } from "./env";
 
-const token = process.env.SANITY_API_WRITE_TOKEN;
+const token = process.env.SANITY_API_WRITE_TOKEN?.trim();
 
 if (!token) {
   throw new Error("Missing SANITY_API_WRITE_TOKEN");

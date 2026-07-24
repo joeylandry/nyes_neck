@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import type { HomepageAnnouncementSettings } from "@/lib/homepageAnnouncement";
 import { NewsletterSignupForm } from "./NewsletterSignupForm";
 
-const storageKey = "nyes-neck-homepage-announcement-dismissed";
+const storageKey = "nyes-neck-homepage-announcement-dismissed-v2";
 
 export function HomepageAnnouncement({ announcement }: { announcement: HomepageAnnouncementSettings }) {
   const closeButtonRef = useRef<HTMLButtonElement>(null);

@@ -12,7 +12,7 @@ export const homepageAnnouncement = defineType({
   initialValue: {
     enabled: true,
     eyebrow: "",
-    heading: "Ordering Opening Soon!",
+    heading: "Ordering Available Soon!",
     body: "",
     newsletterHeading: "Be the first to know",
     newsletterDescription: "",

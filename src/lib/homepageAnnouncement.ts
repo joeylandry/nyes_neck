@@ -38,7 +38,7 @@ type SanityHomepageAnnouncement = {
 export const fallbackHomepageAnnouncement: HomepageAnnouncementSettings = {
   enabled: true,
   eyebrow: "",
-  heading: "Ordering Opening Soon!",
+  heading: "Ordering Available Soon!",
   body: "",
   newsletterHeading: "Be the first to know",
   newsletterDescription: "",

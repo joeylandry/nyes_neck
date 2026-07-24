@@ -27,7 +27,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const body = await request.json();
+    const body = (await request.json()) as Record<string, unknown>;
 
     const title =
       typeof body.title === "string" ? body.title.trim() : "";
@@ -51,14 +51,14 @@ export async function POST(request: NextRequest) {
     const price =
       typeof body.price === "number" ? body.price : undefined;
 
-    const sizes = Array.isArray(body.sizes)
+    const sizes: string[] = Array.isArray(body.sizes)
       ? body.sizes.filter(
           (size: unknown): size is string =>
             typeof size === "string" && size.trim().length > 0,
         )
       : [];
 
-    const colors = Array.isArray(body.colors)
+    const colors: string[] = Array.isArray(body.colors)
       ? body.colors.filter(
           (color: unknown): color is string =>
             typeof color === "string" && color.trim().length > 0,

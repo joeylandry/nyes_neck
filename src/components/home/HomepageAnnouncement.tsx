@@ -93,18 +93,22 @@ export function HomepageAnnouncement({ announcement }: { announcement: HomepageA
           X
         </button>
         <div className="mx-auto max-w-[30rem] pt-5">
-          <p className="text-sm font-bold uppercase text-[#e9e1d3]">
-            {announcement.eyebrow}
-          </p>
+          {announcement.eyebrow ? (
+            <p className="text-sm font-bold uppercase text-[#e9e1d3]">
+              {announcement.eyebrow}
+            </p>
+          ) : null}
           <h2
             id="homepage-announcement-heading"
-            className="mt-3 font-heading text-3xl font-semibold leading-none md:text-4xl"
+            className={`${announcement.eyebrow ? "mt-3" : ""} font-heading text-3xl font-semibold leading-none md:text-4xl`}
           >
             {announcement.heading}
           </h2>
-          <p className="mt-4 text-lg leading-7 text-white/82">
-            {announcement.body}
-          </p>
+          {announcement.body ? (
+            <p className="mt-4 text-lg leading-7 text-white/82">
+              {announcement.body}
+            </p>
+          ) : null}
           {announcement.launchDateText ? (
             <p className="mt-4 inline-flex min-h-10 items-center border border-white/20 bg-white/10 px-4 py-2 text-base font-semibold text-white">
               {announcement.launchDateText}

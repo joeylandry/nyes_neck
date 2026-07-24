@@ -37,11 +37,11 @@ type SanityHomepageAnnouncement = {
 
 export const fallbackHomepageAnnouncement: HomepageAnnouncementSettings = {
   enabled: true,
-  eyebrow: "Nyes Neck Is Returning",
-  heading: "A New Collection Is Coming Soon",
-  body: "We’re preparing a new collection inspired by summers on the Cape, days by the water, and the community that started it all.",
+  eyebrow: "",
+  heading: "Ordering Opening Soon!",
+  body: "",
   newsletterHeading: "Be the first to know",
-  newsletterDescription: "Join the list for launch updates, early access, and new collection announcements.",
+  newsletterDescription: "",
   emailPlaceholder: "Enter your email",
   buttonText: "Join the List",
   successMessage: "You’re on the list. We’ll be in touch before launch.",
@@ -77,12 +77,12 @@ function getTheme(value: SanityHomepageAnnouncement["theme"]): HomepageAnnouncem
 function mapAnnouncement(record: SanityHomepageAnnouncement): HomepageAnnouncementSettings {
   return {
     enabled: record.enabled !== false,
-    eyebrow: trimText(record.eyebrow, fallbackHomepageAnnouncement.eyebrow),
+    eyebrow: trimText(record.eyebrow),
     heading: trimText(record.heading, fallbackHomepageAnnouncement.heading),
-    body: trimText(record.body, fallbackHomepageAnnouncement.body),
+    body: trimText(record.body),
     launchDateText: trimText(record.launchDateText) || undefined,
     newsletterHeading: trimText(record.newsletterHeading, fallbackHomepageAnnouncement.newsletterHeading),
-    newsletterDescription: trimText(record.newsletterDescription, fallbackHomepageAnnouncement.newsletterDescription),
+    newsletterDescription: trimText(record.newsletterDescription),
     emailPlaceholder: trimText(record.emailPlaceholder, fallbackHomepageAnnouncement.emailPlaceholder),
     buttonText: trimText(record.buttonText, fallbackHomepageAnnouncement.buttonText),
     successMessage: trimText(record.successMessage, fallbackHomepageAnnouncement.successMessage),

@@ -86,9 +86,11 @@ export function NewsletterSignupForm({
       className="text-white"
       onSubmit={handleSubmit}
       aria-describedby={
-        privacyNote
-          ? "newsletter-description newsletter-status newsletter-privacy"
-          : "newsletter-description newsletter-status"
+        [
+          description ? "newsletter-description" : "",
+          "newsletter-status",
+          privacyNote ? "newsletter-privacy" : "",
+        ].filter(Boolean).join(" ")
       }
     >
       <label className="sr-only">
@@ -97,9 +99,11 @@ export function NewsletterSignupForm({
       </label>
       <div>
         <h3 className="font-heading text-2xl font-semibold md:text-3xl">{heading}</h3>
-        <p id="newsletter-description" className="mt-2 text-base leading-7 text-white/75">
-          {description}
-        </p>
+        {description ? (
+          <p id="newsletter-description" className="mt-2 text-base leading-7 text-white/75">
+            {description}
+          </p>
+        ) : null}
       </div>
       <div className="mt-5 grid gap-3 sm:grid-cols-[minmax(0,1fr)_auto]">
         <label htmlFor="newsletter-email" className="sr-only">

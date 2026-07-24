@@ -11,11 +11,11 @@ export const homepageAnnouncement = defineType({
   ],
   initialValue: {
     enabled: true,
-    eyebrow: "Nyes Neck Is Returning",
-    heading: "A New Collection Is Coming Soon",
-    body: "We’re preparing a new collection inspired by summers on the Cape, days by the water, and the community that started it all.",
+    eyebrow: "",
+    heading: "Ordering Opening Soon!",
+    body: "",
     newsletterHeading: "Be the first to know",
-    newsletterDescription: "Join the list for launch updates, early access, and new collection announcements.",
+    newsletterDescription: "",
     emailPlaceholder: "Enter your email",
     buttonText: "Join the List",
     successMessage: "You’re on the list. We’ll be in touch before launch.",
@@ -49,7 +49,6 @@ export const homepageAnnouncement = defineType({
       type: "text",
       rows: 3,
       group: "content",
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "launchDateText",
@@ -71,7 +70,6 @@ export const homepageAnnouncement = defineType({
       type: "text",
       rows: 2,
       group: "newsletter",
-      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: "emailPlaceholder",

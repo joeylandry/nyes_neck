@@ -4,6 +4,8 @@ import { visionTool } from "@sanity/vision";
 import { schemaTypes } from "./src/sanity/schemaTypes";
 import { sanityDataset, sanityProjectId } from "./src/sanity/env";
 
+const singletonTypes = new Set(["shopSettings", "homepageAnnouncement"]);
+
 export default defineConfig({
   name: "default",
   title: "NYES NECK",
@@ -16,11 +18,22 @@ export default defineConfig({
           .title("Content")
           .items([
             S.listItem().title("Shop page").child(S.document().schemaType("shopSettings").documentId("shopSettings")),
+            S.listItem()
+              .title("Homepage announcement")
+              .child(S.document().schemaType("homepageAnnouncement").documentId("homepageAnnouncement")),
             S.divider(),
-            ...S.documentTypeListItems().filter((item) => item.getId() !== "shopSettings"),
+            ...S.documentTypeListItems().filter((item) => !singletonTypes.has(item.getId() ?? "")),
           ]),
     }),
     visionTool(),
   ],
+  document: {
+    newDocumentOptions: (previous) =>
+      previous.filter((templateItem) => !singletonTypes.has(templateItem.templateId ?? "")),
+    actions: (previous, context) =>
+      singletonTypes.has(context.schemaType)
+        ? previous.filter((action) => action.action !== "delete" && action.action !== "duplicate")
+        : previous,
+  },
   schema: { types: schemaTypes },
 });

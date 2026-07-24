@@ -38,8 +38,10 @@ export function NewsletterSignupForm({
 
     const form = event.currentTarget;
     const formData = new FormData(form);
-    const email = typeof formData.get("email") === "string" ? formData.get("email")!.trim() : "";
-    const website = typeof formData.get("website") === "string" ? formData.get("website") : "";
+    const emailValue = formData.get("email");
+    const websiteValue = formData.get("website");
+    const email = typeof emailValue === "string" ? emailValue.trim() : "";
+    const website = typeof websiteValue === "string" ? websiteValue : "";
 
     if (!isValidEmail(email)) {
       setStatus("error");

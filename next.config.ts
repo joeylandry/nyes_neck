@@ -8,6 +8,21 @@ const nextConfig: NextConfig = {
         hostname: "cdn.sanity.io",
         pathname: "/images/**",
       },
+      {
+        protocol: "https",
+        hostname: "files.cdn.printful.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "static.cdn.printful.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
+        hostname: "cdn.shopify.com",
+        pathname: "/**",
+      },
     ],
   },
 };

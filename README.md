@@ -63,6 +63,22 @@ Products, product types, collections, featured category, prices, variants, avail
 
 Product media uses a 4:5 crop preview. Shop tiles use a 4:3 crop preview. Sanity stores the selected crop and hotspot; the storefront image pipeline applies both automatically.
 
+## Printful product display
+
+Set `PRINTFUL_API_TOKEN` to show synced Printful products in the storefront. When this token is present, Printful becomes the source for product names, mockup image thumbnails, prices, variants, sizes, colors, and availability. Sanity still controls shop layout, product type tiles, collection tiles, and the featured category.
+
+Optional settings:
+
+```bash
+PRINTFUL_STORE_ID=123456
+PRINTFUL_REVALIDATE_SECONDS=300
+PRINTFUL_DEFAULT_COLLECTION_SLUG=nyes-neck
+PRINTFUL_DEFAULT_PRODUCT_TYPE_SLUG=t-shirts
+PRINTFUL_PRODUCT_OVERRIDES='{"123456789":{"category":"hoodies","collection":"old-silver","featured":true}}'
+```
+
+`PRINTFUL_PRODUCT_OVERRIDES` is keyed by Printful sync product ID, external ID, or exact product name. Use it when a product should appear in a specific site category or collection. Ignored Printful products are hidden from the storefront.
+
 ## Contact form
 
 The contact form posts to `/api/contact`, which forwards submissions to Formspree. Set `CONTACT_FORM_ENDPOINT` in `.env.local` and in production using the endpoint from the Formspree dashboard, for example:

@@ -71,7 +71,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
           {product.sizes.length ? (
             <section className="mt-8" aria-labelledby="size-heading">
-              <h2 id="size-heading" className="text-sm font-bold uppercase tracking-[0.14em] text-black/55">Planned sizes</h2>
+              <h2 id="size-heading" className="text-sm font-bold uppercase tracking-[0.14em] text-black/55">Sizes</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.sizes.map((size) => <span key={size} className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-black/15 bg-white px-3 text-base">{size}</span>)}
               </div>
@@ -80,7 +80,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
 
           {product.colors.length ? (
             <section className="mt-7" aria-labelledby="color-heading">
-              <h2 id="color-heading" className="text-sm font-bold uppercase tracking-[0.14em] text-black/55">Planned colors</h2>
+              <h2 id="color-heading" className="text-sm font-bold uppercase tracking-[0.14em] text-black/55">Colors</h2>
               <div className="mt-3 flex flex-wrap gap-2">
                 {product.colors.map((color) => <span key={color} className="rounded-full border border-black/15 bg-white px-4 py-2.5 text-base">{color}</span>)}
               </div>

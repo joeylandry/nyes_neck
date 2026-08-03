@@ -1,4 +1,5 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
+import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { getSanityClient } from "@/sanity/client";
 import { sanityImageUrl } from "@/sanity/image";
@@ -58,6 +59,8 @@ type SanityShopSettings = {
   collectionTileOrder?: string[];
 };
 
+const SANITY_TIMEOUT_MS = 10000;
+
 const productQuery = `*[_type == "product" && defined(slug.current)] | order(title asc) {
   _id,
   "slug": slug.current,
@@ -104,6 +107,27 @@ function orderByIds<T>(items: T[], ids: string[], getId: (item: T) => string): T
       return a.position - b.position;
     })
     .map(({ item }) => item);
+}
+
+async function withTimeout<T>(promise: Promise<T>, milliseconds: number, label: string): Promise<T | null> {
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+
+  try {
+    return await Promise.race([
+      promise,
+      new Promise<null>((resolve) => {
+        timeout = setTimeout(() => {
+          console.error(`${label} timed out after ${milliseconds}ms`);
+          resolve(null);
+        }, milliseconds);
+      }),
+    ]);
+  } catch (error) {
+    console.error(`${label} failed:`, error);
+    return null;
+  } finally {
+    if (timeout) clearTimeout(timeout);
+  }
 }
 
 function mapProduct(record: SanityProduct): Product | null {
@@ -189,13 +213,19 @@ function fallbackTiles(categories: ShopCategory[]): ShopTile[] {
 async function fetchSanityProducts(): Promise<Product[] | null> {
   const client = getSanityClient();
   if (!client) return null;
-  const records = await client.fetch<SanityProduct[]>(productQuery, {}, { next: { revalidate: 60, tags: ["product"] } });
+  const records = await withTimeout(
+    client.fetch<SanityProduct[]>(productQuery, {}, { next: { revalidate: 60, tags: ["product"] } }),
+    SANITY_TIMEOUT_MS,
+    "Sanity product fetch",
+  );
+  if (!records) return null;
   if (!records.length) return null;
   return records.map(mapProduct).filter((product): product is Product => Boolean(product));
 }
 
 export async function getProducts(): Promise<Product[]> {
-  return (await fetchSanityProducts()) ?? localProducts;
+  const categories = await getShopCategories();
+  return (await fetchPrintfulProducts(categories)) ?? (await fetchSanityProducts()) ?? localProducts;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
@@ -217,7 +247,12 @@ export async function getProductsByCollection(collection: ProductCollection): Pr
 export async function getShopCategories(): Promise<ShopCategory[]> {
   const client = getSanityClient();
   if (!client) return localShopCategories;
-  const records = await client.fetch<SanityTaxonomy[]>(taxonomyQuery, {}, { next: { revalidate: 60, tags: ["productType", "collection"] } });
+  const records = await withTimeout(
+    client.fetch<SanityTaxonomy[]>(taxonomyQuery, {}, { next: { revalidate: 60, tags: ["productType", "collection"] } }),
+    SANITY_TIMEOUT_MS,
+    "Sanity taxonomy fetch",
+  );
+  if (!records) return localShopCategories;
   return records.map(taxonomyToCategory);
 }
 
@@ -233,9 +268,26 @@ export async function getShopSettings(): Promise<ShopSettings> {
     };
   }
   const [settings, taxonomies] = await Promise.all([
-    client.fetch<SanityShopSettings | null>(shopSettingsQuery, {}, { next: { revalidate: 60, tags: ["shopSettings"] } }),
-    client.fetch<SanityTaxonomy[]>(taxonomyQuery, {}, { next: { revalidate: 60, tags: ["productType", "collection"] } }),
+    withTimeout(
+      client.fetch<SanityShopSettings | null>(shopSettingsQuery, {}, { next: { revalidate: 60, tags: ["shopSettings"] } }),
+      SANITY_TIMEOUT_MS,
+      "Sanity shop settings fetch",
+    ),
+    withTimeout(
+      client.fetch<SanityTaxonomy[]>(taxonomyQuery, {}, { next: { revalidate: 60, tags: ["productType", "collection"] } }),
+      SANITY_TIMEOUT_MS,
+      "Sanity taxonomy fetch",
+    ),
   ]);
+  if (!taxonomies) {
+    return {
+      featuredLabel: "Featured",
+      featuredCategory: localShopCategories.find((category) => category.slug === "nyes-neck-collection"),
+      featuredProductOrder: [],
+      productTiles: fallbackTiles(productTypeCategories),
+      collectionTiles: fallbackTiles(collectionCategories),
+    };
+  }
   const productTiles = taxonomies.filter((item) => item._type === "productType").map(taxonomyToTile);
   const collectionTiles = taxonomies.filter((item) => item._type === "collection").map(taxonomyToTile);
   return {

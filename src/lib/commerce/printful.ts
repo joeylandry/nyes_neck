@@ -30,6 +30,11 @@ type PrintfulSyncVariant = {
   size?: string;
   color?: string;
   availability_status?: string;
+  variant_id?: number;
+  product?: { product_id?: number; image?: string };
+  files?: { type?: string; preview_url?: string; thumbnail_url?: string; status?: string }[];
+  color_code?: string;
+
 };
 
 type PrintfulSyncProductDetail = {
@@ -269,16 +274,35 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
       id: variant.external_id ?? `printful-${variant.id}`,
       size: options.size,
       color: options.color,
+      colorCode: variant.color_code,
+      priceCents: parsePriceCents([variant]) ?? undefined,
       available: isVariantAvailable(variant),
     };
   });
 
   const sizes = Array.from(new Set(variants.map((variant) => variant.size).filter((size): size is string => Boolean(size))));
   const colors = Array.from(new Set(variants.map((variant) => variant.color).filter((color): color is string => Boolean(color))));
-  const thumbnail = syncProduct.thumbnail_url;
-  const images: ProductImage[] = thumbnail
-    ? [{ id: `printful-${syncProduct.id}-main`, src: thumbnail, alt: syncProduct.name, role: "main" }]
-    : [{ id: `printful-${syncProduct.id}-placeholder`, src: "/images/products/product-placeholder.svg", alt: syncProduct.name, role: "main" }];
+  const images: ProductImage[] = [];
+  const addImage = (src: string | undefined, color?: string) => {
+    if (!src) return;
+    const existing = images.find((image) => image.src === src);
+    if (existing) {
+      if (color && !existing.colors?.includes(color)) existing.colors = [...(existing.colors ?? []), color];
+      return;
+    }
+    images.push({ id: `printful-${syncProduct.id}-${images.length}`, src,
+      alt: `${syncProduct.name}${color ? ` — ${color}` : ""}`,
+      role: images.length ? "gallery" : "main", colors: color ? [color] : undefined });
+  };
+  for (const variant of detail.sync_variants ?? []) {
+    const { color } = parseVariantOptions(variant, syncProduct.name);
+    // Only preview files depict the finished product; print files are artwork.
+    const previews = (variant.files ?? []).filter((file) => file.type === "preview" && file.status !== "failed");
+    for (const file of previews) addImage(file.preview_url ?? file.thumbnail_url, color);
+    if (!previews.some((file) => file.preview_url || file.thumbnail_url)) addImage(variant.product?.image, color);
+  }
+  addImage(syncProduct.thumbnail_url);
+  if (!images.length) addImage("/images/products/product-placeholder.svg");
 
   return {
     id: `printful-${syncProduct.id}`,
@@ -326,6 +350,23 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
     const summaries = await fetchSyncProductSummaries(token);
     const visibleSummaries = summaries.filter((product) => !product.is_ignored && !getOverride(product, overrides)?.hidden);
     const details = await Promise.all(visibleSummaries.map((product) => fetchSyncProductDetail(product.id, token)));
+    const catalogIds = [...new Set(details.flatMap((detail) =>
+      (detail?.sync_variants ?? []).flatMap((variant) => variant.product?.product_id ? [variant.product.product_id] : [])))];
+    const catalog = new Map<number, { color_code?: string }>();
+    // One cached catalog request per garment style, rather than per size/color.
+    for (const id of catalogIds) {
+      try {
+        const response = await printfulFetch<{ result?: { variants?: { id: number; color_code?: string }[] } }>(`/products/${id}`, token);
+        for (const variant of response.result?.variants ?? []) catalog.set(variant.id, variant);
+      } catch {
+        console.error(`Could not load Printful color metadata for product ${id}`);
+      }
+    }
+    for (const detail of details) {
+      for (const variant of detail?.sync_variants ?? []) {
+        variant.color_code = variant.variant_id ? catalog.get(variant.variant_id)?.color_code : undefined;
+      }
+    }
     const products = details
       .flatMap((detail) => {
         if (!detail) return [];

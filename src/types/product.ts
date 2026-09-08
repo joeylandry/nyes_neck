@@ -20,6 +20,7 @@ export type ProductImage = {
   src: string;
   alt: string;
   role: ProductImageRole;
+  colors?: string[];
 };
 
 export type ShopTile = {
@@ -42,6 +43,8 @@ export type ProductVariant = {
   id: string;
   size?: string;
   color?: string;
+  colorCode?: string;
+  priceCents?: number;
   available: boolean;
 };
 

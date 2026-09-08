@@ -1,4 +1,5 @@
 import "server-only";
+import { getShopifyCheckoutUrl } from "@/lib/commerce/shopify";
 
 import { collectionTileLabel } from "@/lib/shopLabels";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
@@ -183,7 +184,7 @@ function parsePriceCents(variants: PrintfulSyncVariant[]) {
 }
 
 function isVariantAvailable(variant: PrintfulSyncVariant) {
-  return variant.synced !== false && variant.availability_status !== "out_of_stock" && variant.availability_status !== "discontinued";
+  return variant.synced === true && variant.availability_status === "active";
 }
 
 function findProductTypeCategory(productName: string, override: PrintfulProductOverride | undefined, categories: ShopCategory[]) {
@@ -272,6 +273,7 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
     const options = parseVariantOptions(variant, syncProduct.name);
     return {
       id: variant.external_id ?? `printful-${variant.id}`,
+      checkoutUrl: variant.external_id ? getShopifyCheckoutUrl(`printful-${syncProduct.id}`, variant.external_id) : undefined,
       size: options.size,
       color: options.color,
       colorCode: variant.color_code,

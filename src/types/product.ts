@@ -41,6 +41,7 @@ export type ShopSettings = {
 
 export type ProductVariant = {
   id: string;
+  checkoutUrl?: string;
   size?: string;
   color?: string;
   colorCode?: string;

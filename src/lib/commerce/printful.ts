@@ -1,4 +1,5 @@
 import "server-only";
+import { getShopifyCheckoutUrl } from "@/lib/commerce/shopify";
 
 import { collectionTileLabel } from "@/lib/shopLabels";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
@@ -183,7 +184,7 @@ function parsePriceCents(variants: PrintfulSyncVariant[]) {
 }
 
 function isVariantAvailable(variant: PrintfulSyncVariant) {
-  return variant.synced !== false && variant.availability_status !== "out_of_stock" && variant.availability_status !== "discontinued";
+  return variant.synced === true && variant.availability_status === "active";
 }
 
 function findProductTypeCategory(productName: string, override: PrintfulProductOverride | undefined, categories: ShopCategory[]) {
@@ -272,6 +273,7 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
     const options = parseVariantOptions(variant, syncProduct.name);
     return {
       id: variant.external_id ?? `printful-${variant.id}`,
+      checkoutUrl: variant.external_id ? getShopifyCheckoutUrl(`printful-${syncProduct.id}`, variant.external_id) : undefined,
       size: options.size,
       color: options.color,
       colorCode: variant.color_code,
@@ -299,11 +301,9 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
     // Only preview files depict the finished product; print files are artwork.
     const previews = (variant.files ?? []).filter((file) => file.type === "preview" && file.status !== "failed");
     for (const file of previews) addImage(file.preview_url ?? file.thumbnail_url, color);
-    // Catalog images are blank garments, not the finished printed item.
+    if (!previews.some((file) => file.preview_url || file.thumbnail_url)) addImage(variant.product?.image, color);
   }
-  // The unassigned store thumbnail may depict a different color.
-  // Keep it only as a card fallback when no finished-product previews exist.
-  if (!images.length) addImage(syncProduct.thumbnail_url);
+  addImage(syncProduct.thumbnail_url);
   if (!images.length) addImage("/images/products/product-placeholder.svg");
 
   return {

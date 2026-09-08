@@ -45,6 +45,9 @@ export function ProductCard({
               {product.collectionLabel}
             </p>
           ) : null}
+          {product.colors.length > 1 ? (
+            <p className="mb-1.5 text-xs font-medium text-[#183247]/75">{product.colors.length} colors available</p>
+          ) : null}
           <h2 className={`font-heading font-semibold leading-tight tracking-[-0.025em] ${compact ? "text-[0.95rem] md:text-lg" : "text-lg md:text-xl"}`}>{product.name}</h2>
           <p className={`text-black/55 ${compact ? "mt-1.5 text-sm" : "mt-2 text-base"}`}>
             {product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}

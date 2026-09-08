@@ -299,9 +299,11 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
     // Only preview files depict the finished product; print files are artwork.
     const previews = (variant.files ?? []).filter((file) => file.type === "preview" && file.status !== "failed");
     for (const file of previews) addImage(file.preview_url ?? file.thumbnail_url, color);
-    if (!previews.some((file) => file.preview_url || file.thumbnail_url)) addImage(variant.product?.image, color);
+    // Catalog images are blank garments, not the finished printed item.
   }
-  addImage(syncProduct.thumbnail_url);
+  // The unassigned store thumbnail may depict a different color.
+  // Keep it only as a card fallback when no finished-product previews exist.
+  if (!images.length) addImage(syncProduct.thumbnail_url);
   if (!images.length) addImage("/images/products/product-placeholder.svg");
 
   return {

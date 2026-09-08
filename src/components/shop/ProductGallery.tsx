@@ -7,6 +7,7 @@ import type { ProductImage } from "@/types/product";
 export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
   const galleryImages = images;
   const [activeIndex, setActiveIndex] = useState(0);
+  const [ratios, setRatios] = useState<Record<string, number>>({});
   const activeImage = galleryImages[activeIndex] ?? galleryImages[0];
 
   if (!activeImage) return null;
@@ -16,8 +17,15 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
 
   return (
     <section aria-label={`${productName} image gallery`}>
-      <div className="product-pattern relative aspect-[4/5] overflow-hidden rounded-[20px] border border-black/10 bg-[#e9e1d3] shadow-sm md:rounded-[30px]">
-        <Image key={activeImage.id} src={activeImage.src} alt={activeImage.alt} fill priority
+      <div className="relative overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-sm md:rounded-[30px]"
+        style={{ aspectRatio: ratios[activeImage.src] ?? 1 }}>
+        <Image key={activeImage.id} src={activeImage.src} alt={activeImage.alt} fill loading="eager"
+          onLoad={(event) => {
+            const { naturalWidth, naturalHeight } = event.currentTarget;
+            if (naturalWidth && naturalHeight) {
+              setRatios((current) => ({ ...current, [activeImage.src]: naturalWidth / naturalHeight }));
+            }
+          }}
           sizes="(max-width: 768px) 100vw, 55vw" className="object-contain" />
         {galleryImages.length > 1 ? (
           <>
@@ -39,7 +47,7 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
                 onClick={() => setActiveIndex(index)}
                 aria-label={`Show image ${index + 1}: ${image.alt}`}
                 aria-current={index === activeIndex ? "true" : undefined}
-                className={`relative block aspect-[4/5] w-full overflow-hidden rounded-xl border-2 bg-[#e9e1d3] transition ${index === activeIndex ? "border-[#183247]" : "border-transparent opacity-70 hover:opacity-100"}`}
+                className={`relative block aspect-square w-full overflow-hidden rounded-xl border-2 bg-white transition ${index === activeIndex ? "border-[#183247]" : "border-transparent opacity-70 hover:opacity-100"}`}
               >
                 <Image src={image.src} alt="" fill sizes="120px" className="object-contain" />
               </button>

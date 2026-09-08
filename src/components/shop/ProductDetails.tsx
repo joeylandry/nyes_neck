@@ -22,9 +22,7 @@ export function ProductDetails({ product }: { product: Product }) {
   const available = product.available && (!product.variants.length || Boolean(variant?.available));
   const price = variant?.priceCents ?? product.priceCents;
   const colorImages = product.images.filter((image) => image.colors?.includes(color));
-  const images = colorImages.length
-    ? [...colorImages, ...product.images.filter((image) => !image.colors?.length)]
-    : product.images.filter((image) => !image.colors?.length);
+  const images = color ? colorImages : product.images.filter((image) => !image.colors?.length);
 
   function selectColor(nextColor: string) {
     setColor(nextColor);
@@ -36,7 +34,7 @@ export function ProductDetails({ product }: { product: Product }) {
     <div className="mt-6 grid items-start gap-8 md:mt-8 md:grid-cols-[1.15fr_1fr] md:gap-12 lg:gap-16">
       <div>
         {images.length ? <ProductGallery key={color} images={images} productName={product.name} /> : (
-          <div className="flex aspect-[4/5] items-center justify-center rounded-[30px] bg-[#e9e1d3] p-8 text-center text-black/60">Photo unavailable for {color}.</div>
+          <div className="flex aspect-square items-center justify-center rounded-[30px] bg-[#e9e1d3] p-8 text-center text-black/60">Photo unavailable for {color}.</div>
         )}
         <p className="mt-3 text-xs tracking-wide text-black/50">{colorImages.length ? `${color} · Explore the details` : color ? `Product gallery · ${color} photo not available` : "Explore the details"}</p>
       </div>

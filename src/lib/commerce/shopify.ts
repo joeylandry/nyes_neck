@@ -24,13 +24,23 @@ export function getShopifyCheckoutUrl(productId: string, variantId: string): str
 
 export function applyLaunchAvailability(product: Product): Product {
   const launched = product.id === RETRO_CREWNECK_ID;
+  const variants = product.variants.map((variant) => {
+    const checkoutUrl = launched ? variant.checkoutUrl : undefined;
+
+    return {
+      ...variant,
+      // Shopify owns the sellable state at checkout. Printful's sync status can
+      // lag behind a newly published Shopify variant, so do not hide the launch
+      // product when its valid Shopify checkout link is already available.
+      available: launched ? Boolean(checkoutUrl) : variant.available,
+      checkoutUrl,
+    };
+  });
+
   return {
     ...product,
     externalLink: undefined,
-    available: launched && product.variants.some((variant) => variant.available && variant.checkoutUrl),
-    variants: product.variants.map((variant) => ({
-      ...variant,
-      checkoutUrl: launched ? variant.checkoutUrl : undefined,
-    })),
+    available: launched && variants.some((variant) => variant.available),
+    variants,
   };
 }

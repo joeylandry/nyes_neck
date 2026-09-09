@@ -297,26 +297,33 @@ function mapPrintfulProduct(
   const images: ProductImage[] = [];
   const addImage = (src: string | undefined, color?: string) => {
     if (!src) return;
-    const existing = images.find((image) => image.src === src);
-    if (existing) {
-      if (color && !existing.colors?.includes(color)) existing.colors = [...(existing.colors ?? []), color];
-      return;
-    }
+    // Identical fallback URLs must remain separate for each color. Otherwise a
+    // generic image assigned to Black would also leak into every other color.
+    if (images.some((image) => image.src === src && image.colors?.[0] === color)) return;
     images.push({ id: `printful-${syncProduct.id}-${images.length}`, src,
       alt: `${syncProduct.name}${color ? ` — ${color}` : ""}`,
       role: images.length ? "gallery" : "main", colors: color ? [color] : undefined });
   };
+  const hasImageForColor = (color?: string) => images.some((image) => (
+    color ? image.colors?.includes(color) : !image.colors?.length
+  ));
 
-  // `thumbnail_url` is the primary thumbnail on the synced Printful product.
-  // Files on a sync variant are the artwork uploaded for printing, so their
-  // preview URLs must not be used as storefront photos.
-  for (const color of colors.length ? colors : [undefined]) addImage(syncProduct.thumbnail_url, color);
-
+  // Printful's preview files are the generated, branded product mockups. They
+  // are deliberately scoped to the variant color so switching colors never
+  // exposes another color's image.
   for (const variant of detail.sync_variants ?? []) {
     const { color } = parseVariantOptions(variant, syncProduct.name);
-    // This catalog image is a safe color-specific fallback when the synced
-    // product lacks a thumbnail.
-    addImage(variant.product?.image, color);
+    const preview = variant.files?.find((file) => file.type === "preview" && file.preview_url)?.preview_url;
+    addImage(preview, color);
+  }
+
+  // Keep a scoped catalog fallback only for colors that do not yet have a
+  // branded Printful mockup. This preserves a usable product page while never
+  // showing that fallback under a different color selection.
+  for (const color of colors.length ? colors : [undefined]) {
+    if (hasImageForColor(color)) continue;
+    const colorVariant = (detail.sync_variants ?? []).find((variant) => parseVariantOptions(variant, syncProduct.name).color === color);
+    addImage(colorVariant?.product?.image ?? syncProduct.thumbnail_url, color);
   }
   if (!images.length) addImage("/images/products/product-placeholder.svg");
 

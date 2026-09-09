@@ -7,7 +7,6 @@ import type { ProductImage } from "@/types/product";
 export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
   const galleryImages = images;
   const [activeIndex, setActiveIndex] = useState(0);
-  const [ratios, setRatios] = useState<Record<string, number>>({});
   const activeImage = galleryImages[activeIndex] ?? galleryImages[0];
 
   if (!activeImage) return null;
@@ -17,15 +16,8 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
 
   return (
     <section aria-label={`${productName} image gallery`}>
-      <div className="relative overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-sm md:rounded-[30px]"
-        style={{ aspectRatio: ratios[activeImage.src] ?? 1 }}>
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-sm md:rounded-[30px]">
         <Image key={activeImage.id} src={activeImage.src} alt={activeImage.alt} fill loading="eager"
-          onLoad={(event) => {
-            const { naturalWidth, naturalHeight } = event.currentTarget;
-            if (naturalWidth && naturalHeight) {
-              setRatios((current) => ({ ...current, [activeImage.src]: naturalWidth / naturalHeight }));
-            }
-          }}
           sizes="(max-width: 768px) 100vw, 55vw" className="object-contain" />
         {galleryImages.length > 1 ? (
           <>

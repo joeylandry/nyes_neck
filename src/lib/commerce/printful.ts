@@ -306,14 +306,17 @@ function mapPrintfulProduct(
       alt: `${syncProduct.name}${color ? ` — ${color}` : ""}`,
       role: images.length ? "gallery" : "main", colors: color ? [color] : undefined });
   };
+
+  // `thumbnail_url` is the primary thumbnail on the synced Printful product.
+  // Files on a sync variant are the artwork uploaded for printing, so their
+  // preview URLs must not be used as storefront photos.
+  for (const color of colors.length ? colors : [undefined]) addImage(syncProduct.thumbnail_url, color);
+
   for (const variant of detail.sync_variants ?? []) {
     const { color } = parseVariantOptions(variant, syncProduct.name);
-    // Preview URLs are Printful's customer-facing item images. Their file type
-    // describes the placement (front, back, label, etc.), not whether a preview
-    // is available, so collect every usable preview for this exact color.
-    const previews = (variant.files ?? []).filter((file) => file.status !== "failed" && (file.preview_url || file.thumbnail_url));
-    for (const file of previews) addImage(file.preview_url ?? file.thumbnail_url, color);
-    if (!previews.some((file) => file.preview_url || file.thumbnail_url)) addImage(variant.product?.image, color);
+    // This catalog image is a safe color-specific fallback when the synced
+    // product lacks a thumbnail.
+    addImage(variant.product?.image, color);
   }
   if (!images.length) addImage("/images/products/product-placeholder.svg");
 

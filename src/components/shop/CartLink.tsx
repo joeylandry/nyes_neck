@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useCart } from "./CartProvider";
 
 type CartLinkProps = {
   className?: string;
 };
 
 export function CartLink({ className = "" }: CartLinkProps) {
+  const { itemCount } = useCart();
   return (
     <Link
       href="/cart"
@@ -25,6 +29,7 @@ export function CartLink({ className = "" }: CartLinkProps) {
         <circle cx="19" cy="20" r="1" />
         <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H6" />
       </svg>
+      {itemCount ? <span className="absolute -right-0.5 -top-0.5 flex size-5 items-center justify-center rounded-full bg-[#183247] text-xs font-bold text-white">{itemCount}</span> : null}
     </Link>
   );
 }

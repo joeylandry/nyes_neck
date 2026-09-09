@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Cormorant_Garamond } from "next/font/google";
+import { CartProvider } from "@/components/shop/CartProvider";
 import "./globals.css";
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -18,9 +19,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={cormorantGaramond.variable}>
-      <body>
-        {children}
-      </body>
+      <body><CartProvider>{children}</CartProvider></body>
     </html>
   );
 }

@@ -23,7 +23,7 @@ export default async function HomePage() {
           id="mini-shop"
           className="scroll-mt-[var(--site-header-height)]"
         >
-          <ShopStorefront showHeader={false} />
+          <ShopStorefront />
         </div>
       </main>
       <SiteFooter />

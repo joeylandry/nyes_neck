@@ -79,8 +79,17 @@ export function ProductDetails({ product }: { product: Product }) {
               {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
             </select>
           </label> : null}
-          <PurchaseAction productId={product.id} variantId={variant?.id} available={available} cartUrl={variant?.cartUrl} quantity={quantity} comingSoon={!product.available} />
-          <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : !available ? "This selection is currently unavailable. Please choose another size or color." : `${[color, size].filter(Boolean).join(" / ")} · Secure checkout with Shopify`}</p>
+          <PurchaseAction productId={product.id} variantId={variant?.id} available={available} cartUrl={variant?.cartUrl} quantity={quantity} comingSoon={!product.available} item={variant?.cartUrl ? {
+            id: variant.id,
+            productId: product.id,
+            name: product.name,
+            image: images[0]?.src,
+            priceCents: price,
+            currency: product.currency,
+            options: [color, size].filter(Boolean).join(" / "),
+            cartUrl: variant.cartUrl,
+          } : undefined} />
+          <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : !available ? "This selection is currently unavailable. Please choose another size or color." : `${[color, size].filter(Boolean).join(" / ")} · Secure checkout`}</p>
         </div>
         <div className="mt-8"><h2 className="text-sm font-semibold">Item details</h2><p className="mt-3 text-base leading-7 text-black/60">{product.description}</p></div>
       </div>

@@ -29,10 +29,10 @@ export function applyLaunchAvailability(product: Product): Product {
 
     return {
       ...variant,
-      // Shopify owns the sellable state at checkout. Printful's sync status can
-      // lag behind a newly published Shopify variant, so do not hide the launch
-      // product when its valid Shopify cart link is already available.
-      available: launched ? Boolean(cartUrl) : variant.available,
+      // A Shopify cart link alone is not proof the variant can be sold. Keep
+      // Printful's live availability as a required condition so a sold-out
+      // Printful variant cannot be added to the cart.
+      available: launched ? Boolean(cartUrl) && variant.available : variant.available,
       cartUrl,
     };
   });

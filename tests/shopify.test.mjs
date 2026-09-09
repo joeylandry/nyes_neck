@@ -31,7 +31,7 @@ test("other products and fallback catalogs cannot expose purchase links", () => 
   assert.equal(product.available, true);
   assert.equal(applyLaunchAvailability({ ...product, id: RETRO_CREWNECK_ID }).available, true);
   assert.equal(applyLaunchAvailability({ ...product, id: RETRO_CREWNECK_ID, variants: [{ available: true }] }).available, false);
-  const launchedWithCart = applyLaunchAvailability({ ...product, id: RETRO_CREWNECK_ID, variants: [{ available: false, cartUrl: "https://test.myshopify.com/cart/add?id=123&quantity=1" }] });
-  assert.equal(launchedWithCart.available, true);
-  assert.equal(launchedWithCart.variants[0].available, true);
+  const soldOutOnPrintful = applyLaunchAvailability({ ...product, id: RETRO_CREWNECK_ID, variants: [{ available: false, cartUrl: "https://test.myshopify.com/cart/add?id=123&quantity=1" }] });
+  assert.equal(soldOutOnPrintful.available, false);
+  assert.equal(soldOutOnPrintful.variants[0].available, false);
 });

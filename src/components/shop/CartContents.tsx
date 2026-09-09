@@ -72,6 +72,20 @@ export function CartContents() {
         </div>
         <aside className="self-start rounded-2xl bg-[#e9e1d3] p-6 lg:sticky lg:top-[calc(var(--site-header-height)+2rem)]">
           <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Order summary</h2>
+          <ul aria-label="Items in your order" className="mt-5 max-h-64 divide-y divide-black/10 overflow-y-auto border-y border-black/10">
+            {items.map((item) => (
+              <li key={item.id} className="flex items-center gap-3 py-3 pr-2 text-sm leading-tight">
+                <div className="relative h-12 w-10 shrink-0 overflow-hidden rounded-lg bg-white/60">
+                  {item.image ? <Image src={item.image} alt="" fill sizes="40px" className="object-cover" /> : null}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate font-semibold">{item.name}</p>
+                  <p className="mt-1 text-black/55">Qty {item.quantity}</p>
+                </div>
+                <p className="shrink-0 font-semibold">{item.priceCents === null ? "—" : formatCurrency(item.priceCents * item.quantity, item.currency)}</p>
+              </li>
+            ))}
+          </ul>
           <div className="mt-6 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
           <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
           {checkout ? (

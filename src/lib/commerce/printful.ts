@@ -1,5 +1,5 @@
 import "server-only";
-import { getShopifyCheckoutUrl } from "@/lib/commerce/shopify";
+import { getShopifyCartUrl } from "@/lib/commerce/shopify";
 
 import { collectionTileLabel } from "@/lib/shopLabels";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
@@ -60,6 +60,11 @@ type PrintfulProductOverride = {
   featured?: boolean;
   hidden?: boolean;
   slug?: string;
+};
+
+type PrintfulCatalogProduct = {
+  product?: { description?: string };
+  variants?: { id: number; color_code?: string }[];
 };
 
 const DEFAULT_REVALIDATE_SECONDS = 300;
@@ -261,7 +266,12 @@ async function fetchSyncProductDetail(productId: number, token: string) {
   return response.result ?? null;
 }
 
-function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopCategory[], override: PrintfulProductOverride | undefined): Product | null {
+function mapPrintfulProduct(
+  detail: PrintfulSyncProductDetail,
+  categories: ShopCategory[],
+  override: PrintfulProductOverride | undefined,
+  catalogDescriptions: Map<number, string>,
+): Product | null {
   const syncProduct = detail.sync_product;
   if (syncProduct.is_ignored || override?.hidden) return null;
 
@@ -273,7 +283,7 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
     const options = parseVariantOptions(variant, syncProduct.name);
     return {
       id: variant.external_id ?? `printful-${variant.id}`,
-      checkoutUrl: variant.external_id ? getShopifyCheckoutUrl(`printful-${syncProduct.id}`, variant.external_id) : undefined,
+      cartUrl: variant.external_id ? getShopifyCartUrl(`printful-${syncProduct.id}`, variant.external_id) : undefined,
       size: options.size,
       color: options.color,
       colorCode: variant.color_code,
@@ -298,20 +308,26 @@ function mapPrintfulProduct(detail: PrintfulSyncProductDetail, categories: ShopC
   };
   for (const variant of detail.sync_variants ?? []) {
     const { color } = parseVariantOptions(variant, syncProduct.name);
-    // Only preview files depict the finished product; print files are artwork.
-    const previews = (variant.files ?? []).filter((file) => file.type === "preview" && file.status !== "failed");
+    // Preview URLs are Printful's customer-facing item images. Their file type
+    // describes the placement (front, back, label, etc.), not whether a preview
+    // is available, so collect every usable preview for this exact color.
+    const previews = (variant.files ?? []).filter((file) => file.status !== "failed" && (file.preview_url || file.thumbnail_url));
     for (const file of previews) addImage(file.preview_url ?? file.thumbnail_url, color);
     if (!previews.some((file) => file.preview_url || file.thumbnail_url)) addImage(variant.product?.image, color);
   }
-  addImage(syncProduct.thumbnail_url);
   if (!images.length) addImage("/images/products/product-placeholder.svg");
+
+  const catalogProductId = (detail.sync_variants ?? [])
+    .map((variant) => variant.product?.product_id)
+    .find((id): id is number => Boolean(id));
+  const catalogDescription = catalogProductId ? catalogDescriptions.get(catalogProductId) : undefined;
 
   return {
     id: `printful-${syncProduct.id}`,
     slug: override?.slug ? makeSlug(override.slug) : makeSlug(`${syncProduct.name}-${syncProduct.id}`),
     name: syncProduct.name,
     shortDescription: `${collectionTileLabel(collection.label)} ${productType.label.toLowerCase()}.`,
-    description: `A NYES NECK ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
+    description: catalogDescription ?? `A NYES NECK ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
     category: productType.value,
     categoryLabel: productType.label,
     collection: collection.value,
@@ -355,11 +371,14 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
     const catalogIds = [...new Set(details.flatMap((detail) =>
       (detail?.sync_variants ?? []).flatMap((variant) => variant.product?.product_id ? [variant.product.product_id] : [])))];
     const catalog = new Map<number, { color_code?: string }>();
+    const catalogDescriptions = new Map<number, string>();
     // One cached catalog request per garment style, rather than per size/color.
     for (const id of catalogIds) {
       try {
-        const response = await printfulFetch<{ result?: { variants?: { id: number; color_code?: string }[] } }>(`/products/${id}`, token);
+        const response = await printfulFetch<{ result?: PrintfulCatalogProduct }>(`/products/${id}`, token);
         for (const variant of response.result?.variants ?? []) catalog.set(variant.id, variant);
+        const description = response.result?.product?.description?.trim();
+        if (description) catalogDescriptions.set(id, description);
       } catch {
         console.error(`Could not load Printful color metadata for product ${id}`);
       }
@@ -373,7 +392,7 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
       .flatMap((detail) => {
         if (!detail) return [];
         const override = getOverride(detail.sync_product, overrides);
-        const product = mapPrintfulProduct(detail, categories, override);
+        const product = mapPrintfulProduct(detail, categories, override, catalogDescriptions);
         return product ? [product] : [];
       })
       .sort((a, b) => a.name.localeCompare(b.name));

@@ -22,10 +22,12 @@ export function ProductDetails({ product }: { product: Product }) {
   const variant = product.variants.find((item) => (!color || item.color === color) && (!size || item.size === size));
   const available = product.available && (!product.variants.length || Boolean(variant?.available));
   const price = variant?.priceCents ?? product.priceCents;
-  const colorImages = product.images.filter((image) => image.colors?.includes(color));
-  const images = colorImages.length
-    ? [...colorImages, ...product.images.filter((image) => !image.colors?.length)]
+  // Color-tagged Printful images are intentionally never mixed. This ensures a
+  // customer sees every available view for the selected color—and no other.
+  const colorImages = color
+    ? product.images.filter((image) => image.colors?.includes(color))
     : product.images.filter((image) => !image.colors?.length);
+  const images = colorImages;
 
   function selectColor(nextColor: string) {
     setColor(nextColor);
@@ -39,7 +41,6 @@ export function ProductDetails({ product }: { product: Product }) {
         {images.length ? <ProductGallery key={color} images={images} productName={product.name} /> : (
           <div className="flex aspect-[4/5] items-center justify-center rounded-[30px] bg-[#e9e1d3] p-8 text-center text-black/60">Photo unavailable for {color}.</div>
         )}
-        <p className="mt-3 text-xs tracking-wide text-black/50">{colorImages.length ? `${color} · Explore the details` : color ? `Product gallery · ${color} photo not available` : "Explore the details"}</p>
       </div>
       <div className="md:sticky md:top-24 md:py-3">
         <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#183247]/60">{product.collectionLabel || product.categoryLabel}</p>
@@ -51,7 +52,7 @@ export function ProductDetails({ product }: { product: Product }) {
             <div className="mt-3 flex flex-wrap gap-2">
               {product.colors.map((option) => {
                 const code = product.variants.find((item) => item.color === option && item.colorCode)?.colorCode;
-                const disabled = product.variants.length > 0 && !product.variants.some((item) => item.color === option && item.available && item.checkoutUrl);
+                const disabled = product.variants.length > 0 && !product.variants.some((item) => item.color === option && item.available && item.cartUrl);
                 return <button key={option} type="button" disabled={disabled} aria-pressed={color === option} onClick={() => selectColor(option)}
                   className={`flex min-h-12 items-center gap-2.5 rounded-full border px-3 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#183247] disabled:cursor-not-allowed disabled:opacity-30 disabled:line-through ${color === option ? "border-[#183247] bg-white ring-1 ring-[#183247]" : "border-black/15 hover:border-black/50"}`}>
                   <span aria-hidden="true" className="size-6 rounded-full border border-black/15" style={{ backgroundColor: code || swatches[option.toLowerCase()] || option.toLowerCase().replaceAll(" ", "") }} />
@@ -64,7 +65,7 @@ export function ProductDetails({ product }: { product: Product }) {
             <legend className="text-sm font-semibold">Size <span className="ml-2 font-normal text-black/55">{size || "Choose a size"}</span></legend>
             <div className="mt-3 flex flex-wrap gap-2">
               {product.sizes.map((option) => {
-                const disabled = product.variants.length > 0 && !product.variants.some((item) => (!color || item.color === color) && item.size === option && item.available && item.checkoutUrl);
+                const disabled = product.variants.length > 0 && !product.variants.some((item) => (!color || item.color === color) && item.size === option && item.available && item.cartUrl);
                 return <button key={option} type="button" disabled={disabled} aria-pressed={size === option} onClick={() => setSize(option)}
                   className={`min-h-12 min-w-12 rounded-xl border px-4 text-sm font-medium transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#183247] disabled:cursor-not-allowed disabled:opacity-30 disabled:line-through ${size === option ? "border-[#183247] bg-[#183247] text-white" : "border-black/15 bg-white/50 hover:border-[#183247]"}`}>{option}</button>;
               })}
@@ -78,11 +79,10 @@ export function ProductDetails({ product }: { product: Product }) {
               {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
             </select>
           </label> : null}
-          <PurchaseAction productId={product.id} variantId={variant?.id} available={available} href={variant?.checkoutUrl} quantity={quantity} comingSoon={!product.available} />
+          <PurchaseAction productId={product.id} variantId={variant?.id} available={available} cartUrl={variant?.cartUrl} quantity={quantity} comingSoon={!product.available} />
           <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : !available ? "This selection is currently unavailable. Please choose another size or color." : `${[color, size].filter(Boolean).join(" / ")} · Secure checkout with Shopify`}</p>
-          {product.available ? <p className="mt-2 text-center text-xs text-black/50">Shipping and taxes calculated at checkout.</p> : null}
         </div>
-        <div className="mt-8"><h2 className="text-sm font-semibold">The details</h2><p className="mt-3 text-base leading-7 text-black/60">{product.description}</p></div>
+        <div className="mt-8"><h2 className="text-sm font-semibold">Item details</h2><p className="mt-3 text-base leading-7 text-black/60">{product.description}</p></div>
       </div>
     </div>
   );

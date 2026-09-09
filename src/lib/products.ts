@@ -1,6 +1,5 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
-import { fetchPrintfulProducts } from "@/lib/commerce/printful";
-import { applyLaunchAvailability } from "@/lib/commerce/shopify";
+import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { getSanityClient } from "@/sanity/client";
 import { sanityImageUrl } from "@/sanity/image";
@@ -226,8 +225,7 @@ async function fetchSanityProducts(): Promise<Product[] | null> {
 
 export async function getProducts(): Promise<Product[]> {
   const categories = await getShopCategories();
-  const products = (await fetchPrintfulProducts(categories)) ?? (await fetchSanityProducts()) ?? localProducts;
-  return products.map(applyLaunchAvailability);
+  return (await fetchShopifyProducts(categories)) ?? (await fetchSanityProducts()) ?? localProducts;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {

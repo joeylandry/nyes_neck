@@ -27,7 +27,7 @@ export function ProductDetails({ product }: { product: Product }) {
   const colorImages = color
     ? product.images.filter((image) => image.colors?.includes(color))
     : product.images.filter((image) => !image.colors?.length);
-  const images = colorImages;
+  const images = colorImages.length ? colorImages : product.images;
 
   function selectColor(nextColor: string) {
     setColor(nextColor);

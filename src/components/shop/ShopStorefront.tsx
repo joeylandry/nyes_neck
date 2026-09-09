@@ -10,22 +10,22 @@ export async function ShopStorefront() {
 
   return (
     <>
-      <div className="mx-auto max-w-6xl px-4 py-7 md:px-6 md:py-12">
+      <div className="mx-auto max-w-7xl px-3 py-10 md:px-6 md:py-16">
         <section aria-labelledby="featured-heading">
-          <div className="mb-4 flex items-end justify-between gap-5 md:mb-5">
-            <h2 id="featured-heading" className="font-heading text-[1.45rem] font-semibold tracking-[-0.04em] md:text-4xl">
-              {settings.featuredLabel}{featuredCategory ? `: ${featuredCategory.label}` : ""}
+          <div className="mb-8 md:mb-10">
+            <h2 id="featured-heading" className="font-ui max-w-[13ch] text-[2.9rem] font-normal leading-[0.95] tracking-[-0.07em] sm:text-6xl md:max-w-[15ch] md:text-7xl">
+              The Nyes Neck Collection.
             </h2>
             {featuredCategory ? (
-              <Link href={`/shop/category/${featuredCategory.slug}`} className="hidden shrink-0 text-base font-semibold text-black/60 hover:text-black sm:inline-flex">
-                View all <span className="ml-2" aria-hidden="true">→</span>
+              <Link href={`/shop/category/${featuredCategory.slug}`} className="font-ui mt-7 inline-flex min-h-12 items-center rounded-full bg-[#161616] px-7 text-base font-bold !text-white transition hover:bg-[#183247] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-3">
+                Shop Nyes Neck Collection
               </Link>
             ) : null}
           </div>
           <ProductReel products={featuredProducts} />
         </section>
 
-        <ShopBrowseSections settings={settings} className="mt-8 md:mt-14" />
+        <ShopBrowseSections settings={settings} className="mt-14 md:mt-20" />
       </div>
     </>
   );

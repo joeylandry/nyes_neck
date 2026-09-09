@@ -94,12 +94,12 @@ export function HeroGallery() {
           <Wordmark tone="light" className="text-[clamp(2.85rem,14vw,4.25rem)] tracking-[0.13em] drop-shadow-sm md:text-[clamp(2.2rem,10.5vw,5.2rem)]" />
           <div className="mt-2.5 flex w-full max-w-[19rem] items-center gap-2.5 text-white md:mt-3 md:max-w-[24rem] md:gap-4">
             <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
-            <p className="shrink-0 text-[1.08rem] font-semibold leading-none tracking-[0.06em] drop-shadow-sm md:text-[1.175rem] md:tracking-[0.08em]">
+            <p className="font-heading shrink-0 text-[1.08rem] font-semibold leading-none tracking-[0.06em] drop-shadow-sm md:text-[1.175rem] md:tracking-[0.08em]">
               Clothing and Apparel
             </p>
             <span aria-hidden="true" className="h-px flex-1 bg-white/80" />
           </div>
-          <p className="mt-3.5 max-w-[21rem] text-[1.02rem] font-semibold leading-snug tracking-[0.01em] text-white drop-shadow-sm md:mt-5 md:max-w-2xl md:text-[clamp(1.12rem,3.1vw,2rem)] md:leading-tight md:tracking-[0.02em]">
+          <p className="font-heading mt-3.5 max-w-[21rem] text-[1.02rem] font-semibold leading-snug tracking-[0.01em] text-white drop-shadow-sm md:mt-5 md:max-w-2xl md:text-[clamp(1.12rem,3.1vw,2rem)] md:leading-tight md:tracking-[0.02em]">
             Inspired by Nyes Neck. Made for life on the Cape.
           </p>
           <div className="mt-5 flex w-full gap-3 md:mt-6 md:grid md:max-w-[27rem] md:grid-cols-2">

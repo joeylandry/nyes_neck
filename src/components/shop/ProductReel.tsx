@@ -11,9 +11,9 @@ export function ProductReel({
   prioritizeFirst?: boolean;
 }) {
   return (
-    <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-2 md:-mx-6 md:gap-5 md:px-6 md:pb-3">
+    <div className="flex snap-x snap-mandatory gap-3 overflow-x-auto pb-3 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:-mx-6 md:gap-5 md:px-6 md:pb-3">
       {products.map((product, index) => (
-        <div key={product.id} className="w-[41vw] min-w-[138px] max-w-[168px] shrink-0 snap-start md:w-[28vw] md:max-w-[185px] lg:w-[180px]">
+        <div key={product.id} className="w-[72vw] min-w-[250px] max-w-[350px] shrink-0 snap-start md:w-[28vw] md:max-w-[260px] lg:w-[240px]">
           <ProductCard product={product} returnTo={returnTo} priority={prioritizeFirst && index === 0} compact />
         </div>
       ))}

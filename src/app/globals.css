@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 :root {
-  --background: #faf8f3;
+  --background: #ffffff;
   --surface: #ffffff;
   --foreground: #161616;
   --coastal-navy: #183247;
@@ -9,8 +9,9 @@
   --sea-glass: #a8c2bc;
   --dune: #d8c7a8;
   --weathered-sand: #e9e1d3;
+  --font-ui: var(--font-dm-sans), "Avenir Next", Avenir, sans-serif;
   --desktop-header-height: 73px;
-  --mobile-header-height: 64px;
+  --mobile-header-height: 70px;
   --announcement-height: 42px;
   --announcement-offset: var(--announcement-height);
   --site-header-height: calc(var(--mobile-header-height) + var(--announcement-offset));
@@ -25,7 +26,7 @@
   --color-sea-glass: var(--sea-glass);
   --color-dune: var(--dune);
   --color-weathered-sand: var(--weathered-sand);
-  --font-sans: var(--font-cormorant-garamond), Georgia, serif;
+  --font-sans: var(--font-ui);
   --font-heading: var(--font-cormorant-garamond), Georgia, serif;
   --text-xs: 0.875rem;
   --text-xs--line-height: 1.25rem;
@@ -64,9 +65,10 @@ body {
   margin: 0;
   background: var(--background);
   color: var(--foreground);
-  font-family: var(--font-cormorant-garamond), Georgia, serif;
-  font-size: 1.125rem;
-  font-weight: 500;
+  font-family: var(--font-ui);
+  font-size: 1rem;
+  font-weight: 400;
+  letter-spacing: -0.012em;
 }
 
 a {
@@ -87,6 +89,13 @@ a {
   color: #161616;
 }
 
+.button-primary,
+.button-secondary,
+.button-ink {
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
 button,
 input,
 select,
@@ -102,6 +111,10 @@ textarea {
 
 .font-heading {
   font-family: var(--font-cormorant-garamond), Georgia, serif;
+}
+
+.font-ui {
+  font-family: var(--font-ui);
 }
 
 .site-main {

@@ -34,24 +34,27 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
   return (
     <div className="md:hidden">
       <div data-site-header-offset className="fixed inset-x-0 top-[var(--announcement-offset)] z-50 flex h-[var(--mobile-header-height)] items-center justify-between border-b border-black/10 bg-white px-3 shadow-sm">
-        <button
-          ref={triggerRef}
-          type="button"
-          className="flex min-h-11 min-w-11 items-center justify-center gap-1.5 px-1.5 text-[0.95rem] font-semibold"
-          aria-expanded={open}
-          aria-controls="mobile-navigation"
-          onClick={() => setOpen(true)}
-        >
-          Menu
-          <span className="flex w-5 flex-col gap-1.5" aria-hidden="true">
-            <span className="h-px w-full bg-black" />
-            <span className="h-px w-full bg-black" />
-          </span>
-        </button>
-        <Link href="/" aria-label="NYES NECK home" className="absolute left-1/2 -translate-x-1/2">
-          <HeaderBrand showWordmark={false} logoSize="mobileHeader" />
+        <Link href="/" aria-label="NYES NECK home" className="flex min-h-12 min-w-0 items-center">
+          <HeaderBrand logoSize="mobileHeader" wordmarkClassName="text-[0.98rem] tracking-[0.16em]" />
         </Link>
-        <CartLink />
+        <div className="flex items-center gap-1">
+          <CartLink />
+          <button
+            ref={triggerRef}
+            type="button"
+            className="flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 text-[#282828] transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2"
+            aria-expanded={open}
+            aria-controls="mobile-navigation"
+            onClick={() => setOpen(true)}
+          >
+            <span className="sr-only">Menu</span>
+            <span className="flex w-5 flex-col gap-1.5" aria-hidden="true">
+              <span className="h-0.5 w-full bg-current" />
+              <span className="h-0.5 w-full bg-current" />
+              <span className="h-0.5 w-full bg-current" />
+            </span>
+          </button>
+        </div>
       </div>
 
       <div
@@ -66,7 +69,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
         aria-label="Mobile navigation"
         aria-hidden={!open}
         inert={!open}
-        className={`fixed left-0 top-0 z-[70] flex h-[100dvh] w-[min(20rem,86vw)] flex-col border-r border-black/10 bg-white p-4 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed right-0 top-0 z-[70] flex h-[100dvh] w-[min(20rem,86vw)] flex-col border-l border-black/10 bg-white p-4 shadow-2xl transition-transform duration-300 ${open ? "translate-x-0" : "translate-x-full"}`}
       >
         <div className="flex min-h-12 items-center justify-between">
           <div className="flex items-center gap-2">

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { CollectionStorefront } from "@/components/shop/CollectionStorefront";
 import { ProductGrid } from "@/components/shop/ProductGrid";
 import { ShopBackLink } from "@/components/shop/ShopBackLink";
 import { ShopBrowseSections } from "@/components/shop/ShopBrowseSections";
@@ -42,24 +43,22 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <main>
-      <PageHeader title={pageTitle} tone="blue" />
-      <div className="mx-auto max-w-6xl px-4 py-9 md:px-6 md:py-16">
-        <div className="mb-7 md:mb-10">
-          <ShopBackLink href="/shop" label="Shop" />
-        </div>
-        {products.length ? (
-          <ProductGrid products={products} returnTo={category.slug} />
-        ) : (
-          <div className="rounded-[22px] border border-black/10 bg-white px-6 py-14 text-center shadow-[0_10px_28px_rgba(22,22,22,0.04)]">
-            <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Collection items coming soon</h2>
-            <p className="mx-auto mt-3 max-w-md text-lg leading-7 text-black/60">
-              New pieces for the {pageTitle} are currently taking shape.
-            </p>
+      {category.kind === "collection" && products.length ? <CollectionStorefront products={products} returnTo={category.slug} title={pageTitle} /> : null}
+      {category.kind !== "collection" ? (
+        <>
+          <PageHeader title={pageTitle} tone="blue" />
+          <div className="mx-auto max-w-6xl px-4 py-9 md:px-6 md:py-16">
+            <div className="mb-7 md:mb-10"><ShopBackLink href="/shop" label="Shop" /></div>
+            {products.length ? <ProductGrid products={products} returnTo={category.slug} /> : <EmptyCollection pageTitle={pageTitle} />}
           </div>
-        )}
-
-        <ShopBrowseSections settings={settings} className="mt-11 border-t border-black/10 pt-11 md:mt-20 md:pt-20" />
-      </div>
+        </>
+      ) : null}
+      {!products.length && category.kind === "collection" ? <div className="mx-auto max-w-6xl px-4 py-12 md:px-6"><EmptyCollection pageTitle={pageTitle} /></div> : null}
+      <div className="mx-auto max-w-7xl px-3 pb-12 md:px-6 md:pb-20"><ShopBrowseSections settings={settings} className="border-t border-black/10 pt-11 md:pt-20" /></div>
     </main>
   );
+}
+
+function EmptyCollection({ pageTitle }: { pageTitle: string }) {
+  return <div className="rounded-[22px] border border-black/10 bg-white px-6 py-14 text-center shadow-[0_10px_28px_rgba(22,22,22,0.04)]"><h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Collection items coming soon</h2><p className="mx-auto mt-3 max-w-md text-lg leading-7 text-black/60">New pieces for the {pageTitle} are currently taking shape.</p></div>;
 }

@@ -18,7 +18,7 @@ export function Button({
   onClick,
 }: ButtonProps) {
   const base =
-    "inline-flex min-h-11 items-center justify-center rounded-full px-7 py-3.5 text-lg font-semibold tracking-wide transition duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 motion-reduce:transform-none";
+    "font-ui inline-flex min-h-11 items-center justify-center rounded-full px-7 py-3.5 text-base font-bold transition duration-200 active:scale-[0.98] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-current focus-visible:ring-offset-2 motion-reduce:transform-none";
   const styles = {
     primary: "button-primary bg-white text-[#161616] shadow-lg shadow-black/20 hover:-translate-y-0.5 hover:opacity-90",
     secondary:

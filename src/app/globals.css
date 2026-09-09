@@ -122,6 +122,16 @@ textarea {
     linear-gradient(145deg, transparent 44%, rgb(24 50 71 / 7%) 44%, rgb(24 50 71 / 7%) 56%, transparent 56%);
 }
 
+@keyframes cart-added {
+  0% { transform: scale(1); }
+  45% { transform: scale(1.025); background-color: #274d66; }
+  100% { transform: scale(1); }
+}
+
+.animate-cart-added {
+  animation: cart-added 420ms ease-out;
+}
+
 @media (min-width: 768px) {
   :root {
     --announcement-height: 44px;

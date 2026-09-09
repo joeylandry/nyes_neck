@@ -71,7 +71,7 @@ export function CartContents() {
         <div className="flex items-center justify-between text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
         <p className="mt-3 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
         {checkout ? (
-          <a href={checkout} className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold text-white transition hover:bg-[#274d66]">
+          <a href={checkout} className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold !text-white transition hover:bg-[#274d66]">
             Secure checkout
           </a>
         ) : <p className="mt-6 rounded-2xl bg-[#e9e1d3] p-4 text-sm leading-6">This cart can’t be checked out right now. Please remove and add the item again.</p>}

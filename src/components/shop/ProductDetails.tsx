@@ -89,7 +89,7 @@ export function ProductDetails({ product }: { product: Product }) {
             options: [color, size].filter(Boolean).join(" / "),
             cartUrl: variant.cartUrl,
           } : undefined} />
-          <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : !available ? "This selection is currently unavailable. Please choose another size or color." : `${[color, size].filter(Boolean).join(" / ")} · Secure checkout`}</p>
+          {!product.available || !available ? <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : "This selection is currently unavailable. Please choose another size or color."}</p> : null}
         </div>
         <div className="mt-8"><h2 className="text-sm font-semibold">Item details</h2><p className="mt-3 text-base leading-7 text-black/60">{product.description}</p></div>
       </div>

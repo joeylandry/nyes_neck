@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
 import { useCart, type CartItem } from "./CartProvider";
 
 type PurchaseActionProps = {
@@ -15,7 +15,12 @@ type PurchaseActionProps = {
 
 export function PurchaseAction({ productId, variantId, available, cartUrl, quantity = 1, comingSoon = false, item }: PurchaseActionProps) {
   const { addItem } = useCart();
-  const router = useRouter();
+  const [justAdded, setJustAdded] = useState(false);
+  const resetTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => () => {
+    if (resetTimer.current) clearTimeout(resetTimer.current);
+  }, []);
 
   if (available && cartUrl && item) {
     return (
@@ -23,13 +28,15 @@ export function PurchaseAction({ productId, variantId, available, cartUrl, quant
         type="button"
         onClick={() => {
           addItem(item, quantity);
-          router.push("/cart");
+          setJustAdded(true);
+          if (resetTimer.current) clearTimeout(resetTimer.current);
+          resetTimer.current = setTimeout(() => setJustAdded(false), 1800);
         }}
         data-product-id={productId}
         data-variant-id={variantId}
-        className="inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold text-white transition hover:bg-[#274d66]"
+        className={`inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold text-white transition hover:bg-[#274d66] ${justAdded ? "animate-cart-added" : ""}`}
       >
-        Add to cart
+        {justAdded ? "Added to cart ✓" : "Add to cart"}
       </button>
     );
   }

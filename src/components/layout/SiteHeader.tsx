@@ -21,7 +21,7 @@ export function SiteHeader() {
             <HeaderBrand wordmarkClassName="text-[1.55rem]" />
           </Link>
           <div className="flex items-center gap-4">
-            <nav aria-label="Primary navigation" className="flex items-center gap-6 text-[0.95rem] text-[#282828]">
+            <nav aria-label="Primary navigation" className="flex items-center gap-6 text-base text-[#282828]">
               {links.map((link) => (
                 <Link key={link.href} href={link.href} className="rounded-sm py-3 hover:text-black/55">
                   {link.label}

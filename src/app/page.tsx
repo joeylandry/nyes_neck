@@ -5,7 +5,7 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 import { ShopStorefront } from "@/components/shop/ShopStorefront";
 
 export const metadata: Metadata = {
-  title: "NYES NECK",
+  title: "Nyes Neck",
 };
 
 export default function HomePage() {

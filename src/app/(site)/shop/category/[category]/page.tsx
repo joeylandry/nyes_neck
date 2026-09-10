@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const shopCategories = await getShopCategories();
   const category = shopCategories.find(({ slug }) => slug === categorySlug);
 
-  if (!category) return { title: "Collection not found | NYES NECK" };
+  if (!category) return { title: "Collection not found | Nyes Neck" };
 
   return {
-    title: `${category.label} | NYES NECK`,
+    title: `${category.label} | Nyes Neck`,
     description: category.description,
   };
 }

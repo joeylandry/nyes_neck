@@ -3,7 +3,7 @@ import Image from "next/image";
 import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
-  title: "About | NYES NECK",
+  title: "About | Nyes Neck",
   description: "Joey Landry's story and the community purpose behind NYES NECK.",
 };
 

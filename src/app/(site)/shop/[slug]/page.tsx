@@ -19,8 +19,8 @@ export const revalidate = 0;
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "Product not found | NYES NECK" };
-  return { title: `${product.name} | NYES NECK`, description: product.shortDescription };
+  if (!product) return { title: "Product not found | Nyes Neck" };
+  return { title: `${product.name} | Nyes Neck`, description: product.shortDescription };
 }
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {

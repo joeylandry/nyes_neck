@@ -1,14 +1,17 @@
 "use client";
 
-import Image from "next/image";
-import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import type { Product } from "@/types/product";
 import { ProductSwatches } from "./ProductCard";
+import { ProductCardMedia } from "./ProductCardMedia";
 
 type ViewMode = "expanded" | "default" | "minimal";
 type SortMode = "featured" | "newest" | "price-low" | "price-high";
+type FacetKey = "type" | "brand" | "size";
+type SelectedFacets = Record<FacetKey, string[]>;
+
+const EMPTY_FACETS: SelectedFacets = { type: [], brand: [], size: [] };
 
 const viewOptions: Array<{ value: ViewMode; label: string; columns: string }> = [
   { value: "expanded", label: "Expanded", columns: "▯" },
@@ -22,32 +25,25 @@ function priceValue(product: Product) {
 
 function CollectionProductCard({ product, returnTo, view, priority }: { product: Product; returnTo: string; view: ViewMode; priority: boolean }) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0] ?? "");
-  const mainImage = product.images.find((item) => item.role === "main") ?? product.images[0];
-  const image = product.images.find((item) => item.colors?.includes(selectedColor)) ?? mainImage;
-  if (!image) return null;
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
+  const colorCodes = useMemo(() => Object.fromEntries(product.colors.map((color) => [color, product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode])), [product.colors, product.variants]);
 
   if (view === "minimal") {
     return (
-      <Link href={href} className="group relative block aspect-[3/4] overflow-hidden bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2" aria-label={product.name}>
-        <Image src={image.src} alt="" fill priority={priority} sizes="(max-width: 640px) 33vw, 220px" className="object-cover transition duration-500 group-hover:scale-[1.025] motion-reduce:transform-none" />
-      </Link>
+      <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes="(max-width: 640px) 33vw, 220px" aspectClass="aspect-[3/4]" />
     );
   }
 
   const isExpanded = view === "expanded";
   return (
     <article className={`font-ui ${isExpanded ? "grid gap-4 border-b border-black/15 pb-8 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.6fr)] sm:gap-7" : "min-w-0"}`}>
-      <Link href={href} className={`group relative block overflow-hidden bg-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${isExpanded ? "aspect-[4/5]" : "aspect-[3/4]"}`}>
-        <Image src={image.src} alt={image.alt} fill priority={priority} sizes={isExpanded ? "(max-width: 640px) 100vw, 60vw" : "(max-width: 640px) 50vw, 33vw"} className="object-cover transition duration-500 group-hover:scale-[1.025] motion-reduce:transform-none" />
-        {!product.available ? <span className="absolute left-3 top-3 bg-white px-2.5 py-1 text-[0.62rem] font-bold uppercase tracking-[0.12em]">Coming soon</span> : null}
-      </Link>
+      <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={isExpanded ? "(max-width: 640px) 100vw, 60vw" : "(max-width: 640px) 50vw, 33vw"} aspectClass={isExpanded ? "aspect-[4/5]" : "aspect-[3/4]"} />
       <div className={`${isExpanded ? "flex flex-col justify-end" : "pt-3"}`}>
         <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-black/45">{product.collectionLabel}</p>
         <h2 className={`${isExpanded ? "text-2xl sm:text-3xl" : "text-[0.95rem] sm:text-lg"} font-bold leading-[1.18] tracking-[-0.035em]`}>{product.name}</h2>
         {isExpanded ? <p className="mt-3 max-w-[34ch] text-sm leading-5 text-black/65">{product.shortDescription}</p> : null}
         <p className={`${isExpanded ? "mt-4 text-lg" : "mt-2 text-sm"} font-medium text-black/85`}>{product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}</p>
-        {product.colors.length ? <ProductSwatches colors={product.colors} selectedColor={selectedColor} onColorChange={setSelectedColor} className={`${isExpanded ? "mt-4" : "mt-3"}`} /> : null}
+        {product.colors.length ? <ProductSwatches colors={product.colors} selectedColor={selectedColor} onColorChange={setSelectedColor} colorCodes={colorCodes} className={`${isExpanded ? "mt-4" : "mt-3"}`} /> : null}
       </div>
     </article>
   );
@@ -56,9 +52,10 @@ function CollectionProductCard({ product, returnTo, view, priority }: { product:
 function FilterDrawer({
   open,
   onClose,
-  categories,
-  category,
-  setCategory,
+  options,
+  selected,
+  onToggle,
+  onClear,
   inStockOnly,
   setInStockOnly,
   sort,
@@ -67,9 +64,10 @@ function FilterDrawer({
 }: {
   open: boolean;
   onClose: () => void;
-  categories: Array<{ value: string; label: string }>;
-  category: string;
-  setCategory: (category: string) => void;
+  options: SelectedFacets;
+  selected: SelectedFacets;
+  onToggle: (key: FacetKey, value: string) => void;
+  onClear: () => void;
   inStockOnly: boolean;
   setInStockOnly: (value: boolean) => void;
   sort: SortMode;
@@ -89,9 +87,7 @@ function FilterDrawer({
   }, [open, onClose]);
 
   const clearFilters = () => {
-    setCategory("all");
-    setInStockOnly(false);
-    setSort("featured");
+    onClear();
   };
 
   return (
@@ -118,13 +114,9 @@ function FilterDrawer({
             ))}
           </div>
           <FilterHeading>Product type</FilterHeading>
-          <div className="flex flex-wrap gap-2">
-            {[{ value: "all", label: "All products" }, ...categories].map((item) => (
-              <button key={item.value} type="button" onClick={() => setCategory(item.value)} className={`min-h-10 rounded-full border px-4 text-sm font-bold transition ${category === item.value ? "border-[#161616] bg-[#161616] text-white" : "border-black/20 hover:border-black"}`}>
-                {item.label}
-              </button>
-            ))}
-          </div>
+          <FilterOptions values={options.type} selected={selected.type} onToggle={(value) => onToggle("type", value)} />
+          {options.brand.length ? <><FilterHeading>Brand / manufacturer</FilterHeading><FilterOptions values={options.brand} selected={selected.brand} onToggle={(value) => onToggle("brand", value)} /></> : null}
+          {options.size.length ? <><FilterHeading>Size</FilterHeading><FilterOptions values={options.size} selected={selected.size} onToggle={(value) => onToggle("size", value)} /></> : null}
           <FilterHeading>Availability</FilterHeading>
           <label className="flex min-h-12 items-center gap-3 text-base font-medium">
             <input className="size-5 accent-black" type="checkbox" checked={inStockOnly} onChange={(event) => setInStockOnly(event.target.checked)} />
@@ -140,6 +132,13 @@ function FilterDrawer({
   );
 }
 
+function FilterOptions({ values, selected, onToggle }: { values: string[]; selected: string[]; onToggle: (value: string) => void }) {
+  return <div className="flex flex-wrap gap-2">{values.map((value) => {
+    const active = selected.includes(value);
+    return <button key={value} type="button" aria-pressed={active} onClick={() => onToggle(value)} className={`min-h-10 rounded-full border px-4 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${active ? "border-[#161616] bg-[#161616] text-white" : "border-black/20 hover:border-black"}`}>{value}</button>;
+  })}</div>;
+}
+
 function FilterHeading({ children }: { children: React.ReactNode }) {
   return <h3 className="mt-7 border-t border-black/15 pt-6 text-lg font-bold tracking-[-0.02em] first:mt-0 first:border-0">{children}</h3>;
 }
@@ -147,19 +146,38 @@ function FilterHeading({ children }: { children: React.ReactNode }) {
 export function CollectionStorefront({ products, returnTo, title }: { products: Product[]; returnTo: string; title: string }) {
   const [view, setView] = useState<ViewMode>("default");
   const [filterOpen, setFilterOpen] = useState(false);
-  const [category, setCategory] = useState("all");
+  const [selected, setSelected] = useState<SelectedFacets>(EMPTY_FACETS);
   const [inStockOnly, setInStockOnly] = useState(false);
   const [sort, setSort] = useState<SortMode>("featured");
-  const categories = useMemo(() => Array.from(new Map(products.map((product) => [product.category, product.categoryLabel])).entries()).map(([value, label]) => ({ value, label })), [products]);
+  const options = useMemo<SelectedFacets>(() => ({
+    type: unique(products.map((product) => product.categoryLabel)),
+    brand: unique(products.map((product) => product.brand)),
+    size: unique(products.flatMap((product) => product.sizes)),
+  }), [products]);
   const filteredProducts = useMemo(() => [...products]
-    .filter((product) => category === "all" || product.category === category)
+    .filter((product) => !selected.type.length || selected.type.includes(product.categoryLabel))
+    .filter((product) => !selected.brand.length || Boolean(product.brand && selected.brand.includes(product.brand)))
+    .filter((product) => !selected.size.length || selected.size.some((size) => product.sizes.includes(size)))
     .filter((product) => !inStockOnly || product.available)
     .sort((a, b) => {
       if (sort === "price-low") return priceValue(a) - priceValue(b);
       if (sort === "price-high") return priceValue(b) - priceValue(a);
       if (sort === "newest") return b.id.localeCompare(a.id);
       return Number(b.featured) - Number(a.featured);
-    }), [products, category, inStockOnly, sort]);
+    }), [products, selected, inStockOnly, sort]);
+  const activeFilterCount = Object.values(selected).reduce((total, values) => total + values.length, 0) + Number(inStockOnly);
+
+  const toggleFacet = (key: FacetKey, value: string) => {
+    setSelected((current) => ({
+      ...current,
+      [key]: current[key].includes(value) ? current[key].filter((item) => item !== value) : [...current[key], value],
+    }));
+  };
+  const clearFilters = () => {
+    setSelected(EMPTY_FACETS);
+    setInStockOnly(false);
+    setSort("featured");
+  };
 
   return (
     <section className="mx-auto max-w-7xl px-3 py-8 md:px-6 md:py-14" aria-labelledby="collection-title">
@@ -168,7 +186,7 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
         <div className="flex flex-wrap items-end justify-between gap-5">
           <h1 id="collection-title" className="font-ui text-[2.5rem] font-normal leading-none tracking-[-0.07em] sm:text-6xl">{title}<span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{products.length}</span></h1>
           <button type="button" onClick={() => setFilterOpen(true)} className="font-ui inline-flex min-h-11 items-center gap-2 rounded-full border border-black px-4 text-sm font-bold hover:bg-black hover:text-white">
-            <FilterIcon /> Filters
+            <FilterIcon /> Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
           </button>
         </div>
         <div className="mt-6 flex items-center justify-between gap-4">
@@ -188,11 +206,15 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
           {filteredProducts.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < 2} />)}
         </div>
       ) : (
-        <div className="py-20 text-center"><h2 className="font-ui text-2xl font-bold">No products match these filters.</h2><button type="button" className="mt-4 underline underline-offset-4" onClick={() => { setCategory("all"); setInStockOnly(false); }}>Clear filters</button></div>
+        <div className="py-20 text-center"><h2 className="font-ui text-2xl font-bold">No products match these filters.</h2><button type="button" className="mt-4 underline underline-offset-4" onClick={clearFilters}>Clear filters</button></div>
       )}
-      <FilterDrawer open={filterOpen} onClose={() => setFilterOpen(false)} categories={categories} category={category} setCategory={setCategory} inStockOnly={inStockOnly} setInStockOnly={setInStockOnly} sort={sort} setSort={setSort} count={filteredProducts.length} />
+      <FilterDrawer open={filterOpen} onClose={() => setFilterOpen(false)} options={options} selected={selected} onToggle={toggleFacet} onClear={clearFilters} inStockOnly={inStockOnly} setInStockOnly={setInStockOnly} sort={sort} setSort={setSort} count={filteredProducts.length} />
     </section>
   );
+}
+
+function unique(values: Array<string | undefined>) {
+  return [...new Set(values.filter((value): value is string => Boolean(value?.trim())))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
 }
 
 function FilterIcon() {

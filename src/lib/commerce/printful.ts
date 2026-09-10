@@ -2,6 +2,8 @@ import "server-only";
 import { getShopifyCartUrl } from "@/lib/commerce/shopify";
 
 import { collectionTileLabel } from "@/lib/shopLabels";
+import { makeProductSlug, slugifyProductValue } from "@/lib/productSlugs";
+import { inferManufacturer, inferProductTypeCategory } from "@/lib/productTaxonomy";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
 
 type PrintfulPaging = {
@@ -66,26 +68,21 @@ type PrintfulProductOverride = {
 };
 
 type PrintfulCatalogProduct = {
-  product?: { description?: string; brand?: string; manufacturer?: string; product_type?: string; type?: string };
+  product?: {
+    description?: string;
+    brand?: string;
+    manufacturer?: string;
+    product_type?: string;
+    type?: string;
+    type_name?: string;
+    title?: string;
+  };
   variants?: { id: number; color_code?: string }[];
 };
 
 const DEFAULT_REVALIDATE_SECONDS = 300;
 const DEFAULT_COLLECTION = "nyes-neck";
-const DEFAULT_PRODUCT_TYPE = "t-shirts";
 const PRINTFUL_TIMEOUT_MS = 10000;
-
-const productTypeRules: Array<{ category: string; patterns: RegExp[] }> = [
-  { category: "t-shirts", patterns: [/\bt-?shirts?\b/i, /\btees?\b/i, /\bpolos?\b/i] },
-  { category: "hoodies", patterns: [/\bhoodies?\b/i] },
-  { category: "crewnecks", patterns: [/\bcrew\s*necks?\b/i, /\bsweatshirts?\b/i] },
-  { category: "quarter-zips", patterns: [/\bquarter[-\s]?zips?\b/i, /\b1\/4[-\s]?zips?\b/i] },
-  { category: "hats", patterns: [/\bhats?\b/i, /\bcaps?\b/i, /\bbeanies?\b/i] },
-  { category: "towels", patterns: [/\btowels?\b/i] },
-  { category: "stickers", patterns: [/\bstickers?\b/i, /\bdecals?\b/i] },
-  { category: "drinkware", patterns: [/\bdrinkware\b/i, /\btumblers?\b/i, /\bmugs?\b/i, /\bbottles?\b/i, /\bcups?\b/i] },
-  { category: "beach-boat-accessories", patterns: [/\btotes?\b/i, /\bbags?\b/i, /\bpouches?\b/i, /\bbeach\b/i, /\bboat\b/i] },
-];
 
 const knownSizes = new Set([
   "2XS",
@@ -114,14 +111,6 @@ function getPrintfulToken() {
 function getRevalidateSeconds() {
   const value = Number(process.env.PRINTFUL_REVALIDATE_SECONDS);
   return Number.isFinite(value) && value > 0 ? value : DEFAULT_REVALIDATE_SECONDS;
-}
-
-function makeSlug(value: string) {
-  return value
-    .toLowerCase()
-    .trim()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
 }
 
 function parseOverrides(): Record<string, PrintfulProductOverride> {
@@ -193,20 +182,6 @@ function parsePriceCents(variants: PrintfulSyncVariant[]) {
 
 function isVariantAvailable(variant: PrintfulSyncVariant) {
   return variant.synced === true && variant.availability_status === "active";
-}
-
-function findProductTypeCategory(productName: string, override: PrintfulProductOverride | undefined, categories: ShopCategory[], printfulType?: string) {
-  const productTypes = categories.filter((category) => category.kind === "product-type");
-  const requested = override?.category ?? process.env.PRINTFUL_DEFAULT_PRODUCT_TYPE_SLUG;
-  const explicit = requested ? productTypes.find((category) => category.value === requested || category.slug === requested) : undefined;
-  if (explicit) return explicit;
-
-  const inferred = productTypeRules.find((rule) => rule.patterns.some((pattern) => pattern.test(printfulType ?? productName)));
-  const inferredCategory = inferred
-    ? productTypes.find((category) => category.value === inferred.category || category.slug === inferred.category)
-    : undefined;
-
-  return inferredCategory ?? productTypes.find((category) => category.value === DEFAULT_PRODUCT_TYPE) ?? productTypes[0];
 }
 
 function findCollectionCategory(productName: string, override: PrintfulProductOverride | undefined, categories: ShopCategory[]) {
@@ -282,7 +257,12 @@ function mapPrintfulProduct(
     .map((variant) => variant.product?.product_id)
     .find((id): id is number => Boolean(id));
   const catalogProduct = catalogProductId ? catalogProducts.get(catalogProductId) : undefined;
-  const productType = findProductTypeCategory(syncProduct.name, override, categories, syncProduct.product_type ?? catalogProduct?.product_type ?? catalogProduct?.type);
+  const productType = inferProductTypeCategory({
+    categories,
+    requested: override?.category,
+    preferredType: catalogProduct?.type_name ?? catalogProduct?.product_type ?? catalogProduct?.type ?? syncProduct.product_type,
+    searchText: `${catalogProduct?.title ?? ""} ${syncProduct.name}`,
+  });
   const collection = findCollectionCategory(syncProduct.name, override, categories);
   if (!productType || !collection) return null;
 
@@ -344,8 +324,13 @@ function mapPrintfulProduct(
   const catalogDescription = catalogProduct?.description?.trim();
 
   return {
-    id: `printful-${syncProduct.id}`,
-    slug: override?.slug ? makeSlug(override.slug) : makeSlug(`${syncProduct.name}-${syncProduct.id}`),
+    id: syncProduct.external_id ?? `printful-${syncProduct.id}`,
+    externalId: syncProduct.external_id,
+    slug: makeProductSlug(syncProduct.name, syncProduct.external_id, String(syncProduct.id)),
+    legacySlugs: [
+      slugifyProductValue(`${syncProduct.name}-${syncProduct.id}`),
+      ...(override?.slug ? [slugifyProductValue(override.slug)] : []),
+    ],
     name: syncProduct.name,
     shortDescription: `${collectionTileLabel(collection.label)} ${productType.label.toLowerCase()}.`,
     description: catalogDescription ?? `A NYES NECK ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
@@ -354,7 +339,7 @@ function mapPrintfulProduct(
     collection: collection.value,
     collectionLabel: collectionTileLabel(collection.label),
     collections: [collection.value],
-    brand: syncProduct.brand ?? syncProduct.manufacturer ?? catalogProduct?.brand ?? catalogProduct?.manufacturer,
+    brand: inferManufacturer(`${catalogProduct?.title ?? ""} ${syncProduct.name}`, catalogProduct?.brand ?? catalogProduct?.manufacturer ?? syncProduct.brand ?? syncProduct.manufacturer),
     priceCents: parsePriceCents(detail.sync_variants ?? []),
     currency: "USD",
     images,
@@ -389,19 +374,30 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
     const overrides = parseOverrides();
     const summaries = await fetchSyncProductSummaries(token);
     const visibleSummaries = summaries.filter((product) => !product.is_ignored && !getOverride(product, overrides)?.hidden);
-    const details = await Promise.all(visibleSummaries.map((product) => fetchSyncProductDetail(product.id, token)));
+    // A single temporarily unavailable product must not take the whole store
+    // offline or make its routes switch wholesale to a different data source.
+    const detailResults = await Promise.allSettled(visibleSummaries.map((product) => fetchSyncProductDetail(product.id, token)));
+    const details = detailResults.flatMap((result, index) => {
+      if (result.status === "fulfilled" && result.value) return [result.value];
+      console.error(`Could not load Printful sync product ${visibleSummaries[index]?.id}`);
+      return [];
+    });
     const catalogIds = [...new Set(details.flatMap((detail) =>
       (detail?.sync_variants ?? []).flatMap((variant) => variant.product?.product_id ? [variant.product.product_id] : [])))];
     const catalog = new Map<number, { color_code?: string }>();
     const catalogProducts = new Map<number, NonNullable<PrintfulCatalogProduct["product"]>>();
     // One cached catalog request per garment style, rather than per size/color.
-    for (const id of catalogIds) {
-      try {
-        const response = await printfulFetch<{ result?: PrintfulCatalogProduct }>(`/products/${id}`, token);
+    const catalogResults = await Promise.allSettled(catalogIds.map(async (id) => ({
+      id,
+      response: await printfulFetch<{ result?: PrintfulCatalogProduct }>(`/products/${id}`, token),
+    })));
+    for (const result of catalogResults) {
+      if (result.status === "fulfilled") {
+        const { id, response } = result.value;
         for (const variant of response.result?.variants ?? []) catalog.set(variant.id, variant);
         if (response.result?.product) catalogProducts.set(id, response.result.product);
-      } catch {
-        console.error(`Could not load Printful color metadata for product ${id}`);
+      } else {
+        console.error("Could not load Printful catalog metadata for a synchronized product");
       }
     }
     for (const detail of details) {

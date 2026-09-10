@@ -51,7 +51,11 @@ export type ProductVariant = {
 
 export type Product = {
   id: string;
+  /** Stable ID from the connected commerce platform (Shopify for Printful sync stores). */
+  externalId?: string;
   slug: string;
+  /** Previous/source-system routes kept working while canonical URLs evolve. */
+  legacySlugs?: string[];
   name: string;
   shortDescription: string;
   description: string;

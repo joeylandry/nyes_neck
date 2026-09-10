@@ -1,15 +1,11 @@
 import Link from "next/link";
-import { getFeaturedShopProducts, getProducts, getShopSettings } from "@/lib/products";
+import { getFeaturedShopProducts, getShopSettings } from "@/lib/products";
 import { ProductReel } from "./ProductReel";
-import { ShopCatalog } from "./ShopCatalog";
 import { ShopBrowseSections } from "./ShopBrowseSections";
 
-export async function ShopStorefront({ showCatalog = false }: { showCatalog?: boolean }) {
+export async function ShopStorefront() {
   const settings = await getShopSettings();
-  const [featuredProducts, products] = await Promise.all([
-    getFeaturedShopProducts(settings),
-    showCatalog ? getProducts() : Promise.resolve([]),
-  ]);
+  const featuredProducts = await getFeaturedShopProducts(settings);
   const featuredCategory = settings.featuredCategory;
 
   return (
@@ -29,7 +25,6 @@ export async function ShopStorefront({ showCatalog = false }: { showCatalog?: bo
           <ProductReel products={featuredProducts} />
         </section>
 
-        {showCatalog ? <ShopCatalog products={products} /> : null}
         <ShopBrowseSections settings={settings} className="mt-14 md:mt-20" />
       </div>
     </>

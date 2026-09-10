@@ -2,6 +2,7 @@ import { collectionCategories, productTypeCategories, products as localProducts,
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { collectionTileLabel } from "@/lib/shopLabels";
+import { productMatchesSlug } from "@/lib/productSlugs";
 import { getSanityClient } from "@/sanity/client";
 import { sanityImageUrl } from "@/sanity/image";
 import type {
@@ -226,11 +227,39 @@ async function fetchSanityProducts(): Promise<Product[] | null> {
 
 export async function getProducts(): Promise<Product[]> {
   const categories = await getShopCategories();
-  // Printful is the source of truth for the synchronized catalog: it carries
-  // its current garment descriptions, colors, catalog codes, and mockups.
-  // Shopify remains a compatible fallback for an outage or an unconfigured
-  // Printful token, followed by the established CMS/local fallbacks.
-  return (await fetchPrintfulProducts(categories)) ?? (await fetchShopifyProducts(categories)) ?? (await fetchSanityProducts()) ?? localProducts;
+  const [printfulProducts, shopifyProducts] = await Promise.all([
+    fetchPrintfulProducts(categories),
+    fetchShopifyProducts(categories),
+  ]);
+
+  if (printfulProducts?.length && shopifyProducts?.length) {
+    const printfulByExternalId = new Map(printfulProducts.flatMap((product) => product.externalId ? [[product.externalId, product] as const] : []));
+    const merged = shopifyProducts.map((shopifyProduct) => {
+      const printfulProduct = shopifyProduct.externalId ? printfulByExternalId.get(shopifyProduct.externalId) : undefined;
+      if (!printfulProduct) return shopifyProduct;
+      printfulByExternalId.delete(shopifyProduct.externalId!);
+
+      // Printful's Sync API does not expose the connected storefront's
+      // product-level description. Keep that synchronized Shopify copy, while
+      // Printful remains authoritative for catalog type, manufacturer, color
+      // codes, variants, availability, and color-scoped previews.
+      return {
+        ...shopifyProduct,
+        ...printfulProduct,
+        description: shopifyProduct.description || printfulProduct.description,
+        shortDescription: shopifyProduct.shortDescription || printfulProduct.shortDescription,
+        brand: printfulProduct.brand || shopifyProduct.brand,
+        legacySlugs: [...new Set([...(printfulProduct.legacySlugs ?? []), ...(shopifyProduct.legacySlugs ?? [])])],
+        images: [
+          ...printfulProduct.images,
+          ...shopifyProduct.images.filter((image) => !printfulProduct.images.some((candidate) => candidate.src === image.src)),
+        ],
+      };
+    });
+    return [...merged, ...printfulByExternalId.values()].sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  return printfulProducts ?? shopifyProducts ?? (await fetchSanityProducts()) ?? localProducts;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {
@@ -238,7 +267,11 @@ export async function getFeaturedProducts(): Promise<Product[]> {
 }
 
 export async function getProductBySlug(slug: string): Promise<Product | undefined> {
-  return (await getProducts()).find((product) => product.slug === slug);
+  return findProductBySlug(await getProducts(), slug);
+}
+
+export function findProductBySlug(products: Product[], slug: string) {
+  return products.find((product) => productMatchesSlug(product, slug));
 }
 
 export async function getProductsByCategory(category: ProductCategory): Promise<Product[]> {

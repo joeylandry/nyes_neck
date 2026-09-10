@@ -1,12 +1,13 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { ProductImage } from "@/types/product";
 
 export function ProductGallery({ images, productName }: { images: ProductImage[]; productName: string }) {
   const galleryImages = images;
   const [activeIndex, setActiveIndex] = useState(0);
+  const pointerStart = useRef<{ x: number; y: number } | null>(null);
   const activeImage = galleryImages[activeIndex] ?? galleryImages[0];
 
   if (!activeImage) return null;
@@ -16,9 +17,21 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
 
   return (
     <section aria-label={`${productName} image gallery`}>
-      <div className="relative aspect-[4/5] overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-sm md:rounded-[30px]">
+      <div
+        className="relative aspect-[4/5] touch-pan-y select-none overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-sm md:rounded-[30px]"
+        onPointerDown={(event) => { if (event.button === 0) pointerStart.current = { x: event.clientX, y: event.clientY }; }}
+        onPointerUp={(event) => {
+          if (!pointerStart.current) return;
+          const distanceX = event.clientX - pointerStart.current.x;
+          const distanceY = event.clientY - pointerStart.current.y;
+          pointerStart.current = null;
+          if (galleryImages.length < 2 || Math.abs(distanceX) < 32 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
+          if (distanceX < 0) showNext(); else showPrevious();
+        }}
+        onPointerCancel={() => { pointerStart.current = null; }}
+      >
         <Image key={activeImage.id} src={activeImage.src} alt={activeImage.alt} fill loading="eager"
-          sizes="(max-width: 768px) 100vw, 55vw" className="object-contain" />
+          sizes="(max-width: 768px) 100vw, 55vw" draggable={false} className="pointer-events-none object-contain" />
         {galleryImages.length > 1 ? (
           <>
             <button type="button" onClick={showPrevious} aria-label="Previous image" className="absolute left-4 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-xl shadow-sm backdrop-blur transition hover:bg-white">←</button>

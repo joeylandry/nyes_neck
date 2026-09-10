@@ -3,7 +3,7 @@ import { redirect } from "next/navigation";
 import { ProductDetails } from "@/components/shop/ProductDetails";
 import { ProductReel } from "@/components/shop/ProductReel";
 import { ShopBackLink } from "@/components/shop/ShopBackLink";
-import { getProductBySlug, getProducts, getShopCategories } from "@/lib/products";
+import { findProductBySlug, getProductBySlug, getProducts, getShopCategories } from "@/lib/products";
 import { collectionPageLabel } from "@/lib/shopLabels";
 
 type ProductPageProps = {
@@ -27,7 +27,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const { slug } = await params;
   const { from } = await searchParams;
   const [products, categories] = await Promise.all([getProducts(), getShopCategories()]);
-  const product = products.find((item) => item.slug === slug);
+  const product = findProductBySlug(products, slug);
   if (!product) redirect("/shop");
 
   const source = typeof from === "string" ? from : undefined;

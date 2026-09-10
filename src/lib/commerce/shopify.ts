@@ -1,6 +1,8 @@
 import "server-only";
 
 import { collectionTileLabel } from "@/lib/shopLabels";
+import { makeProductSlug, slugifyProductValue } from "@/lib/productSlugs";
+import { inferManufacturer, inferProductTypeCategory } from "@/lib/productTaxonomy";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
 
 type ShopifyProduct = {
@@ -10,7 +12,7 @@ type ShopifyProduct = {
   body_html?: string | null;
   product_type?: string;
   vendor?: string;
-  tags?: string;
+  tags?: string[] | string;
   images?: Array<{ id: number; src: string; alt?: string | null; variant_ids?: number[] }>;
   variants?: Array<{
     id: number;
@@ -58,21 +60,12 @@ function cleanText(value?: string | null) {
 }
 
 function classifyProduct(product: ShopifyProduct, categories: ShopCategory[]) {
-  const productTypes = categories.filter((category) => category.kind === "product-type");
-  const haystack = `${product.product_type ?? ""} ${product.tags ?? ""} ${product.title}`.toLowerCase();
-  const rules: Array<[string, RegExp]> = [
-    ["hats", /\b(cap|hat|beanie)\b/],
-    ["crewnecks", /\b(crewneck|sweatshirt)\b/],
-    ["hoodies", /\bhoodie\b/],
-    ["quarter-zips", /\b(quarter.?zip|1\/4 zip)\b/],
-    ["towels", /\btowel\b/],
-    ["drinkware", /\b(glass|tumbler|mug|bottle|cup)\b/],
-    ["beach-boat-accessories", /\b(tote|bag|beach|boat)\b/],
-    ["stickers", /\b(sticker|decal|notecard)\b/],
-    ["t-shirts", /\b(tee|t-shirt|tshirt|polo)\b/],
-  ];
-  const match = rules.find(([, pattern]) => pattern.test(haystack))?.[0] ?? "t-shirts";
-  return productTypes.find((category) => category.value === match) ?? productTypes[0];
+  const tags = Array.isArray(product.tags) ? product.tags.join(" ") : product.tags ?? "";
+  return inferProductTypeCategory({
+    categories,
+    preferredType: product.product_type,
+    searchText: `${product.title} ${tags} ${cleanText(product.body_html)}`,
+  });
 }
 
 function variantOptions(product: ShopifyProduct, variant: NonNullable<ShopifyProduct["variants"]>[number]) {
@@ -109,6 +102,7 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
     };
   });
   const colorByVariantId = new Map(variants.map((variant) => [Number(variant.id), variant.color]));
+  const colors = Array.from(new Set(variants.map((variant) => variant.color).filter((color): color is string => Boolean(color))));
   const colorsByFeaturedImageId = new Map<number, string[]>();
   (product.variants ?? []).forEach((variant, index) => {
     const imageId = variant.featured_image?.id;
@@ -121,6 +115,16 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
       ...(image.variant_ids ?? []).map((id) => colorByVariantId.get(id)).filter((color): color is string => Boolean(color)),
       ...(colorsByFeaturedImageId.get(image.id) ?? []),
     ]);
+    if (!matchingColors.size) {
+      let source = `${image.src} ${image.alt ?? ""}`;
+      try { source = `${decodeURIComponent(new URL(image.src).pathname)} ${image.alt ?? ""}`; } catch { /* retain the raw URL */ }
+      const normalizedSource = slugifyProductValue(source);
+      const inferredColors = colors.filter((color) => normalizedSource.includes(slugifyProductValue(color)));
+      const mostSpecificLength = Math.max(0, ...inferredColors.map((color) => slugifyProductValue(color).length));
+      inferredColors
+        .filter((color) => slugifyProductValue(color).length === mostSpecificLength)
+        .forEach((color) => matchingColors.add(color));
+    }
     return {
       id: String(image.id),
       src: image.src,
@@ -134,7 +138,9 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
 
   return {
     id: String(product.id),
-    slug: product.handle,
+    externalId: String(product.id),
+    slug: makeProductSlug(product.title, String(product.id)),
+    legacySlugs: [product.handle],
     name: product.title,
     shortDescription: cleanText(product.body_html).slice(0, 150) || `${collectionTileLabel(collection.label)} ${productType.label.toLowerCase()}.`,
     description: cleanText(product.body_html) || `A NYES NECK ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
@@ -143,12 +149,15 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
     collection: collection.value,
     collectionLabel: collectionTileLabel(collection.label),
     collections: [collection.value],
-    brand: product.vendor?.trim() || undefined,
+    brand: inferManufacturer(
+      `${product.title} ${cleanText(product.body_html)}`,
+      product.vendor && !/^nyes\s+neck$/i.test(product.vendor.trim()) ? product.vendor : undefined,
+    ),
     priceCents: prices.length ? Math.min(...prices) : null,
     currency: "USD",
     images,
     sizes: Array.from(new Set(variants.map((variant) => variant.size).filter((size): size is string => Boolean(size)))),
-    colors: Array.from(new Set(variants.map((variant) => variant.color).filter((color): color is string => Boolean(color)))),
+    colors,
     variants,
     featured: true,
     available: variants.some((variant) => variant.available),

@@ -6,6 +6,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --conditions=react-server --experimental-strip-types --experimental-loader ./tests/alias-loader.mjs --test ./tests/*.test.mjs",
     "lint": "eslint",
     "studio": "sanity dev",
     "studio:deploy": "sanity deploy",

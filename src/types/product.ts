@@ -60,6 +60,10 @@ export type Product = {
   collection: ProductCollection;
   collectionLabel: string;
   collections: ProductCollection[];
+  // Printful does not guarantee this field for every catalog item. When it is
+  // present, it is deliberately kept with the synchronized product rather
+  // than maintained as a storefront-only list.
+  brand?: string;
   priceCents: number | null;
   currency: "USD";
   externalLink?: string;

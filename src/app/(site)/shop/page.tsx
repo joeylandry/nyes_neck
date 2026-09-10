@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 export default function ShopPage() {
   return (
     <main>
-      <ShopStorefront />
+      <ShopStorefront showCatalog />
     </main>
   );
 }

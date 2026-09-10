@@ -9,6 +9,7 @@ type ShopifyProduct = {
   handle: string;
   body_html?: string | null;
   product_type?: string;
+  vendor?: string;
   tags?: string;
   images?: Array<{ id: number; src: string; alt?: string | null; variant_ids?: number[] }>;
   variants?: Array<{
@@ -142,6 +143,7 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
     collection: collection.value,
     collectionLabel: collectionTileLabel(collection.label),
     collections: [collection.value],
+    brand: product.vendor?.trim() || undefined,
     priceCents: prices.length ? Math.min(...prices) : null,
     currency: "USD",
     images,

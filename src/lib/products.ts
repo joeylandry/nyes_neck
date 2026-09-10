@@ -1,5 +1,6 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
+import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { getSanityClient } from "@/sanity/client";
 import { sanityImageUrl } from "@/sanity/image";
@@ -225,7 +226,11 @@ async function fetchSanityProducts(): Promise<Product[] | null> {
 
 export async function getProducts(): Promise<Product[]> {
   const categories = await getShopCategories();
-  return (await fetchShopifyProducts(categories)) ?? (await fetchSanityProducts()) ?? localProducts;
+  // Printful is the source of truth for the synchronized catalog: it carries
+  // its current garment descriptions, colors, catalog codes, and mockups.
+  // Shopify remains a compatible fallback for an outage or an unconfigured
+  // Printful token, followed by the established CMS/local fallbacks.
+  return (await fetchPrintfulProducts(categories)) ?? (await fetchShopifyProducts(categories)) ?? (await fetchSanityProducts()) ?? localProducts;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {

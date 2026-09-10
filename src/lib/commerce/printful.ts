@@ -18,6 +18,9 @@ type PrintfulSyncProductSummary = {
   synced?: number;
   thumbnail_url?: string;
   is_ignored?: boolean;
+  brand?: string;
+  manufacturer?: string;
+  product_type?: string;
 };
 
 type PrintfulSyncVariant = {
@@ -63,7 +66,7 @@ type PrintfulProductOverride = {
 };
 
 type PrintfulCatalogProduct = {
-  product?: { description?: string };
+  product?: { description?: string; brand?: string; manufacturer?: string; product_type?: string; type?: string };
   variants?: { id: number; color_code?: string }[];
 };
 
@@ -192,13 +195,13 @@ function isVariantAvailable(variant: PrintfulSyncVariant) {
   return variant.synced === true && variant.availability_status === "active";
 }
 
-function findProductTypeCategory(productName: string, override: PrintfulProductOverride | undefined, categories: ShopCategory[]) {
+function findProductTypeCategory(productName: string, override: PrintfulProductOverride | undefined, categories: ShopCategory[], printfulType?: string) {
   const productTypes = categories.filter((category) => category.kind === "product-type");
   const requested = override?.category ?? process.env.PRINTFUL_DEFAULT_PRODUCT_TYPE_SLUG;
   const explicit = requested ? productTypes.find((category) => category.value === requested || category.slug === requested) : undefined;
   if (explicit) return explicit;
 
-  const inferred = productTypeRules.find((rule) => rule.patterns.some((pattern) => pattern.test(productName)));
+  const inferred = productTypeRules.find((rule) => rule.patterns.some((pattern) => pattern.test(printfulType ?? productName)));
   const inferredCategory = inferred
     ? productTypes.find((category) => category.value === inferred.category || category.slug === inferred.category)
     : undefined;
@@ -270,12 +273,16 @@ function mapPrintfulProduct(
   detail: PrintfulSyncProductDetail,
   categories: ShopCategory[],
   override: PrintfulProductOverride | undefined,
-  catalogDescriptions: Map<number, string>,
+  catalogProducts: Map<number, NonNullable<PrintfulCatalogProduct["product"]>>,
 ): Product | null {
   const syncProduct = detail.sync_product;
   if (syncProduct.is_ignored || override?.hidden) return null;
 
-  const productType = findProductTypeCategory(syncProduct.name, override, categories);
+  const catalogProductId = (detail.sync_variants ?? [])
+    .map((variant) => variant.product?.product_id)
+    .find((id): id is number => Boolean(id));
+  const catalogProduct = catalogProductId ? catalogProducts.get(catalogProductId) : undefined;
+  const productType = findProductTypeCategory(syncProduct.name, override, categories, syncProduct.product_type ?? catalogProduct?.product_type ?? catalogProduct?.type);
   const collection = findCollectionCategory(syncProduct.name, override, categories);
   if (!productType || !collection) return null;
 
@@ -283,7 +290,10 @@ function mapPrintfulProduct(
     const options = parseVariantOptions(variant, syncProduct.name);
     return {
       id: variant.external_id ?? `printful-${variant.id}`,
-      cartUrl: variant.external_id ? getShopifyCartUrl(`printful-${syncProduct.id}`, variant.external_id) : undefined,
+      // Printful keeps the linked Shopify IDs as external IDs. The cart helper
+      // validates both values, so retain the synchronized product's external
+      // ID instead of the internal `printful-*` storefront ID.
+      cartUrl: variant.external_id ? getShopifyCartUrl(syncProduct.external_id ?? String(syncProduct.id), variant.external_id) : undefined,
       size: options.size,
       color: options.color,
       colorCode: variant.color_code,
@@ -313,8 +323,12 @@ function mapPrintfulProduct(
   // exposes another color's image.
   for (const variant of detail.sync_variants ?? []) {
     const { color } = parseVariantOptions(variant, syncProduct.name);
-    const preview = variant.files?.find((file) => file.type === "preview" && file.preview_url)?.preview_url;
-    addImage(preview, color);
+    // A synced variant can expose several Printful mockups. Keep every
+    // preview for that color so both the product page and the card carousel
+    // can browse the full color-specific gallery.
+    for (const file of variant.files ?? []) {
+      if (file.type === "preview") addImage(file.preview_url, color);
+    }
   }
 
   // Keep a scoped catalog fallback only for colors that do not yet have a
@@ -327,10 +341,7 @@ function mapPrintfulProduct(
   }
   if (!images.length) addImage("/images/products/product-placeholder.svg");
 
-  const catalogProductId = (detail.sync_variants ?? [])
-    .map((variant) => variant.product?.product_id)
-    .find((id): id is number => Boolean(id));
-  const catalogDescription = catalogProductId ? catalogDescriptions.get(catalogProductId) : undefined;
+  const catalogDescription = catalogProduct?.description?.trim();
 
   return {
     id: `printful-${syncProduct.id}`,
@@ -343,6 +354,7 @@ function mapPrintfulProduct(
     collection: collection.value,
     collectionLabel: collectionTileLabel(collection.label),
     collections: [collection.value],
+    brand: syncProduct.brand ?? syncProduct.manufacturer ?? catalogProduct?.brand ?? catalogProduct?.manufacturer,
     priceCents: parsePriceCents(detail.sync_variants ?? []),
     currency: "USD",
     images,
@@ -381,14 +393,13 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
     const catalogIds = [...new Set(details.flatMap((detail) =>
       (detail?.sync_variants ?? []).flatMap((variant) => variant.product?.product_id ? [variant.product.product_id] : [])))];
     const catalog = new Map<number, { color_code?: string }>();
-    const catalogDescriptions = new Map<number, string>();
+    const catalogProducts = new Map<number, NonNullable<PrintfulCatalogProduct["product"]>>();
     // One cached catalog request per garment style, rather than per size/color.
     for (const id of catalogIds) {
       try {
         const response = await printfulFetch<{ result?: PrintfulCatalogProduct }>(`/products/${id}`, token);
         for (const variant of response.result?.variants ?? []) catalog.set(variant.id, variant);
-        const description = response.result?.product?.description?.trim();
-        if (description) catalogDescriptions.set(id, description);
+        if (response.result?.product) catalogProducts.set(id, response.result.product);
       } catch {
         console.error(`Could not load Printful color metadata for product ${id}`);
       }
@@ -402,7 +413,7 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
       .flatMap((detail) => {
         if (!detail) return [];
         const override = getOverride(detail.sync_product, overrides);
-        const product = mapPrintfulProduct(detail, categories, override, catalogDescriptions);
+        const product = mapPrintfulProduct(detail, categories, override, catalogProducts);
         return product ? [product] : [];
       })
       .sort((a, b) => a.name.localeCompare(b.name));

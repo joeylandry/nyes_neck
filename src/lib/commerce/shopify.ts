@@ -75,12 +75,18 @@ function classifyProduct(product: ShopifyProduct, categories: ShopCategory[]) {
 }
 
 function variantOptions(product: ShopifyProduct, variant: NonNullable<ShopifyProduct["variants"]>[number]) {
-  const values = [variant.option1, variant.option2, variant.option3].map((value) => value?.trim()).filter((value): value is string => Boolean(value && value !== "Default Title"));
+  // Preserve option positions: a missing earlier option must not shift the
+  // color/size index declared by Shopify and hide valid colors downstream.
+  const optionValues = [variant.option1, variant.option2, variant.option3].map((value) => {
+    const normalized = value?.trim();
+    return normalized && normalized !== "Default Title" ? normalized : undefined;
+  });
+  const values = optionValues.filter((value): value is string => Boolean(value));
   const options = product.options ?? [];
   const colorIndex = options.findIndex((option) => /colou?r/i.test(option.name ?? ""));
   const sizeIndex = options.findIndex((option) => /size/i.test(option.name ?? ""));
-  const size = sizeIndex >= 0 ? values[sizeIndex] : values.find((value) => knownSizes.has(value.toUpperCase()));
-  const color = colorIndex >= 0 ? values[colorIndex] : values.find((value) => value !== size);
+  const size = sizeIndex >= 0 ? optionValues[sizeIndex] : values.find((value) => knownSizes.has(value.toUpperCase()));
+  const color = colorIndex >= 0 ? optionValues[colorIndex] : values.find((value) => value !== size);
   return { size, color };
 }
 

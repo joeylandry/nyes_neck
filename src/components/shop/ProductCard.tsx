@@ -4,50 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { getProductColor } from "@/lib/productColors";
 import type { Product } from "@/types/product";
-
-const swatchColors: Record<string, string> = {
-  "true navy": "#1e3149",
-  "collegiate navy": "#263b5b",
-  "french navy": "#26334d",
-  "blue spruce": "#4e7570",
-  "blue jean": "#5b7f99",
-  "flo blue": "#6eb7c9",
-  "light green": "#a1b98b",
-  "forest green": "#355d42",
-  seafoam: "#9bcfc4",
-  watermelon: "#e97d85",
-  "bubble pink": "#e98ab3",
-  "cool heather grey": "#a5a4a0",
-  "heather grey": "#a5a4a0",
-  pepper: "#5d5b57",
-  crimson: "#a62d3a",
-  espresso: "#4a362f",
-  peachy: "#ecad96",
-  butter: "#eedb87",
-  ivory: "#eee4d2",
-  orchid: "#b789b5",
-  violet: "#70618b",
-  graphite: "#55575a",
-  black: "#191919",
-  white: "#f4f3ee",
-  navy: "#1e3149",
-  blue: "#7899a8",
-  sand: "#d8c7a8",
-  natural: "#d5c6a6",
-  green: "#859981",
-  grey: "#787878",
-  gray: "#787878",
-  red: "#a8302a",
-};
-
-function getSwatchColor(color: string) {
-  const normalized = color.toLowerCase().trim();
-  const exactMatch = swatchColors[normalized];
-  if (exactMatch) return exactMatch;
-  const partialMatch = Object.entries(swatchColors).find(([name]) => normalized.includes(name));
-  return partialMatch?.[1] ?? "#a8c2bc";
-}
 
 export function ProductSwatches({
   colors,
@@ -66,7 +24,7 @@ export function ProductSwatches({
   return (
     <div className={`flex items-center gap-1.5 ${className}`} aria-label={`${colors.length} color${colors.length === 1 ? "" : "s"} available`}>
       {visibleColors.map((color) => {
-        const swatch = <span aria-hidden="true" className="block size-4 rounded-full border border-black/25 ring-1 ring-white" style={{ backgroundColor: getSwatchColor(color) }} />;
+        const swatch = <span aria-hidden="true" className="block size-4 rounded-full border border-black/25 ring-1 ring-white" style={{ backgroundColor: getProductColor(color) }} />;
         return onColorChange ? <button key={color} type="button" title={color} aria-label={`Show ${color}`} aria-pressed={selectedColor === color} onClick={() => onColorChange(color)} className={`grid size-6 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${selectedColor === color ? "ring-1 ring-black" : "hover:scale-110"}`}>{swatch}</button> : <span key={color} title={color}>{swatch}</span>;
       })}
       {overflow > 0 ? <span className="ml-0.5 text-sm font-medium text-black/60">+{overflow}</span> : null}

@@ -4,15 +4,8 @@ import { useState } from "react";
 import { ProductGallery } from "@/components/shop/ProductGallery";
 import { PurchaseAction } from "@/components/shop/PurchaseAction";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { getProductColor } from "@/lib/productColors";
 import type { Product } from "@/types/product";
-
-const swatches: Record<string, string> = {
-  black: "#171717", white: "#ffffff", navy: "#182b49", "navy blue": "#182b49",
-  natural: "#eee5d3", cream: "#f5edda", sand: "#d5c5aa", charcoal: "#414448",
-  "sport grey": "#b4b4b2", "sport gray": "#b4b4b2", "heather grey": "#b7b7b5",
-  "dark heather": "#55565a", "light blue": "#b9d7e8", "royal blue": "#2455a4",
-  "forest green": "#254b36", "military green": "#62674c", maroon: "#651d32",
-};
 
 export function ProductDetails({ product }: { product: Product }) {
   const initial = product.variants.find((variant) => variant.available) ?? product.variants[0];
@@ -55,7 +48,7 @@ export function ProductDetails({ product }: { product: Product }) {
                 const disabled = product.variants.length > 0 && !product.variants.some((item) => item.color === option && item.available && item.cartUrl);
                 return <button key={option} type="button" disabled={disabled} aria-pressed={color === option} onClick={() => selectColor(option)}
                   className={`flex min-h-12 items-center gap-2.5 rounded-full border px-3 py-2 text-sm transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#183247] disabled:cursor-not-allowed disabled:opacity-30 disabled:line-through ${color === option ? "border-[#183247] bg-white ring-1 ring-[#183247]" : "border-black/15 hover:border-black/50"}`}>
-                  <span aria-hidden="true" className="size-6 rounded-full border border-black/15" style={{ backgroundColor: code || swatches[option.toLowerCase()] || option.toLowerCase().replaceAll(" ", "") }} />
+                  <span aria-hidden="true" className="size-6 rounded-full border border-black/15" style={{ backgroundColor: getProductColor(option, code) }} />
                   {option}
                 </button>;
               })}

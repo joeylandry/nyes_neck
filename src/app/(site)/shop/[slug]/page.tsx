@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { ProductDetails } from "@/components/shop/ProductDetails";
 import { ProductReel } from "@/components/shop/ProductReel";
 import { ShopBackLink } from "@/components/shop/ShopBackLink";
@@ -11,10 +11,10 @@ type ProductPageProps = {
   searchParams: Promise<{ from?: string | string[] }>;
 };
 
-export async function generateStaticParams() {
-  const products = await getProducts();
-  return products.map((product) => ({ slug: product.slug }));
-}
+// The inventory changes independently of site deploys. Resolving this route at
+// request time keeps product-card links valid when Shopify adds a new product.
+export const dynamic = "force-dynamic";
+export const revalidate = 0;
 
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
@@ -28,7 +28,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   const { from } = await searchParams;
   const [products, categories] = await Promise.all([getProducts(), getShopCategories()]);
   const product = products.find((item) => item.slug === slug);
-  if (!product) notFound();
+  if (!product) redirect("/shop");
 
   const source = typeof from === "string" ? from : undefined;
   const sourceCategory = categories.find((category) => category.slug === source);

@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
-  title: "Contact | Nyes Neck",
+  title: "Contact | Nyes Neck Shop",
   description: "Contact NYES NECK about products, local partnerships, and our giving-back mission.",
 };
 

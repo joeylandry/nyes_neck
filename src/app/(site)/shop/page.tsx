@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ShopStorefront } from "@/components/shop/ShopStorefront";
 
 export const metadata: Metadata = {
-  title: "Shop | Nyes Neck",
+  title: "Shop | Nyes Neck Shop",
   description: "Explore the first NYES NECK Upper Cape apparel and lifestyle collection.",
 };
 

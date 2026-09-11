@@ -62,6 +62,7 @@ test("synchronized product images do not repeat Shopify's primary image", () => 
   ];
   const shopifyImages = [
     { id: "shopify-main", src: "https://shopify.test/front.png", alt: "Front", role: "main" },
+    { id: "shopify-front-copy", src: "https://shopify.test/shirt-blue-front-abc.jpg", alt: "Front", role: "gallery" },
     { id: "shopify-back", src: "https://shopify.test/back.png", alt: "Back", role: "gallery" },
     { id: "shopify-back-copy", src: "https://shopify.test/back.png", alt: "Back", role: "gallery" },
   ];

@@ -6,13 +6,21 @@ export function mergeSynchronizedProductImages(
 ): ProductImage[] {
   const seenSources = new Set(printfulImages.map((image) => image.src));
 
+  const isShopifyFrontView = (image: ProductImage) => {
+    try {
+      return /(?:^|[-_/])front(?:[-_./]|$)/i.test(decodeURIComponent(new URL(image.src).pathname));
+    } catch {
+      return /(?:^|[-_/])front(?:[-_./]|$)/i.test(decodeURIComponent(image.src));
+    }
+  };
+
   return [
     ...printfulImages,
     ...shopifyImages.filter((image) => {
-      // Shopify's primary image mirrors Printful's first mockup, but the two
-      // services publish it at different URLs. Keep Printful's color-scoped
-      // primary and only append genuinely supplemental Shopify gallery shots.
-      if (image.role === "main" || seenSources.has(image.src)) return false;
+      // Printful supplies the color-scoped front preview. Shopify can publish
+      // that same front view more than once and mark later copies as gallery
+      // images, so role alone is not enough to identify the duplicate.
+      if (image.role === "main" || isShopifyFrontView(image) || seenSources.has(image.src)) return false;
       seenSources.add(image.src);
       return true;
     }),

@@ -10,8 +10,16 @@ type ViewMode = "expanded" | "default" | "minimal";
 type SortMode = "featured" | "newest" | "price-low" | "price-high";
 type FacetKey = "type" | "brand" | "size";
 type SelectedFacets = Record<FacetKey, string[]>;
+type FilterGroup = { label: string; values: string[] };
 
 const EMPTY_FACETS: SelectedFacets = { type: [], brand: [], size: [] };
+
+const sortOptions: Array<{ value: SortMode; label: string }> = [
+  { value: "featured", label: "Featured" },
+  { value: "newest", label: "Newest" },
+  { value: "price-low", label: "Price: Low to High" },
+  { value: "price-high", label: "Price: High to Low" },
+];
 
 const viewOptions: Array<{ value: ViewMode; label: string; columns: string }> = [
   { value: "expanded", label: "Expanded", columns: "▯" },
@@ -99,29 +107,21 @@ function FilterDrawer({
           <button type="button" aria-label="Close filters" onClick={onClose} className="grid size-10 place-items-center rounded-full text-2xl hover:bg-black/5">×</button>
         </div>
         <div className="overflow-y-auto px-5 pb-28 pt-2">
-          <FilterHeading>Sort by</FilterHeading>
-          <div className="space-y-1">
-            {([
-              ["featured", "Featured"],
-              ["newest", "Newest"],
-              ["price-low", "Price: Low to High"],
-              ["price-high", "Price: High to Low"],
-            ] as Array<[SortMode, string]>).map(([value, label]) => (
-              <label key={value} className="flex min-h-12 items-center gap-3 text-base font-medium">
-                <input className="size-5 accent-black" type="radio" name="sort" checked={sort === value} onChange={() => setSort(value)} />
-                {label}
-              </label>
-            ))}
+          <div className="border-b border-black/15 py-5">
+            <label htmlFor="filter-sort" className="mb-2 block text-xs font-bold uppercase tracking-[0.14em] text-black/55">Sort by</label>
+            <select id="filter-sort" value={sort} onChange={(event) => setSort(event.target.value as SortMode)} className="min-h-11 w-full rounded-md border border-black/25 bg-white px-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+              {sortOptions.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+            </select>
           </div>
-          <FilterHeading>Product type</FilterHeading>
-          <FilterOptions values={options.type} selected={selected.type} onToggle={(value) => onToggle("type", value)} />
-          {options.brand.length ? <><FilterHeading>Brand / manufacturer</FilterHeading><FilterOptions values={options.brand} selected={selected.brand} onToggle={(value) => onToggle("brand", value)} /></> : null}
-          {options.size.length ? <><FilterHeading>Size</FilterHeading><FilterOptions values={options.size} selected={selected.size} onToggle={(value) => onToggle("size", value)} /></> : null}
-          <FilterHeading>Availability</FilterHeading>
-          <label className="flex min-h-12 items-center gap-3 text-base font-medium">
-            <input className="size-5 accent-black" type="checkbox" checked={inStockOnly} onChange={(event) => setInStockOnly(event.target.checked)} />
-            In stock only
-          </label>
+          <FilterMenu label="Product type" groups={productTypeGroups(options.type)} selected={selected.type} onToggle={(value) => onToggle("type", value)} defaultOpen />
+          {options.brand.length ? <FilterMenu label="Brands" groups={brandGroups(options.brand)} selected={selected.brand} onToggle={(value) => onToggle("brand", value)} /> : null}
+          {options.size.length ? <FilterMenu label="Size" groups={sizeGroups(options.size)} selected={selected.size} onToggle={(value) => onToggle("size", value)} /> : null}
+          <div className="border-b border-black/15 py-1">
+            <label className="flex min-h-12 cursor-pointer items-center gap-3 text-sm font-bold">
+              <input className="size-4 rounded-sm accent-black" type="checkbox" checked={inStockOnly} onChange={(event) => setInStockOnly(event.target.checked)} />
+              In stock only
+            </label>
+          </div>
         </div>
         <div className="absolute inset-x-0 bottom-0 flex gap-3 border-t border-black/15 bg-white p-4">
           <button type="button" onClick={clearFilters} className="min-h-12 flex-1 rounded-full border border-black px-4 text-sm font-bold">Clear all</button>
@@ -132,15 +132,70 @@ function FilterDrawer({
   );
 }
 
-function FilterOptions({ values, selected, onToggle }: { values: string[]; selected: string[]; onToggle: (value: string) => void }) {
-  return <div className="flex flex-wrap gap-2">{values.map((value) => {
-    const active = selected.includes(value);
-    return <button key={value} type="button" aria-pressed={active} onClick={() => onToggle(value)} className={`min-h-10 rounded-full border px-4 text-sm font-bold transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${active ? "border-[#161616] bg-[#161616] text-white" : "border-black/20 hover:border-black"}`}>{value}</button>;
-  })}</div>;
+function FilterMenu({ label, groups, selected, onToggle, defaultOpen = false }: { label: string; groups: FilterGroup[]; selected: string[]; onToggle: (value: string) => void; defaultOpen?: boolean }) {
+  const selectedCount = selected.length;
+
+  return (
+    <details className="group border-b border-black/15" open={defaultOpen}>
+      <summary className="flex min-h-14 cursor-pointer list-none items-center justify-between gap-3 py-3 text-base font-bold marker:content-none">
+        <span>{label}{selectedCount ? <span className="ml-2 text-sm font-medium text-black/50">({selectedCount})</span> : null}</span>
+        <ChevronIcon />
+      </summary>
+      <div className="-mt-1 space-y-5 pb-5">
+        {groups.map((group) => (
+          <div key={group.label}>
+            {group.label ? <p className="mb-1 text-xs font-bold uppercase tracking-[0.14em] text-black/45">{group.label}</p> : null}
+            <ul>
+              {group.values.map((value) => {
+                const active = selected.includes(value);
+                return (
+                  <li key={value}>
+                    <label className={`flex min-h-10 cursor-pointer items-center gap-3 rounded-sm px-1 text-sm font-medium transition hover:bg-black/[0.035] ${active ? "text-black" : "text-black/75"}`}>
+                      <input className="size-4 rounded-sm accent-black" type="checkbox" checked={active} onChange={() => onToggle(value)} />
+                      {value}
+                    </label>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </details>
+  );
 }
 
-function FilterHeading({ children }: { children: React.ReactNode }) {
-  return <h3 className="mt-7 border-t border-black/15 pt-6 text-lg font-bold tracking-[-0.02em] first:mt-0 first:border-0">{children}</h3>;
+function productTypeGroups(values: string[]): FilterGroup[] {
+  const groups = [
+    { label: "Clothing", match: /shirt|hoodie|sweatshirt|crewneck|polo|quarter|jacket|vest|apron/i },
+    { label: "Headwear", match: /hat|cap|beanie/i },
+    { label: "Drinkware", match: /glass|tumbler|drinkware|mug|bottle|cup/i },
+  ];
+  const matched = new Set<string>();
+  const organized = groups.map(({ label, match }) => {
+    const items = values.filter((value) => match.test(value));
+    items.forEach((item) => matched.add(item));
+    return { label, values: items };
+  }).filter((group) => group.values.length);
+  const remaining = values.filter((value) => !matched.has(value));
+  if (remaining.length) organized.push({ label: "Home & accessories", values: remaining });
+  return organized;
+}
+
+function brandGroups(values: string[]): FilterGroup[] {
+  return values.length ? [{ label: "All brands", values }] : [];
+}
+
+function sizeGroups(values: string[]): FilterGroup[] {
+  const adult = values.filter((value) => /^(?:XXS|XS|S|M|L|XL|XXL|2XL|3XL)$/i.test(value));
+  const youth = values.filter((value) => /youth|\bY(?:XS|S|M|L|XL)\b/i.test(value));
+  const matched = new Set([...adult, ...youth]);
+  const groups: FilterGroup[] = [];
+  if (adult.length) groups.push({ label: "Adult sizes", values: adult });
+  if (youth.length) groups.push({ label: "Youth sizes", values: youth });
+  const remaining = values.filter((value) => !matched.has(value));
+  if (remaining.length) groups.push({ label: "Other sizes", values: remaining });
+  return groups;
 }
 
 export function CollectionStorefront({ products, returnTo, title }: { products: Product[]; returnTo: string; title: string }) {
@@ -202,7 +257,7 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
       </div>
 
       {filteredProducts.length ? (
-        <div className={view === "expanded" ? "grid gap-8" : view === "default" ? "grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4" : "grid grid-cols-3 gap-px bg-black/15 sm:grid-cols-4 md:grid-cols-5"}>
+        <div className={view === "expanded" ? "grid min-w-0 grid-cols-1 gap-8" : view === "default" ? "grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4" : "grid grid-cols-3 gap-px bg-black/15 sm:grid-cols-4 md:grid-cols-5"}>
           {filteredProducts.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < 2} />)}
         </div>
       ) : (
@@ -219,4 +274,8 @@ function unique(values: Array<string | undefined>) {
 
 function FilterIcon() {
   return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4"><path d="M4 7h16M7 12h10M10 17h4" strokeLinecap="round" /></svg>;
+}
+
+function ChevronIcon() {
+  return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="size-4 shrink-0 transition-transform group-open:rotate-180"><path d="m6 9 6 6 6-6" strokeLinecap="round" strokeLinejoin="round" /></svg>;
 }

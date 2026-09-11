@@ -1,6 +1,7 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { fetchPrintfulProducts } from "@/lib/commerce/printful";
+import { mergeSynchronizedProductImages } from "@/lib/productImages";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { productMatchesSlug } from "@/lib/productSlugs";
 import { getSanityClient } from "@/sanity/client";
@@ -250,10 +251,7 @@ export async function getProducts(): Promise<Product[]> {
         shortDescription: shopifyProduct.shortDescription || printfulProduct.shortDescription,
         brand: printfulProduct.brand || shopifyProduct.brand,
         legacySlugs: [...new Set([...(printfulProduct.legacySlugs ?? []), ...(shopifyProduct.legacySlugs ?? [])])],
-        images: [
-          ...printfulProduct.images,
-          ...shopifyProduct.images.filter((image) => !printfulProduct.images.some((candidate) => candidate.src === image.src)),
-        ],
+        images: mergeSynchronizedProductImages(printfulProduct.images, shopifyProduct.images),
       };
     });
     return [...merged, ...printfulByExternalId.values()].sort((a, b) => a.name.localeCompare(b.name));

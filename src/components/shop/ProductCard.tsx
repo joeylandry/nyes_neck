@@ -16,13 +16,13 @@ export function ProductSwatches({ colors, className = "", selectedColor, onColor
   </div>;
 }
 
-export function ProductCard({ product, returnTo, priority = false, compact = false }: { product: Product; returnTo: string; priority?: boolean; compact?: boolean }) {
+export function ProductCard({ product, returnTo, priority = false, compact = false, touchSwipeFallback = false }: { product: Product; returnTo: string; priority?: boolean; compact?: boolean; touchSwipeFallback?: boolean }) {
   const [selectedColor, setSelectedColor] = useState(product.colors[0] ?? "");
   const colorCodes = useMemo(() => Object.fromEntries(product.colors.map((color) => [color, product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode])), [product.colors, product.variants]);
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
 
   return <article className="font-ui">
-    <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={compact ? "(max-width: 640px) 72vw, 260px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"} aspectClass="aspect-[4/5]" roundedClass={compact ? "rounded-[16px] md:rounded-[20px]" : "rounded-[20px] md:rounded-[30px]"} />
+    <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={compact ? "(max-width: 640px) 72vw, 260px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"} aspectClass="aspect-[4/5]" roundedClass={compact ? "rounded-[16px] md:rounded-[20px]" : "rounded-[20px] md:rounded-[30px]"} touchSwipeFallback={touchSwipeFallback} />
     <Link href={href} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-3">
       <div className={`px-0.5 pb-2 md:px-1 ${compact ? "pt-3 md:pt-4" : "pt-4 md:pt-5"}`}>
         {product.collectionLabel ? <p className={`font-bold uppercase tracking-[0.13em] text-black/45 ${compact ? "mb-1 text-[0.62rem] md:text-xs" : "mb-1.5 text-xs md:text-[0.8rem]"}`}>{product.collectionLabel}</p> : null}

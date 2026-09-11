@@ -15,6 +15,7 @@ export function ProductCardMedia({
   sizes,
   aspectClass = "aspect-[3/4]",
   roundedClass = "",
+  touchSwipeFallback = false,
 }: {
   product: Product;
   selectedColor: string;
@@ -23,6 +24,8 @@ export function ProductCardMedia({
   sizes: string;
   aspectClass?: string;
   roundedClass?: string;
+  /** Use touch events when this card sits inside a horizontally scrolling reel. */
+  touchSwipeFallback?: boolean;
 }) {
   const [imageIndex, setImageIndex] = useState(0);
   const pointerStart = useRef<{ x: number; y: number } | null>(null);
@@ -41,6 +44,21 @@ export function ProductCardMedia({
     setImageIndex((current) => (current + direction + images.length) % images.length);
   };
 
+  const beginSwipe = (x: number, y: number) => {
+    pointerStart.current = { x, y };
+    suppressNextClick.current = false;
+  };
+
+  const finishSwipe = (x: number, y: number) => {
+    if (!pointerStart.current) return;
+    const distanceX = x - pointerStart.current.x;
+    const distanceY = y - pointerStart.current.y;
+    pointerStart.current = null;
+    if (images.length < 2 || Math.abs(distanceX) < 32 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
+    suppressNextClick.current = true;
+    moveImage(distanceX < 0 ? 1 : -1);
+  };
+
   return (
     <div className={`group relative ${roundedClass}`}>
       <Link
@@ -49,21 +67,28 @@ export function ProductCardMedia({
         aria-label={`View ${product.name}`}
         className="block rounded-[inherit] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
         onPointerDown={(event) => {
+          if (touchSwipeFallback && event.pointerType === "touch") return;
           if (event.button !== 0) return;
           event.currentTarget.setPointerCapture(event.pointerId);
-          pointerStart.current = { x: event.clientX, y: event.clientY };
-          suppressNextClick.current = false;
+          beginSwipe(event.clientX, event.clientY);
         }}
         onPointerUp={(event) => {
-          if (!pointerStart.current) return;
-          const distanceX = event.clientX - pointerStart.current.x;
-          const distanceY = event.clientY - pointerStart.current.y;
-          pointerStart.current = null;
-          if (images.length < 2 || Math.abs(distanceX) < 32 || Math.abs(distanceX) <= Math.abs(distanceY)) return;
-          suppressNextClick.current = true;
-          moveImage(distanceX < 0 ? 1 : -1);
+          if (touchSwipeFallback && event.pointerType === "touch") return;
+          finishSwipe(event.clientX, event.clientY);
         }}
-        onPointerCancel={() => { pointerStart.current = null; }}
+        onPointerCancel={(event) => {
+          if (touchSwipeFallback && event.pointerType === "touch") return;
+          pointerStart.current = null;
+        }}
+        onTouchStart={touchSwipeFallback ? (event) => {
+          const touch = event.touches[0];
+          if (touch) beginSwipe(touch.clientX, touch.clientY);
+        } : undefined}
+        onTouchEnd={touchSwipeFallback ? (event) => {
+          const touch = event.changedTouches[0];
+          if (touch) finishSwipe(touch.clientX, touch.clientY);
+        } : undefined}
+        onTouchCancel={touchSwipeFallback ? () => { pointerStart.current = null; } : undefined}
         onDragStart={(event) => event.preventDefault()}
         onClick={(event) => {
           if (!suppressNextClick.current) return;

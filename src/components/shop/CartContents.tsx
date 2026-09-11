@@ -6,6 +6,10 @@ import { useMemo } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useCart } from "./CartProvider";
 
+// Keep checkout closed until product pricing is finalized. The cart can still
+// be used to review products and variants without exposing a purchase link.
+const CHECKOUT_ENABLED = false;
+
 function checkoutUrl(items: ReturnType<typeof useCart>["items"]) {
   if (!items.length) return undefined;
 
@@ -22,6 +26,33 @@ function checkoutUrl(items: ReturnType<typeof useCart>["items"]) {
   } catch {
     return undefined;
   }
+}
+
+function CheckoutAction({ checkout }: { checkout?: string }) {
+  if (!checkout) {
+    return <p className="mt-6 rounded-2xl bg-white/60 p-4 text-sm leading-6">This cart can’t be checked out right now. Please remove and add the item again.</p>;
+  }
+
+  if (!CHECKOUT_ENABLED) {
+    return (
+      <div className="mt-6">
+        <button
+          type="button"
+          disabled
+          className="inline-flex min-h-14 w-full cursor-not-allowed items-center justify-center rounded-full bg-[#183247]/45 px-6 py-4 text-lg font-semibold text-white/90"
+        >
+          Secure checkout
+        </button>
+        <p className="mt-3 text-center text-sm leading-5 text-black/55">Checkout is temporarily unavailable while pricing is finalized.</p>
+      </div>
+    );
+  }
+
+  return (
+    <a href={checkout} className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold !text-white transition hover:bg-[#274d66]">
+      Secure checkout
+    </a>
+  );
 }
 
 export function CartContents() {
@@ -74,11 +105,7 @@ export function CartContents() {
             <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Order summary</h2>
             <div className="mt-5 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
             <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
-            {checkout ? (
-              <a href={checkout} className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold !text-white transition hover:bg-[#274d66]">
-                Secure checkout
-              </a>
-            ) : <p className="mt-6 rounded-2xl bg-white/60 p-4 text-sm leading-6">This cart can’t be checked out right now. Please remove and add the item again.</p>}
+            <CheckoutAction checkout={checkout} />
             <Link href="/shop" className="mt-5 block text-center font-semibold underline underline-offset-4 hover:text-[#183247]">Continue shopping</Link>
           </aside>
         </div>
@@ -100,11 +127,7 @@ export function CartContents() {
           </ul>
           <div className="mt-6 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
           <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
-          {checkout ? (
-            <a href={checkout} className="mt-6 inline-flex min-h-14 w-full items-center justify-center rounded-full bg-[#183247] px-6 py-4 text-lg font-semibold !text-white transition hover:bg-[#274d66]">
-              Secure checkout
-            </a>
-          ) : <p className="mt-6 rounded-2xl bg-white/60 p-4 text-sm leading-6">This cart can’t be checked out right now. Please remove and add the item again.</p>}
+          <CheckoutAction checkout={checkout} />
           <Link href="/shop" className="mt-5 block text-center font-semibold underline underline-offset-4 hover:text-[#183247]">Continue shopping</Link>
         </aside>
       </div>

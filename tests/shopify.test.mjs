@@ -3,6 +3,7 @@ import { test } from "node:test";
 import { getShopifyOrigin, getShopifyCartUrl, applyLaunchAvailability } from "../src/lib/commerce/shopify.ts";
 import { makeProductSlug, productMatchesSlug } from "../src/lib/productSlugs.ts";
 import { inferManufacturer, inferProductTypeCategory } from "../src/lib/productTaxonomy.ts";
+import { mergeSynchronizedProductImages } from "../src/lib/productImages.ts";
 
 test("cart links accept numeric Shopify IDs and only a Shopify HTTPS domain", () => {
   const previous = process.env.SHOPIFY_STORE_DOMAIN;
@@ -53,4 +54,20 @@ test("catalog metadata produces useful product types and manufacturer fallbacks"
   assert.equal(inferProductTypeCategory({ categories, preferredType: "T-SHIRT", searchText: "Retro crewneck sweatshirt" })?.label, "Sweatshirts");
   assert.equal(inferManufacturer("Retro Columbia fleece jacket"), "Columbia");
   assert.equal(inferManufacturer("Custom shirt", "Comfort Colors"), "Comfort Colors");
+});
+
+test("synchronized product images do not repeat Shopify's primary image", () => {
+  const printfulImages = [
+    { id: "printful-main", src: "https://printful.test/front.png", alt: "Front", role: "main", colors: ["Blue"] },
+  ];
+  const shopifyImages = [
+    { id: "shopify-main", src: "https://shopify.test/front.png", alt: "Front", role: "main" },
+    { id: "shopify-back", src: "https://shopify.test/back.png", alt: "Back", role: "gallery" },
+    { id: "shopify-back-copy", src: "https://shopify.test/back.png", alt: "Back", role: "gallery" },
+  ];
+
+  assert.deepEqual(
+    mergeSynchronizedProductImages(printfulImages, shopifyImages).map((image) => image.id),
+    ["printful-main", "shopify-back"],
+  );
 });

@@ -44,7 +44,7 @@ function CollectionProductCard({ product, returnTo, view, priority }: { product:
 
   const isExpanded = view === "expanded";
   return (
-    <article className={`font-ui ${isExpanded ? "grid gap-4 border-b border-black/15 pb-8 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.6fr)] sm:gap-7" : "min-w-0"}`}>
+    <article className={`font-ui ${isExpanded ? "grid min-w-0 grid-cols-1 gap-4 border-b border-black/15 pb-8 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.6fr)] sm:gap-7" : "min-w-0"}`}>
       <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={isExpanded ? "(max-width: 640px) 100vw, 60vw" : "(max-width: 640px) 50vw, 33vw"} aspectClass={isExpanded ? "aspect-[4/5]" : "aspect-[3/4]"} />
       <div className={`${isExpanded ? "flex flex-col justify-end" : "pt-3"}`}>
         <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-black/45">{product.collectionLabel}</p>

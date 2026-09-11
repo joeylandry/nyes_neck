@@ -8,7 +8,7 @@ import type { Product } from "@/types/product";
 import { ProductCardMedia } from "./ProductCardMedia";
 
 export function ProductSwatches({ colors, className = "", selectedColor, onColorChange, colorCodes = {} }: { colors: string[]; className?: string; selectedColor?: string; onColorChange?: (color: string) => void; colorCodes?: Record<string, string | undefined> }) {
-  return <div className={`flex max-w-full items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`} aria-label={`${colors.length} color${colors.length === 1 ? "" : "s"} available`}>
+  return <div className={`flex min-w-0 max-w-full items-center gap-1.5 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden ${className}`} aria-label={`${colors.length} color${colors.length === 1 ? "" : "s"} available`}>
     {colors.map((color) => {
       const swatch = <span aria-hidden="true" className="block size-4 rounded-full border border-black/25 ring-1 ring-white" style={{ backgroundColor: getProductColor(color, colorCodes[color]) }} />;
       return onColorChange ? <button key={color} type="button" title={color} aria-label={`Show ${color}`} aria-pressed={selectedColor === color} onClick={() => onColorChange(color)} className={`grid size-6 place-items-center rounded-full transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${selectedColor === color ? "ring-1 ring-black" : "hover:scale-110"}`}>{swatch}</button> : <span key={color} title={color}>{swatch}</span>;

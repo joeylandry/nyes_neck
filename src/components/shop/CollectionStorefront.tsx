@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { getProductDefaultColor } from "@/lib/productImages";
 import type { Product } from "@/types/product";
 import { ProductSwatches } from "./ProductCard";
 import { ProductCardMedia } from "./ProductCardMedia";
@@ -32,7 +33,7 @@ function priceValue(product: Product) {
 }
 
 function CollectionProductCard({ product, returnTo, view, priority }: { product: Product; returnTo: string; view: ViewMode; priority: boolean }) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(() => getProductDefaultColor(product));
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
   const colorCodes = useMemo(() => Object.fromEntries(product.colors.map((color) => [color, product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode])), [product.colors, product.variants]);
 

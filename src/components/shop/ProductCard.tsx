@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useMemo, useState } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { getProductColor } from "@/lib/productColors";
+import { getProductDefaultColor } from "@/lib/productImages";
 import type { Product } from "@/types/product";
 import { ProductCardMedia } from "./ProductCardMedia";
 
@@ -17,7 +18,7 @@ export function ProductSwatches({ colors, className = "", selectedColor, onColor
 }
 
 export function ProductCard({ product, returnTo, priority = false, compact = false, touchSwipeFallback = false }: { product: Product; returnTo: string; priority?: boolean; compact?: boolean; touchSwipeFallback?: boolean }) {
-  const [selectedColor, setSelectedColor] = useState(product.colors[0] ?? "");
+  const [selectedColor, setSelectedColor] = useState(() => getProductDefaultColor(product));
   const colorCodes = useMemo(() => Object.fromEntries(product.colors.map((color) => [color, product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode])), [product.colors, product.variants]);
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
 

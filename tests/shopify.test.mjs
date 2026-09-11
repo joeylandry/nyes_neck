@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { getShopifyOrigin, getShopifyCartUrl, applyLaunchAvailability } from "../src/lib/commerce/shopify.ts";
 import { makeProductSlug, productMatchesSlug } from "../src/lib/productSlugs.ts";
 import { inferManufacturer, inferProductTypeCategory } from "../src/lib/productTaxonomy.ts";
-import { mergeSynchronizedProductImages } from "../src/lib/productImages.ts";
+import { getProductDefaultColor, mergeSynchronizedProductImages } from "../src/lib/productImages.ts";
 
 test("cart links accept numeric Shopify IDs and only a Shopify HTTPS domain", () => {
   const previous = process.env.SHOPIFY_STORE_DOMAIN;
@@ -59,16 +59,30 @@ test("catalog metadata produces useful product types and manufacturer fallbacks"
 test("synchronized product images do not repeat Shopify's primary image", () => {
   const printfulImages = [
     { id: "printful-main", src: "https://printful.test/front.png", alt: "Front", role: "main", colors: ["Blue"] },
+    { id: "printful-back", src: "https://printful.test/back.png", alt: "Back", role: "gallery", colors: ["Blue"] },
   ];
   const shopifyImages = [
-    { id: "shopify-main", src: "https://shopify.test/front.png", alt: "Front", role: "main" },
-    { id: "shopify-front-copy", src: "https://shopify.test/shirt-blue-front-abc.jpg", alt: "Front", role: "gallery" },
-    { id: "shopify-back", src: "https://shopify.test/back.png", alt: "Back", role: "gallery" },
-    { id: "shopify-back-copy", src: "https://shopify.test/back.png", alt: "Back", role: "gallery" },
+    { id: "shopify-main", src: "https://shopify.test/shirt-blue-front.png", alt: "Front", role: "main", colors: ["Blue"] },
+    { id: "shopify-front-copy", src: "https://shopify.test/shirt-blue-front-abc.jpg", alt: "Front", role: "gallery", colors: ["Blue"] },
+    { id: "shopify-back", src: "https://shopify.test/back.png", alt: "Back", role: "gallery", colors: ["Blue"] },
+    { id: "shopify-back-copy", src: "https://shopify.test/back.png", alt: "Back", role: "gallery", colors: ["Blue"] },
   ];
 
-  assert.deepEqual(
-    mergeSynchronizedProductImages(printfulImages, shopifyImages).map((image) => image.id),
-    ["printful-main", "shopify-back"],
-  );
+  const images = mergeSynchronizedProductImages(printfulImages, shopifyImages);
+  assert.deepEqual(images.map((image) => image.id), ["shopify-main", "printful-back", "shopify-back"]);
+  assert.deepEqual(images.map((image) => image.role), ["main", "gallery", "gallery"]);
+});
+
+test("the published primary image controls the initial product color", () => {
+  assert.equal(getProductDefaultColor({
+    colors: ["Black", "Blue"],
+    images: [
+      { id: "blue-main", src: "https://shopify.test/blue-front.png", alt: "Blue", role: "main", colors: ["Blue"] },
+      { id: "black", src: "https://shopify.test/black-front.png", alt: "Black", role: "gallery", colors: ["Black"] },
+    ],
+    variants: [
+      { id: "black-small", color: "Black", size: "S", available: true },
+      { id: "blue-small", color: "Blue", size: "S", available: true },
+    ],
+  }), "Blue");
 });

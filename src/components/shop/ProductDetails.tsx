@@ -5,11 +5,15 @@ import { ProductGallery } from "@/components/shop/ProductGallery";
 import { PurchaseAction } from "@/components/shop/PurchaseAction";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { getProductColor } from "@/lib/productColors";
+import { getProductDefaultColor } from "@/lib/productImages";
 import type { Product } from "@/types/product";
 
 export function ProductDetails({ product }: { product: Product }) {
-  const initial = product.variants.find((variant) => variant.available) ?? product.variants[0];
-  const [color, setColor] = useState(initial?.color ?? product.colors[0] ?? "");
+  const defaultColor = getProductDefaultColor(product);
+  const initial = product.variants.find((variant) => variant.color === defaultColor && variant.available)
+    ?? product.variants.find((variant) => variant.available)
+    ?? product.variants[0];
+  const [color, setColor] = useState(initial?.color ?? defaultColor);
   const [size, setSize] = useState(initial?.size ?? product.sizes[0] ?? "");
   const [quantity, setQuantity] = useState(1);
   const variant = product.variants.find((item) => (!color || item.color === color) && (!size || item.size === size));

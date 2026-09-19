@@ -19,8 +19,27 @@ export const revalidate = 0;
 export async function generateMetadata({ params }: ProductPageProps): Promise<Metadata> {
   const { slug } = await params;
   const product = await getProductBySlug(slug);
-  if (!product) return { title: "Product not found | Nyes Neck Shop" };
-  return { title: `${product.name} | Nyes Neck Shop`, description: product.shortDescription };
+  if (!product) return { title: "Product not found" };
+
+  const image = product.images.find(({ role }) => role === "main") ?? product.images[0];
+  return {
+    title: product.name,
+    description: product.shortDescription,
+    alternates: { canonical: `/shop/${product.slug}` },
+    openGraph: {
+      type: "website",
+      title: product.name,
+      description: product.shortDescription,
+      url: `/shop/${product.slug}`,
+      images: image ? [{ url: image.src, alt: image.alt }] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: product.name,
+      description: product.shortDescription,
+      images: image ? [image.src] : undefined,
+    },
+  };
 }
 
 export default async function ProductPage({ params, searchParams }: ProductPageProps) {
@@ -49,7 +68,7 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
   );
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-7 md:px-6 md:py-14">
+    <div className="mx-auto max-w-6xl px-4 py-7 md:px-6 md:py-14">
       <ShopBackLink href={backHref} label={backLabel} />
 
       <ProductDetails key={product.id} product={product} />
@@ -70,6 +89,6 @@ export default async function ProductPage({ params, searchParams }: ProductPageP
           <p className="mt-4 text-lg text-black/60">More from this collection is coming soon.</p>
         )}
       </section>
-    </main>
+    </div>
   );
 }

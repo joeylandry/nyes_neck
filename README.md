@@ -53,6 +53,12 @@ Add optimized local images to `public/images/hero/`, then edit `src/data/hero-im
 
 Products, product types, collections, featured category, prices, variants, availability, and photography are managed in Sanity. Product-type and collection documents automatically become shop tiles and each document owns its tile image and 4:3 crop. Local records in `src/data/products.ts` are used only when Sanity is not configured; a configured storefront lists only published Sanity product types and collections.
 
+## Canonical site URL
+
+`NEXT_PUBLIC_SITE_URL` sets the origin used for canonical links, Open Graph
+tags, `robots.txt`, and `sitemap.xml`. On Vercel the deployment URL is used
+automatically; locally it falls back to `http://localhost:3000`.
+
 ## Sanity setup
 
 1. Copy `.env.example` to `.env.local` and enter the Sanity project ID and dataset.

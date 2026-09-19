@@ -117,8 +117,42 @@ textarea {
   font-family: var(--font-ui);
 }
 
+/*
+ * Set before first paint by the inline script in the root layout, so a visitor
+ * who already dismissed the banner gets the correct header offset on the very
+ * first frame instead of a jump once React hydrates.
+ */
+:root[data-announcement="dismissed"] {
+  --announcement-offset: 0px;
+}
+
+:root[data-announcement="dismissed"] [data-announcement-banner] {
+  display: none;
+}
+
 .site-main {
   padding-top: var(--site-header-height);
+}
+
+.skip-link {
+  position: fixed;
+  left: 0.75rem;
+  top: 0.75rem;
+  z-index: 100;
+  display: inline-flex;
+  min-height: 3rem;
+  align-items: center;
+  border-radius: 9999px;
+  background: var(--coastal-navy);
+  padding: 0 1.5rem;
+  font-weight: 600;
+  color: #ffffff;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus-visible {
+  transform: translateY(0);
+  outline-color: #ffffff;
 }
 
 .hero-height {

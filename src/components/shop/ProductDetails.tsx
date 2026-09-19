@@ -16,7 +16,12 @@ export function ProductDetails({ product }: { product: Product }) {
   const [color, setColor] = useState(initial?.color ?? defaultColor);
   const [size, setSize] = useState(initial?.size ?? product.sizes[0] ?? "");
   const [quantity, setQuantity] = useState(1);
-  const variant = product.variants.find((item) => (!color || item.color === color) && (!size || item.size === size));
+  // A size must be picked explicitly when the product offers any, otherwise the
+  // lookup below would silently resolve to whichever size happens to be first.
+  const needsSize = product.sizes.length > 0 && !size;
+  const variant = needsSize
+    ? undefined
+    : product.variants.find((item) => (!color || item.color === color) && (!size || item.size === size));
   const available = product.available && (!product.variants.length || Boolean(variant?.available));
   const price = variant?.priceCents ?? product.priceCents;
   // Color-tagged Printful images are intentionally never mixed. This ensures a
@@ -76,7 +81,7 @@ export function ProductDetails({ product }: { product: Product }) {
               {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
             </select>
           </label> : null}
-          <PurchaseAction productId={product.id} variantId={variant?.id} available={available} cartUrl={variant?.cartUrl} quantity={quantity} comingSoon={!product.available} item={variant?.cartUrl ? {
+          <PurchaseAction productId={product.id} variantId={variant?.id} available={available} cartUrl={variant?.cartUrl} quantity={quantity} comingSoon={!product.available} needsSelection={needsSize} item={variant?.cartUrl ? {
             id: variant.id,
             productId: product.id,
             name: product.name,
@@ -86,7 +91,7 @@ export function ProductDetails({ product }: { product: Product }) {
             options: [color, size].filter(Boolean).join(" / "),
             cartUrl: variant.cartUrl,
           } : undefined} />
-          {!product.available || !available ? <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : "This selection is currently unavailable. Please choose another size or color."}</p> : null}
+          {!product.available || !available ? <p className="mt-3 text-center text-sm text-black/50" aria-live="polite">{!product.available ? "Coming soon. Check back for availability." : needsSize ? "Choose a size to continue." : "This selection is currently unavailable. Please choose another size or color."}</p> : null}
         </div>
         <div className="mt-8"><h2 className="text-sm font-semibold">Item details</h2><p className="mt-3 text-base leading-7 text-black/60">{product.description}</p></div>
       </div>

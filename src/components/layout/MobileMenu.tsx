@@ -1,35 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { HeaderBrand } from "@/components/brand/HeaderBrand";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CartLink } from "@/components/shop/CartLink";
-
-type NavLink = { href: string; label: string };
+import { useDialog } from "@/hooks/useDialog";
+import { useActivePath, type NavLink } from "./navigation";
 
 export function MobileMenu({ links }: { links: NavLink[] }) {
   const [open, setOpen] = useState(false);
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const triggerRef = useRef<HTMLButtonElement>(null);
-
-  useEffect(() => {
-    if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    const triggerElement = triggerRef.current;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-
-    const onKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Escape") setOpen(false);
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-      triggerElement?.focus();
-    };
-  }, [open]);
+  const isActive = useActivePath();
+  const panelRef = useDialog({ open, onClose: () => setOpen(false) });
 
   return (
     <div className="md:hidden">
@@ -40,7 +22,6 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
         <div className="flex items-center gap-1">
           <CartLink />
           <button
-            ref={triggerRef}
             type="button"
             className="flex min-h-11 min-w-11 items-center justify-center rounded-full px-2 text-[#282828] transition hover:bg-black/5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black/60 focus-visible:ring-offset-2"
             aria-expanded={open}
@@ -63,6 +44,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
         onClick={() => setOpen(false)}
       />
       <aside
+        ref={panelRef as React.RefObject<HTMLElement>}
         id="mobile-navigation"
         role="dialog"
         aria-modal="true"
@@ -77,26 +59,30 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
             <HeaderBrand compact showWordmark={false} />
           </div>
           <button
-            ref={closeButtonRef}
             type="button"
             className="flex min-h-11 min-w-11 items-center justify-center rounded-full border border-black/10 text-2xl leading-none"
             aria-label="Close menu"
             onClick={() => setOpen(false)}
           >
-            ×
+            <span aria-hidden="true">×</span>
           </button>
         </div>
         <nav aria-label="Mobile navigation" className="mt-7 flex flex-col">
-          {links.map((link) => (
-            <Link
-              key={link.href}
-              href={link.href}
-              className="flex min-h-14 items-center border-b border-black/10 text-[1.15rem] font-semibold"
-              onClick={() => setOpen(false)}
-            >
-              {link.label}
-            </Link>
-          ))}
+          {links.map((link) => {
+            const active = isActive(link.href);
+            return (
+              <Link
+                key={link.href}
+                href={link.href}
+                aria-current={active ? "page" : undefined}
+                className={`flex min-h-14 items-center border-b border-black/10 text-[1.15rem] font-semibold ${active ? "text-[#183247]" : ""}`}
+                onClick={() => setOpen(false)}
+              >
+                {link.label}
+                {active ? <span aria-hidden="true" className="ml-2 inline-block size-1.5 rounded-full bg-[#183247]" /> : null}
+              </Link>
+            );
+          })}
         </nav>
       </aside>
     </div>

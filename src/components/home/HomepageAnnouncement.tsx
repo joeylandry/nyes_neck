@@ -1,74 +1,26 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
 import type { HomepageAnnouncementSettings } from "@/lib/homepageAnnouncement";
+import { useDialog } from "@/hooks/useDialog";
+import { createPersistentStore, usePersistentStore } from "@/lib/persistentStore";
 import { NewsletterSignupForm } from "./NewsletterSignupForm";
 
-const storageKey = "nyes-neck-homepage-announcement-dismissed-v2";
+const dismissedStore = createPersistentStore<boolean>({
+  key: "nyes-neck-homepage-announcement-dismissed-v2",
+  fallback: false,
+  parse: (value) => (typeof value === "boolean" ? value : value === "true" ? true : undefined),
+});
 
 export function HomepageAnnouncement({ announcement }: { announcement: HomepageAnnouncementSettings }) {
-  const closeButtonRef = useRef<HTMLButtonElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  useEffect(() => {
-    if (!announcement.enabled) {
-      return;
-    }
-
-    let dismissed = false;
-
-    try {
-      dismissed = window.localStorage.getItem(storageKey) === "true";
-    } catch {
-      dismissed = false;
-    }
-
-    if (!dismissed) {
-      setIsVisible(true);
-    }
-  }, [announcement.enabled]);
-
-  useEffect(() => {
-    if (!isVisible) {
-      return;
-    }
-
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButtonRef.current?.focus();
-
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key === "Escape") {
-        dismissAnnouncement();
-      }
-    }
-
-    window.addEventListener("keydown", handleKeyDown);
-
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isVisible]);
-
-  function rememberDismissal() {
-    try {
-      window.localStorage.setItem(storageKey, "true");
-    } catch {
-      // Storage can be unavailable in private browsing or locked-down contexts.
-    }
-  }
+  const dismissed = usePersistentStore(dismissedStore);
+  const isVisible = announcement.enabled && !dismissed;
+  const panelRef = useDialog({ open: isVisible, onClose: () => dismissedStore.set(true) });
 
   function dismissAnnouncement() {
-    rememberDismissal();
-    setIsVisible(false);
+    dismissedStore.set(true);
   }
 
-  function rememberSignup() {
-    rememberDismissal();
-  }
-
-  if (!announcement.enabled || !isVisible) {
+  if (!isVisible) {
     return null;
   }
 
@@ -78,19 +30,19 @@ export function HomepageAnnouncement({ announcement }: { announcement: HomepageA
       role="presentation"
     >
       <section
+        ref={panelRef as React.RefObject<HTMLElement>}
         className="relative max-h-[calc(100svh-3rem)] w-full max-w-[36rem] overflow-y-auto bg-[#183247] px-5 py-7 text-center text-white shadow-2xl shadow-black/25 md:px-8 md:py-8"
         aria-labelledby="homepage-announcement-heading"
         aria-modal="true"
         role="dialog"
       >
         <button
-          ref={closeButtonRef}
           type="button"
           aria-label="Dismiss announcement"
           className="absolute right-2 top-2 flex min-h-10 min-w-10 items-center justify-center rounded-full text-lg font-bold leading-none text-white transition hover:bg-white/12 focus-visible:outline-white motion-reduce:transition-none"
           onClick={dismissAnnouncement}
         >
-          X
+          <span aria-hidden="true">×</span>
         </button>
         <div className="mx-auto max-w-[30rem] pt-5">
           {announcement.eyebrow ? (
@@ -123,7 +75,7 @@ export function HomepageAnnouncement({ announcement }: { announcement: HomepageA
             buttonText={announcement.buttonText}
             successMessage={announcement.successMessage}
             privacyNote={announcement.privacyNote}
-            onSuccess={rememberSignup}
+            onSuccess={dismissAnnouncement}
           />
         </div>
       </section>

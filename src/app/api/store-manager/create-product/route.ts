@@ -1,6 +1,6 @@
 import { randomUUID } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { sanityWriteClient } from "@/sanity/writeClient";
+import { getSanityWriteClient } from "@/sanity/writeClient";
 
 function makeSlug(value: string) {
   return value
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     const productTypeSlug = makeSlug(productType);
     const collectionSlug = makeSlug(collection);
 
-    const productTypeId = await sanityWriteClient.fetch<string | null>(
+    const productTypeId = await getSanityWriteClient().fetch<string | null>(
       `*[
         _type == "productType" &&
         (slug.current == $slug || title == $title)
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const collectionId = await sanityWriteClient.fetch<string | null>(
+    const collectionId = await getSanityWriteClient().fetch<string | null>(
       `*[
         _type == "collection" &&
         (slug.current == $slug || title == $title)
@@ -179,7 +179,7 @@ export async function POST(request: NextRequest) {
       variants,
     };
 
-    const product = await sanityWriteClient.create(document);
+    const product = await getSanityWriteClient().create(document);
 
     return NextResponse.json(
       {

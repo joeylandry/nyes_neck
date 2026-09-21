@@ -3,49 +3,43 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useMemo } from "react";
+import { bulkPricingEnabled, bulkTiers, getBulkDiscountCents, getBulkTier, getNextBulkTier } from "@/lib/bulkPricing";
+import { buildShopifyCheckoutUrl } from "@/lib/commerce/shopifyCheckout";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useCart } from "./CartProvider";
 
-// Keep checkout closed until product pricing is finalized. The cart can still
-// be used to review products and variants without exposing a purchase link.
-const CHECKOUT_ENABLED = false;
+/** Shopify remains the source of truth for money, so these totals are estimates. */
+function OrderTotals({ subtotalCents, quantity }: { subtotalCents: number; quantity: number }) {
+  const tier = getBulkTier(quantity);
+  const nextTier = getNextBulkTier(quantity);
+  const discountCents = getBulkDiscountCents(subtotalCents, quantity);
+  const itemsAway = nextTier ? nextTier.minimumQuantity - quantity : 0;
 
-function checkoutUrl(items: ReturnType<typeof useCart>["items"]) {
-  if (!items.length) return undefined;
-
-  try {
-    const first = new URL(items[0].cartUrl);
-    const lines = items.map((item) => {
-      const url = new URL(item.cartUrl);
-      if (url.origin !== first.origin) throw new Error("Cart items use different checkout hosts");
-      const variantId = url.searchParams.get("id");
-      if (!variantId || !/^\d+$/.test(variantId)) throw new Error("Invalid checkout variant");
-      return `${variantId}:${item.quantity}`;
-    });
-    return `${first.origin}/cart/${lines.join(",")}?checkout`;
-  } catch {
-    return undefined;
-  }
+  return (
+    <div className="mt-5">
+      <div className={`flex items-center justify-between border-t border-black/10 py-4 ${discountCents ? "text-lg" : "border-b text-xl font-semibold"}`}>
+        <span>Subtotal</span><span>{formatCurrency(subtotalCents, "USD")}</span>
+      </div>
+      {discountCents ? <div className="flex items-baseline justify-between gap-4 border-t border-black/10 py-4 text-lg text-[#246a43]">
+        <span>Bulk savings <span className="text-sm">({tier?.percentOff}% off {quantity} items)</span></span>
+        <span className="whitespace-nowrap">−{formatCurrency(discountCents, "USD")}</span>
+      </div> : null}
+      {discountCents ? <div className="flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold">
+        <span>Estimated total</span><span>{formatCurrency(subtotalCents - discountCents, "USD")}</span>
+      </div> : null}
+      {nextTier ? <p className="mt-4 rounded-xl bg-white/60 p-3 text-sm leading-6">
+        Add {itemsAway} more {itemsAway === 1 ? "item" : "items"} to save {nextTier.percentOff}% on this order.
+      </p> : null}
+      <p className="mt-4 text-sm leading-6 text-black/55">
+        {bulkPricingEnabled ? `Volume pricing (${bulkTiers.map((entry) => `${entry.minimumQuantity}+ save ${entry.percentOff}%`).join(", ")}), taxes, and shipping are applied securely during checkout.` : "Taxes and shipping are calculated securely during checkout."}
+      </p>
+    </div>
+  );
 }
 
 function CheckoutAction({ checkout }: { checkout?: string }) {
   if (!checkout) {
     return <p className="mt-6 rounded-2xl bg-white/60 p-4 text-sm leading-6">This cart can’t be checked out right now. Please remove and add the item again.</p>;
-  }
-
-  if (!CHECKOUT_ENABLED) {
-    return (
-      <div className="mt-6">
-        <button
-          type="button"
-          disabled
-          className="inline-flex min-h-14 w-full cursor-not-allowed items-center justify-center rounded-full bg-[#183247]/45 px-6 py-4 text-lg font-semibold text-white/90"
-        >
-          Secure checkout
-        </button>
-        <p className="mt-3 text-center text-sm leading-5 text-black/55">Checkout is temporarily unavailable while pricing is finalized.</p>
-      </div>
-    );
   }
 
   return (
@@ -56,8 +50,8 @@ function CheckoutAction({ checkout }: { checkout?: string }) {
 }
 
 export function CartContents() {
-  const { items, updateQuantity, removeItem } = useCart();
-  const checkout = useMemo(() => checkoutUrl(items), [items]);
+  const { items, itemCount, updateQuantity, removeItem } = useCart();
+  const checkout = useMemo(() => buildShopifyCheckoutUrl(items), [items]);
   const subtotal = items.reduce((total, item) => total + (item.priceCents ?? 0) * item.quantity, 0);
 
   if (!items.length) {
@@ -90,7 +84,7 @@ export function CartContents() {
                   <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
                     <label className="text-sm font-semibold" htmlFor={`quantity-${item.id}`}>Quantity</label>
                     <select id={`quantity-${item.id}`} value={item.quantity} onChange={(event) => updateQuantity(item.id, Number(event.target.value))} className="min-h-10 rounded-lg border border-black/15 bg-white px-3">
-                      {Array.from({ length: Math.max(10, item.quantity) }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
+                      {Array.from({ length: Math.max(12, item.quantity) }, (_, index) => index + 1).map((quantity) => <option key={quantity} value={quantity}>{quantity}</option>)}
                     </select>
                     <button type="button" onClick={() => removeItem(item.id)} className="min-h-10 px-2 text-sm font-semibold underline underline-offset-4 hover:text-[#183247]">Remove</button>
                   </div>
@@ -103,8 +97,7 @@ export function CartContents() {
           </div>
           <aside className="mt-8 rounded-2xl bg-[#e9e1d3] p-5 sm:p-6 lg:hidden">
             <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Order summary</h2>
-            <div className="mt-5 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
-            <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
+            <OrderTotals subtotalCents={subtotal} quantity={itemCount} />
             <CheckoutAction checkout={checkout} />
             <Link href="/shop" className="mt-5 block text-center font-semibold underline underline-offset-4 hover:text-[#183247]">Continue shopping</Link>
           </aside>
@@ -125,8 +118,7 @@ export function CartContents() {
               </li>
             ))}
           </ul>
-          <div className="mt-6 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
-          <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
+          <OrderTotals subtotalCents={subtotal} quantity={itemCount} />
           <CheckoutAction checkout={checkout} />
           <Link href="/shop" className="mt-5 block text-center font-semibold underline underline-offset-4 hover:text-[#183247]">Continue shopping</Link>
         </aside>

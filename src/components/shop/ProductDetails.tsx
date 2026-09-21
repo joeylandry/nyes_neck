@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { ProductGallery } from "@/components/shop/ProductGallery";
 import { PurchaseAction } from "@/components/shop/PurchaseAction";
+import { useCart } from "@/components/shop/CartProvider";
+import { bulkPricingEnabled, bulkTiers, getBulkTier, getNextBulkTier, getQuantityPresets, quantityPresetLabel } from "@/lib/bulkPricing";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { getProductColor } from "@/lib/productColors";
 import { getProductDefaultColor } from "@/lib/productImages";
@@ -16,9 +18,13 @@ export function ProductDetails({ product }: { product: Product }) {
   const [color, setColor] = useState(initial?.color ?? defaultColor);
   const [size, setSize] = useState(initial?.size ?? product.sizes[0] ?? "");
   const [quantity, setQuantity] = useState(1);
-  // A size must be picked explicitly when the product offers any, otherwise the
-  // lookup below would silently resolve to whichever size happens to be first.
-  const needsSize = product.sizes.length > 0 && !size;
+  const { itemCount } = useCart();
+  // One-size goods (glasses, hats, decals) have nothing to choose, so they must
+  // never be held at "Select a size". A size is only ambiguous when the product
+  // genuinely offers more than one, where the lookup below would otherwise
+  // silently resolve to whichever size happens to be first.
+  const onlySize = product.sizes.length === 1 ? product.sizes[0] : undefined;
+  const needsSize = product.sizes.length > 1 && !size;
   const variant = needsSize
     ? undefined
     : product.variants.find((item) => (!color || item.color === color) && (!size || item.size === size));
@@ -30,11 +36,19 @@ export function ProductDetails({ product }: { product: Product }) {
     ? product.images.filter((image) => image.colors?.includes(color))
     : product.images.filter((image) => !image.colors?.length);
   const images = colorImages.length ? colorImages : product.images;
+  // Volume pricing is an order-level Shopify discount, so the tier depends on
+  // everything already in the cart plus what is about to be added.
+  const quantityPresets = getQuantityPresets(product.category);
+  const quantityOptions = Array.from(new Set([...Array.from({ length: 12 }, (_, index) => index + 1), ...quantityPresets, quantity])).sort((first, second) => first - second);
+  const orderQuantity = itemCount + quantity;
+  const orderTier = getBulkTier(orderQuantity);
+  const nextTier = getNextBulkTier(orderQuantity);
+  const itemsAway = nextTier ? nextTier.minimumQuantity - orderQuantity : 0;
 
   function selectColor(nextColor: string) {
     setColor(nextColor);
     const matches = product.variants.filter((item) => item.color === nextColor && item.available);
-    if (!matches.some((item) => item.size === size)) setSize(matches[0]?.size ?? "");
+    if (!matches.some((item) => item.size === size)) setSize(onlySize ?? matches[0]?.size ?? "");
   }
 
   return (
@@ -63,7 +77,8 @@ export function ProductDetails({ product }: { product: Product }) {
               })}
             </div>
           </fieldset> : null}
-          {product.sizes.length ? <fieldset>
+          {product.sizes.length === 1 ? <p className="text-sm font-semibold">Size <span className="ml-2 font-normal text-black/55">{onlySize}</span></p> : null}
+          {product.sizes.length > 1 ? <fieldset>
             <legend className="text-sm font-semibold">Size <span className="ml-2 font-normal text-black/55">{size || "Choose a size"}</span></legend>
             <div className="mt-3 flex flex-wrap gap-2">
               {product.sizes.map((option) => {
@@ -75,12 +90,38 @@ export function ProductDetails({ product }: { product: Product }) {
           </fieldset> : null}
         </div>
         <div className="mt-7">
-          {product.available ? <label className="mb-5 flex items-center gap-4 text-sm font-semibold">
-            Quantity
-            <select value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className="min-h-12 rounded-xl border border-black/15 bg-white px-4">
-              {Array.from({ length: 10 }, (_, index) => index + 1).map((value) => <option key={value} value={value}>{value}</option>)}
-            </select>
-          </label> : null}
+          {product.available ? <div className="mb-5">
+            <label className="flex items-center gap-4 text-sm font-semibold" htmlFor="product-quantity">
+              Quantity
+              <select id="product-quantity" value={quantity} onChange={(event) => setQuantity(Number(event.target.value))} className="min-h-12 rounded-xl border border-black/15 bg-white px-4">
+                {quantityOptions.map((value) => <option key={value} value={value}>{value}</option>)}
+              </select>
+            </label>
+            {bulkPricingEnabled ? <div className="mt-4 rounded-2xl bg-[#e9e1d3]/70 p-4">
+              <div className="flex flex-wrap gap-2" role="group" aria-label="Bulk quantities">
+                {quantityPresets.map((preset) => {
+                  const tier = getBulkTier(preset);
+                  return <button key={preset} type="button" aria-pressed={quantity === preset} onClick={() => setQuantity(preset)}
+                    className={`min-h-12 min-w-28 flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#183247] ${quantity === preset ? "border-[#183247] bg-[#183247] text-white" : "border-black/15 bg-white/70 hover:border-[#183247]"}`}>
+                    {quantityPresetLabel(preset)}
+                    <span className={`mt-0.5 block text-xs font-medium ${quantity === preset ? "text-white/75" : "text-black/55"}`}>
+                      {preset === 1 ? "1 item" : `${preset} items`}{tier ? ` · save ${tier.percentOff}%` : ""}
+                    </span>
+                  </button>;
+                })}
+              </div>
+              <p className="mt-3 text-sm leading-6 text-black/60" aria-live="polite">
+                {orderTier
+                  ? `${orderQuantity} ${orderQuantity === 1 ? "item" : "items"} with this selection — ${orderTier.percentOff}% off your order at checkout.`
+                  : nextTier
+                    ? `Add ${itemsAway} more ${itemsAway === 1 ? "item" : "items"} to save ${nextTier.percentOff}% on your order.`
+                    : ""}
+              </p>
+              <p className="mt-1 text-xs leading-5 text-black/45">
+                Volume pricing: {bulkTiers.map((tier) => `${tier.minimumQuantity}+ save ${tier.percentOff}%`).join(" · ")}. Mix any items.
+              </p>
+            </div> : null}
+          </div> : null}
           <PurchaseAction productId={product.id} variantId={variant?.id} available={available} cartUrl={variant?.cartUrl} quantity={quantity} comingSoon={!product.available} needsSelection={needsSize} item={variant?.cartUrl ? {
             id: variant.id,
             productId: product.id,

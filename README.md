@@ -85,6 +85,45 @@ PRINTFUL_PRODUCT_OVERRIDES='{"123456789":{"category":"hoodies","collection":"old
 
 `PRINTFUL_PRODUCT_OVERRIDES` is keyed by Printful sync product ID, external ID, or exact product name. Use it when a product should appear in a specific site category or collection. Ignored Printful products are hidden from the storefront.
 
+## Checkout and bulk pricing
+
+Adding to cart is available on every purchasable product, including one-size
+goods such as glasses, hats, and decals: a product with a single size (or none
+at all) never asks the customer to choose one. The cart hands the whole order
+to Shopify as a cart permalink, so Shopify remains the source of truth for
+prices, taxes, shipping, and payment. `SHOPIFY_STORE_DOMAIN` must be set for
+checkout to be reachable.
+
+Volume pricing is defined in `src/lib/bulkPricing.ts` and applies to the order
+as a whole — mixed items count together:
+
+| Items in the order | Discount |
+| --- | --- |
+| 3 or more | 5% |
+| 6 (half dozen) | 10% |
+| 12 (dozen) | 15% |
+
+Product pages offer matching quantity presets (one-size goods get Single/Half
+dozen/Dozen; sized apparel also gets a 3-pack), and the cart shows the saving
+before checkout.
+
+**The storefront only displays the discount — Shopify has to apply it.** Set it
+up once in the Shopify admin, either way:
+
+1. **Automatic discounts (recommended).** Discounts → Create discount →
+   Amount off order → Automatic. Set the percentage and a minimum quantity of
+   items, once per tier (3 / 6 / 12). Nothing else is needed; Shopify applies
+   the tier at checkout for every customer.
+2. **Discount codes.** Create the same three discounts as codes, then list them
+   in `NEXT_PUBLIC_SHOPIFY_BULK_DISCOUNT_CODES` as
+   `3:CODE3,6:CODE6,12:CODE12`. The cart adds the best matching code to the
+   checkout link.
+
+Until the Shopify side exists, set `NEXT_PUBLIC_BULK_DISCOUNTS=off` so the
+storefront stops advertising a saving the checkout will not honor. Tiers,
+percentages, and per-category presets are edited in `src/lib/bulkPricing.ts`;
+keep them in step with the discounts configured in Shopify.
+
 ## Contact form
 
 The contact form posts to `/api/contact`, which forwards submissions to Formspree. Set `CONTACT_FORM_ENDPOINT` in `.env.local` and in production using the endpoint from the Formspree dashboard, for example:
@@ -95,6 +134,6 @@ CONTACT_FORM_ENDPOINT=https://formspree.io/f/your-form-id
 
 `FORMSPREE_ENDPOINT` is still supported as a legacy alias.
 
-## Future cart and checkout
+## Cart and checkout structure
 
-`src/components/shop/PurchaseAction.tsx` is the future cart integration boundary. It already receives stable product and variant IDs, but is intentionally disabled. Add provider-neutral cart state near the root layout only after a commerce provider is selected. Provider-specific checkout and order-confirmation code should live in a dedicated `src/lib/commerce/` area and route handlers or server actions, not in product cards.
+`src/components/shop/PurchaseAction.tsx` is the cart boundary and receives stable product and variant IDs. Cart state is provider-neutral (`src/components/shop/CartProvider.tsx`, persisted in `localStorage`). Provider-specific checkout code lives in `src/lib/commerce/` — `shopifyCheckout.ts` builds the checkout permalink — and never in product cards.

@@ -8,7 +8,7 @@ import { useCart } from "./CartProvider";
 
 // Keep checkout closed until product pricing is finalized. The cart can still
 // be used to review products and variants without exposing a purchase link.
-const CHECKOUT_ENABLED = false;
+const CHECKOUT_ENABLED = true;
 
 function checkoutUrl(items: ReturnType<typeof useCart>["items"]) {
   if (!items.length) return undefined;

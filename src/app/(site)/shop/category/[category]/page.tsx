@@ -20,10 +20,10 @@ export async function generateMetadata({ params }: CategoryPageProps): Promise<M
   const shopCategories = await getShopCategories();
   const category = shopCategories.find(({ slug }) => slug === categorySlug);
 
-  if (!category) return { title: "Collection not found | Nyes Neck Shop" };
+  if (!category) return { title: "Collection not found" };
 
   return {
-    title: `${category.label} | Nyes Neck Shop`,
+    title: `${category.label}`,
     description: category.description,
   };
 }
@@ -42,7 +42,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
   const pageTitle = category.kind === "collection" ? collectionPageLabel(category.label) : category.label;
 
   return (
-    <main>
+    <>
       {category.kind === "collection" && products.length ? <CollectionStorefront products={products} returnTo={category.slug} title={pageTitle} /> : null}
       {category.kind !== "collection" ? (
         <>
@@ -55,7 +55,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
       ) : null}
       {!products.length && category.kind === "collection" ? <div className="mx-auto max-w-6xl px-4 py-12 md:px-6"><EmptyCollection pageTitle={pageTitle} /></div> : null}
       <div className="mx-auto max-w-7xl px-3 pb-12 md:px-6 md:pb-20"><ShopBrowseSections settings={settings} className="border-t border-black/10 pt-11 md:pt-20" /></div>
-    </main>
+    </>
   );
 }
 

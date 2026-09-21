@@ -1,6 +1,6 @@
 import { createHash } from "crypto";
 import { NextRequest, NextResponse } from "next/server";
-import { sanityWriteClient } from "@/sanity/writeClient";
+import { getSanityWriteClient } from "@/sanity/writeClient";
 
 export const runtime = "nodejs";
 
@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
   const subscriberId = subscriberIdForEmail(email);
 
   try {
-    const existingSubscriber = await sanityWriteClient.fetch<ExistingSubscriber | null>(
+    const existingSubscriber = await getSanityWriteClient().fetch<ExistingSubscriber | null>(
       `*[_type == "newsletterSubscriber" && email == $email] | order(_createdAt desc)[0] {
         _id,
         active
@@ -102,7 +102,7 @@ export async function POST(request: NextRequest) {
     }
 
     if (existingSubscriber) {
-      await sanityWriteClient
+      await getSanityWriteClient()
         .patch(existingSubscriber._id)
         .set({ active: true, subscribedAt, source })
         .commit();
@@ -110,7 +110,7 @@ export async function POST(request: NextRequest) {
       return json(successMessage);
     }
 
-    await sanityWriteClient.createIfNotExists({
+    await getSanityWriteClient().createIfNotExists({
       _id: subscriberId,
       _type: "newsletterSubscriber",
       email,

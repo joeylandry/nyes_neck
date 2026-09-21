@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useDialog } from "@/hooks/useDialog";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { getProductDefaultColor } from "@/lib/productImages";
 import type { Product } from "@/types/product";
@@ -83,26 +84,14 @@ function FilterDrawer({
   setSort: (sort: SortMode) => void;
   count: number;
 }) {
-  useEffect(() => {
-    if (!open) return;
-    const previousOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
-    window.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.body.style.overflow = previousOverflow;
-      window.removeEventListener("keydown", onKeyDown);
-    };
-  }, [open, onClose]);
-
-  const clearFilters = () => {
-    onClear();
-  };
+  const panelRef = useDialog({ open, onClose });
 
   return (
-    <div className={`fixed inset-0 z-[90] transition ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open}>
-      <button type="button" aria-label="Close filters" className={`absolute inset-0 bg-black/30 transition-opacity ${open ? "opacity-100" : "opacity-0"}`} onClick={onClose} />
-      <section role="dialog" aria-modal="true" aria-label="Filters" className={`absolute inset-x-0 bottom-0 flex max-h-[90dvh] flex-col bg-white transition-transform duration-300 md:inset-y-0 md:left-auto md:w-[28rem] ${open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-x-full"}`}>
+    // `inert` keeps the off-screen panel's checkboxes and selects out of the tab
+    // order; without it Tab walks into controls the visitor cannot see.
+    <div className={`fixed inset-0 z-[90] transition ${open ? "pointer-events-auto" : "pointer-events-none"}`} aria-hidden={!open} inert={!open}>
+      <button type="button" tabIndex={-1} aria-label="Close filters" className={`absolute inset-0 bg-black/30 transition-opacity ${open ? "opacity-100" : "opacity-0"}`} onClick={onClose} />
+      <section ref={panelRef as React.RefObject<HTMLElement>} role="dialog" aria-modal="true" aria-label="Filters" className={`absolute inset-x-0 bottom-0 flex max-h-[90dvh] flex-col bg-white transition-transform duration-300 md:inset-y-0 md:left-auto md:w-[28rem] ${open ? "translate-y-0 md:translate-x-0" : "translate-y-full md:translate-x-full"}`}>
         <div className="flex items-center justify-between border-b border-black/15 px-5 py-5">
           <h2 className="font-ui text-3xl font-normal tracking-[-0.06em]">Filters</h2>
           <button type="button" aria-label="Close filters" onClick={onClose} className="grid size-10 place-items-center rounded-full text-2xl hover:bg-black/5">×</button>
@@ -125,7 +114,7 @@ function FilterDrawer({
           </div>
         </div>
         <div className="absolute inset-x-0 bottom-0 flex gap-3 border-t border-black/15 bg-white p-4">
-          <button type="button" onClick={clearFilters} className="min-h-12 flex-1 rounded-full border border-black px-4 text-sm font-bold">Clear all</button>
+          <button type="button" onClick={onClear} className="min-h-12 flex-1 rounded-full border border-black px-4 text-sm font-bold">Clear all</button>
           <button type="button" onClick={onClose} className="min-h-12 flex-[1.3] rounded-full bg-[#161616] px-4 text-sm font-bold text-white">View {count} product{count === 1 ? "" : "s"}</button>
         </div>
       </section>
@@ -253,8 +242,9 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
               </button>
             ))}
           </div>
-          <p className="text-sm font-medium text-black/55">{filteredProducts.length} styles</p>
+          <p className="text-sm font-medium text-black/55" aria-live="polite">{filteredProducts.length} styles</p>
         </div>
+        <ActiveFilters selected={selected} inStockOnly={inStockOnly} onRemove={toggleFacet} onRemoveInStock={() => setInStockOnly(false)} onClear={clearFilters} />
       </div>
 
       {filteredProducts.length ? (
@@ -266,6 +256,43 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
       )}
       <FilterDrawer open={filterOpen} onClose={() => setFilterOpen(false)} options={options} selected={selected} onToggle={toggleFacet} onClear={clearFilters} inStockOnly={inStockOnly} setInStockOnly={setInStockOnly} sort={sort} setSort={setSort} count={filteredProducts.length} />
     </section>
+  );
+}
+
+function ActiveFilters({ selected, inStockOnly, onRemove, onRemoveInStock, onClear }: {
+  selected: SelectedFacets;
+  inStockOnly: boolean;
+  onRemove: (key: FacetKey, value: string) => void;
+  onRemoveInStock: () => void;
+  onClear: () => void;
+}) {
+  const chips = (Object.keys(selected) as FacetKey[]).flatMap((key) => selected[key].map((value) => ({ key, value })));
+  if (!chips.length && !inStockOnly) return null;
+
+  return (
+    <ul className="mt-4 flex flex-wrap items-center gap-2" aria-label="Active filters">
+      {chips.map(({ key, value }) => (
+        <li key={`${key}:${value}`}>
+          <button type="button" onClick={() => onRemove(key, value)} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-black/20 bg-white px-3 text-sm font-medium transition hover:border-black hover:bg-black/[0.04]">
+            {value}
+            <span aria-hidden="true" className="text-base leading-none text-black/50">&times;</span>
+            <span className="sr-only">Remove filter</span>
+          </button>
+        </li>
+      ))}
+      {inStockOnly ? (
+        <li>
+          <button type="button" onClick={onRemoveInStock} className="inline-flex min-h-9 items-center gap-1.5 rounded-full border border-black/20 bg-white px-3 text-sm font-medium transition hover:border-black hover:bg-black/[0.04]">
+            In stock only
+            <span aria-hidden="true" className="text-base leading-none text-black/50">&times;</span>
+            <span className="sr-only">Remove filter</span>
+          </button>
+        </li>
+      ) : null}
+      <li>
+        <button type="button" onClick={onClear} className="min-h-9 px-2 text-sm font-semibold underline underline-offset-4 hover:text-[#183247]">Clear all</button>
+      </li>
+    </ul>
   );
 }
 

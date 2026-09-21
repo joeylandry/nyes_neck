@@ -18,6 +18,16 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
   return (
     <section aria-label={`${productName} image gallery`}>
       <div
+        // Focusable with arrow-key paging so the gallery is usable without a
+        // pointer, matching the swipe and button affordances.
+        role={galleryImages.length > 1 ? "group" : undefined}
+        tabIndex={galleryImages.length > 1 ? 0 : undefined}
+        aria-roledescription={galleryImages.length > 1 ? "carousel" : undefined}
+        onKeyDown={(event) => {
+          if (galleryImages.length < 2) return;
+          if (event.key === "ArrowLeft") { event.preventDefault(); showPrevious(); }
+          if (event.key === "ArrowRight") { event.preventDefault(); showNext(); }
+        }}
         className="relative aspect-[4/5] touch-pan-y select-none overflow-hidden rounded-[20px] border border-black/10 bg-white shadow-sm md:rounded-[30px]"
         onPointerDown={(event) => { if (event.button === 0) pointerStart.current = { x: event.clientX, y: event.clientY }; }}
         onPointerUp={(event) => {
@@ -36,9 +46,10 @@ export function ProductGallery({ images, productName }: { images: ProductImage[]
           <>
             <button type="button" onClick={showPrevious} aria-label="Previous image" className="absolute left-4 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-xl shadow-sm backdrop-blur transition hover:bg-white">←</button>
             <button type="button" onClick={showNext} aria-label="Next image" className="absolute right-4 top-1/2 flex size-11 -translate-y-1/2 items-center justify-center rounded-full bg-white/90 text-xl shadow-sm backdrop-blur transition hover:bg-white">→</button>
-            <span className="absolute bottom-4 right-4 rounded-full bg-black/65 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
+            <span aria-hidden="true" className="absolute bottom-4 right-4 rounded-full bg-black/65 px-3 py-1.5 text-sm font-semibold text-white backdrop-blur">
               {activeIndex + 1} / {galleryImages.length}
             </span>
+            <span className="sr-only" aria-live="polite">Image {activeIndex + 1} of {galleryImages.length}</span>
           </>
         ) : null}
       </div>

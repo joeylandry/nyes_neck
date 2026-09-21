@@ -3,9 +3,10 @@ import { SiteHeader } from "@/components/layout/SiteHeader";
 
 export default function SiteLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="site-main min-h-screen">
+    <div className="site-main flex min-h-screen flex-col">
+      <a href="#main-content" className="skip-link">Skip to main content</a>
       <SiteHeader />
-      {children}
+      <main id="main-content" className="flex-1">{children}</main>
       <SiteFooter />
     </div>
   );

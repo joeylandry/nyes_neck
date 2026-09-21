@@ -3,7 +3,7 @@ import Image from "next/image";
 import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
-  title: "About | Nyes Neck Shop",
+  title: "About",
   description: "Joey Landry's story and the community purpose behind NYES NECK.",
 };
 
@@ -82,7 +82,7 @@ function StoryFeatureRow({ feature }: { feature: StoryFeature }) {
 
 export default function AboutPage() {
   return (
-    <main>
+    <>
       <PageTitle title="About" />
       <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-20">
         <section className="grid gap-5 border-b border-black/10 pb-10 md:grid-cols-[0.8fr_1.2fr] md:gap-16 md:pb-20">
@@ -114,6 +114,6 @@ export default function AboutPage() {
           </p>
         </section>
       </div>
-    </main>
+    </>
   );
 }

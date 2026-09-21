@@ -1,6 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useContext, useMemo } from "react";
+import { createPersistentStore, usePersistentStore } from "@/lib/persistentStore";
 
 export type CartItem = {
   id: string;
@@ -22,48 +23,49 @@ type CartContextValue = {
   removeItem: (id: string) => void;
 };
 
-const STORAGE_KEY = "nyes-neck-cart-v1";
+const MAX_QUANTITY = 99;
 const CartContext = createContext<CartContextValue | null>(null);
 
-function readCart(): CartItem[] {
-  try {
-    const value = window.localStorage.getItem(STORAGE_KEY);
-    const parsed: unknown = value ? JSON.parse(value) : [];
-    return Array.isArray(parsed) ? parsed.filter((item): item is CartItem => Boolean(item && typeof item === "object" && "id" in item && "cartUrl" in item)) : [];
-  } catch {
-    return [];
-  }
+function isCartItem(item: unknown): item is CartItem {
+  if (!item || typeof item !== "object") return false;
+  const candidate = item as Partial<CartItem>;
+  return typeof candidate.id === "string"
+    && typeof candidate.cartUrl === "string"
+    && typeof candidate.quantity === "number"
+    && candidate.quantity > 0;
+}
+
+const cartStore = createPersistentStore<CartItem[]>({
+  key: "nyes-neck-cart-v1",
+  fallback: [],
+  parse: (value) => (Array.isArray(value) ? value.filter(isCartItem) : undefined),
+});
+
+function clampQuantity(quantity: number) {
+  return Math.min(Math.max(Math.round(quantity), 0), MAX_QUANTITY);
 }
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  const [items, setItems] = useState<CartItem[]>([]);
-  const [ready, setReady] = useState(false);
-
-  useEffect(() => {
-    setItems(readCart());
-    setReady(true);
-  }, []);
-
-  useEffect(() => {
-    if (ready) window.localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
-  }, [items, ready]);
+  const items = usePersistentStore(cartStore);
 
   const value = useMemo<CartContextValue>(() => ({
     items,
     itemCount: items.reduce((total, item) => total + item.quantity, 0),
     addItem: (item, quantity = 1) => {
-      setItems((current) => {
-        const existing = current.find((entry) => entry.id === item.id);
-        if (existing) return current.map((entry) => entry.id === item.id ? { ...entry, quantity: entry.quantity + quantity } : entry);
-        return [...current, { ...item, quantity }];
-      });
+      const existing = items.find((entry) => entry.id === item.id);
+      cartStore.set(existing
+        ? items.map((entry) => entry.id === item.id
+          ? { ...entry, ...item, quantity: clampQuantity(entry.quantity + quantity) }
+          : entry)
+        : [...items, { ...item, quantity: clampQuantity(quantity) || 1 }]);
     },
     updateQuantity: (id, quantity) => {
-      setItems((current) => quantity > 0
-        ? current.map((item) => item.id === id ? { ...item, quantity } : item)
-        : current.filter((item) => item.id !== id));
+      const next = clampQuantity(quantity);
+      cartStore.set(next > 0
+        ? items.map((item) => item.id === id ? { ...item, quantity: next } : item)
+        : items.filter((item) => item.id !== id));
     },
-    removeItem: (id) => setItems((current) => current.filter((item) => item.id !== id)),
+    removeItem: (id) => cartStore.set(items.filter((item) => item.id !== id)),
   }), [items]);
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

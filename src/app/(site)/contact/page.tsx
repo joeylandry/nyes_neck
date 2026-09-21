@@ -3,7 +3,7 @@ import { ContactForm } from "@/components/contact/ContactForm";
 import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
-  title: "Contact | Nyes Neck Shop",
+  title: "Contact",
   description: "Contact NYES NECK about products, local partnerships, and our giving-back mission.",
 };
 
@@ -16,7 +16,7 @@ const topics = [
 
 export default function ContactPage() {
   return (
-    <main>
+    <>
       <PageTitle title="Contact" />
       <div className="mx-auto max-w-6xl px-4 py-10 md:px-6 md:py-20">
         <div className="grid gap-9 md:gap-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
@@ -37,6 +37,6 @@ export default function ContactPage() {
           <ContactForm />
         </div>
       </div>
-    </main>
+    </>
   );
 }

@@ -63,7 +63,7 @@ function CollectionProductCard({ product, returnTo, view, priority }: { product:
         <h2 className={`${isExpanded ? "text-2xl sm:text-3xl" : "text-[0.95rem] sm:text-lg"} font-bold leading-[1.18] tracking-[-0.035em]`}>{product.name}</h2>
         {isExpanded ? <p className="mt-3 max-w-[34ch] text-sm leading-5 text-black/65">{product.shortDescription}</p> : null}
         <p className={`${isExpanded ? "mt-4 text-lg" : "mt-2 text-sm"} font-medium text-black/85`}>{product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}</p>
-        {product.colors.length ? <ProductSwatches colors={product.colors} selectedColor={selectedColor} onColorChange={setSelectedColor} colorCodes={colorCodes} className={`${isExpanded ? "mt-4" : "mt-3"}`} /> : null}
+        {product.colors.length ? <ProductSwatches colors={product.colors} selectedColor={selectedColor} onColorChange={setSelectedColor} colorCodes={colorCodes} className={`${isExpanded ? "mt-2.5" : "mt-1.5"}`} /> : null}
       </div>
     </article>
   );

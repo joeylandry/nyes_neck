@@ -16,7 +16,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
   return (
     <div className="md:hidden">
       <div data-site-header-offset className="fixed inset-x-0 top-[var(--announcement-offset)] z-50 flex h-[var(--mobile-header-height)] items-center justify-between border-b border-black/10 bg-white px-3 shadow-sm">
-        <Link href="/" aria-label="NYES NECK home" className="flex min-h-12 min-w-0 items-center">
+        <Link href="/" aria-label="Nyes Neck home" className="flex min-h-12 min-w-0 items-center">
           <HeaderBrand logoSize="mobileHeader" wordmarkClassName="text-[0.98rem] tracking-[0.16em]" />
         </Link>
         <div className="flex items-center gap-1">

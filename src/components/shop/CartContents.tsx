@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, type ReactNode } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useCart } from "./CartProvider";
 
@@ -55,22 +55,55 @@ function CheckoutAction({ checkout }: { checkout?: string }) {
   );
 }
 
-export function CartContents() {
+function EmptyCart({ browse }: { browse?: ReactNode }) {
+  return (
+    <section className="mx-auto w-full max-w-6xl px-5 py-10 md:px-6 md:py-16">
+      <div className="product-pattern relative overflow-hidden rounded-[22px] border border-black/10 bg-[#e9e1d3] px-6 py-12 text-center shadow-[0_10px_28px_rgba(22,22,22,0.05)] md:rounded-[30px] md:px-12 md:py-16">
+        <span aria-hidden="true" className="mx-auto flex size-16 items-center justify-center rounded-full bg-white/75 text-[#183247] shadow-[0_6px_18px_rgba(22,22,22,0.08)] md:size-20">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="size-8 md:size-9">
+            <circle cx="9" cy="20" r="1" />
+            <circle cx="19" cy="20" r="1" />
+            <path d="M3 4h2l2.4 10.2a2 2 0 0 0 2 1.5h7.8a2 2 0 0 0 1.9-1.4L21 8H6" />
+          </svg>
+        </span>
+        <h1 className="font-heading mt-7 text-4xl font-semibold tracking-[-0.04em] md:text-5xl">Your cart is empty</h1>
+        <p className="mx-auto mt-4 max-w-md text-lg leading-8 text-black/60">
+          Nothing in the bag yet. Browse Nyes Neck apparel and coastal goods made for life on the Upper Cape.
+        </p>
+        <div className="mx-auto mt-9 flex w-full max-w-xs flex-col gap-3 sm:max-w-none sm:flex-row sm:justify-center">
+          <Link
+            href="/shop"
+            className="inline-flex min-h-14 items-center justify-center whitespace-nowrap rounded-full bg-[#183247] px-8 text-lg font-semibold !text-white transition hover:bg-[#274d66]"
+          >
+            Shop the collection
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex min-h-14 items-center justify-center whitespace-nowrap rounded-full border border-black/15 bg-white/70 px-8 text-lg font-semibold transition hover:bg-white"
+          >
+            Back to home
+          </Link>
+        </div>
+      </div>
+
+      {browse ? (
+        <section aria-labelledby="empty-cart-browse-heading" className="mt-12 md:mt-16">
+          <h2 id="empty-cart-browse-heading" className="font-heading mb-5 text-[1.8rem] font-semibold tracking-[-0.04em] md:mb-7 md:text-5xl">
+            Start with a collection
+          </h2>
+          {browse}
+        </section>
+      ) : null}
+    </section>
+  );
+}
+
+export function CartContents({ browse }: { browse?: ReactNode }) {
   const { items, updateQuantity, removeItem } = useCart();
   const checkout = useMemo(() => checkoutUrl(items), [items]);
   const subtotal = items.reduce((total, item) => total + (item.priceCents ?? 0) * item.quantity, 0);
 
-  if (!items.length) {
-    return (
-      <section className="mx-auto flex max-w-6xl flex-col items-center px-5 py-20 text-center md:px-6 md:py-28">
-        <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em] md:text-4xl">Your cart is empty</h2>
-        <p className="mt-4 max-w-md leading-7 text-black/60">Discover NYES NECK apparel and coastal goods.</p>
-        <Link href="/shop" className="mt-8 inline-flex min-h-12 items-center justify-center rounded-full bg-[#183247] px-7 py-3 text-lg font-semibold text-white transition hover:bg-[#274d66]">
-          Continue shopping
-        </Link>
-      </section>
-    );
-  }
+  if (!items.length) return <EmptyCart browse={browse} />;
 
   return (
     <section className="mx-auto max-w-6xl px-5 py-10 md:px-6 md:py-16">

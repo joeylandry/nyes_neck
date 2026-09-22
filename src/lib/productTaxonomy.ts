@@ -27,7 +27,7 @@ function categoryFor(category: string, label: string, categories: ShopCategory[]
   return categories.find((item) => item.kind === "product-type" && (item.value === category || item.slug === category)) ?? {
     slug: category,
     label,
-    description: `Explore NYES NECK ${label.toLowerCase()}.`,
+    description: `Explore Nyes Neck ${label.toLowerCase()}.`,
     kind: "product-type",
     value: category,
   };

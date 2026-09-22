@@ -34,7 +34,7 @@ export function SiteFooter() {
             <Link href="/shop">Shop</Link>
             <Link href="/contact">Contact</Link>
           </nav>
-          <p className="text-xs text-black/55">© {new Date().getFullYear()} NYES NECK</p>
+          <p className="text-xs text-black/55">© {new Date().getFullYear()} Nyes Neck</p>
         </div>
       </div>
     </footer>

@@ -8,7 +8,7 @@ const singletonTypes = new Set(["shopSettings", "homepageAnnouncement"]);
 
 export default defineConfig({
   name: "default",
-  title: "NYES NECK",
+  title: "Nyes Neck",
   projectId: sanityProjectId ?? "missing",
   dataset: sanityDataset,
   plugins: [

@@ -143,7 +143,7 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
     legacySlugs: [product.handle],
     name: product.title,
     shortDescription: cleanText(product.body_html).slice(0, 150) || `${collectionTileLabel(collection.label)} ${productType.label.toLowerCase()}.`,
-    description: cleanText(product.body_html) || `A NYES NECK ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
+    description: cleanText(product.body_html) || `A Nyes Neck ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
     category: productType.value,
     categoryLabel: productType.label,
     collection: collection.value,

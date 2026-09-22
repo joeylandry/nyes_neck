@@ -25,7 +25,7 @@ export async function ShopStorefront() {
           <ProductReel products={featuredProducts} />
         </section>
 
-        <ShopBrowseSections settings={settings} className="mt-14 md:mt-20" />
+        <ShopBrowseSections settings={settings} className="mt-14 md:mt-20" showProductTypes />
       </div>
     </>
   );

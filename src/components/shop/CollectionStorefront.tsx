@@ -3,7 +3,9 @@
 import { useMemo, useState } from "react";
 import { useDialog } from "@/hooks/useDialog";
 import { formatCurrency } from "@/lib/formatCurrency";
+import { byFamilyThenLabel, groupByProductType, GROUPING_THRESHOLD, OTHER_FAMILY_LABEL, typeFamilies, UNGROUPED_SECTION_KEY } from "@/lib/collectionSections";
 import { getProductDefaultColor } from "@/lib/productImages";
+import { slugifyProductValue } from "@/lib/productSlugs";
 import type { Product } from "@/types/product";
 import { ProductSwatches } from "./ProductCard";
 import { ProductCardMedia } from "./ProductCardMedia";
@@ -23,14 +25,22 @@ const sortOptions: Array<{ value: SortMode; label: string }> = [
   { value: "price-high", label: "Price: High to Low" },
 ];
 
-const viewOptions: Array<{ value: ViewMode; label: string; columns: string }> = [
-  { value: "expanded", label: "Expanded", columns: "▯" },
-  { value: "default", label: "Default", columns: "▯ ▯" },
-  { value: "minimal", label: "Minimal", columns: "▯ ▯ ▯" },
+const viewOptions: Array<{ value: ViewMode; label: string; columns: number }> = [
+  { value: "expanded", label: "Expanded", columns: 1 },
+  { value: "default", label: "Default", columns: 2 },
+  { value: "minimal", label: "Minimal", columns: 3 },
 ];
 
 function priceValue(product: Product) {
   return product.priceCents ?? Number.MAX_SAFE_INTEGER;
+}
+
+function gridClass(view: ViewMode) {
+  if (view === "expanded") return "grid min-w-0 grid-cols-1 gap-8";
+  if (view === "default") return "grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4";
+  // Hairlines are drawn on the tiles themselves; a tinted grid background would
+  // also fill the empty cells at the end of a short row.
+  return "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 [&>*]:outline [&>*]:outline-[0.5px] [&>*]:-outline-offset-[0.5px] [&>*]:outline-black/15";
 }
 
 function CollectionProductCard({ product, returnTo, view, priority }: { product: Product; returnTo: string; view: ViewMode; priority: boolean }) {
@@ -156,19 +166,14 @@ function FilterMenu({ label, groups, selected, onToggle, defaultOpen = false }: 
 }
 
 function productTypeGroups(values: string[]): FilterGroup[] {
-  const groups = [
-    { label: "Clothing", match: /shirt|hoodie|sweatshirt|crewneck|polo|quarter|jacket|vest|apron/i },
-    { label: "Headwear", match: /hat|cap|beanie/i },
-    { label: "Drinkware", match: /glass|tumbler|drinkware|mug|bottle|cup/i },
-  ];
   const matched = new Set<string>();
-  const organized = groups.map(({ label, match }) => {
+  const organized = typeFamilies.map(({ label, match }) => {
     const items = values.filter((value) => match.test(value));
     items.forEach((item) => matched.add(item));
     return { label, values: items };
   }).filter((group) => group.values.length);
   const remaining = values.filter((value) => !matched.has(value));
-  if (remaining.length) organized.push({ label: "Home & accessories", values: remaining });
+  if (remaining.length) organized.push({ label: OTHER_FAMILY_LABEL, values: remaining });
   return organized;
 }
 
@@ -211,6 +216,15 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
       return Number(b.featured) - Number(a.featured);
     }), [products, selected, inStockOnly, sort]);
   const activeFilterCount = Object.values(selected).reduce((total, values) => total + values.length, 0) + Number(inStockOnly);
+  const typeChips = useMemo(() => [...options.type].sort(byFamilyThenLabel), [options.type]);
+  // Headings only make sense while the grid is in its natural order: once a type
+  // is chosen or a sort is applied, one uninterrupted grid is the clearer answer.
+  const sections = useMemo(
+    () => (sort === "featured" && !selected.type.length && filteredProducts.length > GROUPING_THRESHOLD ? groupByProductType(filteredProducts) : null),
+    [filteredProducts, selected.type, sort],
+  );
+  const renderOrder = sections ? sections.flatMap((section) => section.products) : filteredProducts;
+  const priorityIds = new Set(renderOrder.slice(0, 2).map((product) => product.id));
 
   const toggleFacet = (key: FacetKey, value: string) => {
     setSelected((current) => ({
@@ -218,6 +232,8 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
       [key]: current[key].includes(value) ? current[key].filter((item) => item !== value) : [...current[key], value],
     }));
   };
+  const showOnlyType = (value: string) => setSelected((current) => ({ ...current, type: [value] }));
+  const clearTypes = () => setSelected((current) => ({ ...current, type: [] }));
   const clearFilters = () => {
     setSelected(EMPTY_FACETS);
     setInStockOnly(false);
@@ -234,22 +250,61 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
             <FilterIcon /> Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
           </button>
         </div>
-        <div className="mt-6 flex items-center justify-between gap-4">
+        {typeChips.length > 1 ? (
+          <div className="-mx-3 mt-6 overflow-x-auto px-3 pb-1 md:mx-0 md:px-0">
+            <ul className="flex w-max items-center gap-2 md:w-auto md:flex-wrap" aria-label="Filter by product type">
+              <li><TypeChip label="All" pressed={!selected.type.length} onClick={clearTypes} /></li>
+              {typeChips.map((value) => (
+                <li key={value}>
+                  <TypeChip label={value} pressed={selected.type.includes(value)} onClick={() => (selected.type.includes(value) ? toggleFacet("type", value) : showOnlyType(value))} />
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
           <div className="flex overflow-hidden rounded-full border border-black/20 p-1" role="radiogroup" aria-label="Collection view">
             {viewOptions.map((option) => (
-              <button key={option.value} type="button" role="radio" aria-checked={view === option.value} onClick={() => setView(option.value)} aria-label={option.label} className={`grid h-9 min-w-11 place-items-center rounded-full px-2 text-[0.65rem] font-bold tracking-[-0.1em] transition ${view === option.value ? "bg-[#161616] text-white" : "text-black/60 hover:bg-black/5"}`}>
-                {option.columns}
+              <button key={option.value} type="button" role="radio" aria-checked={view === option.value} onClick={() => setView(option.value)} aria-label={option.label} className={`grid h-9 min-w-11 place-items-center rounded-full px-2 transition ${view === option.value ? "bg-[#161616] text-white" : "text-black/60 hover:bg-black/5"}`}>
+                <ViewIcon columns={option.columns} />
               </button>
             ))}
           </div>
-          <p className="text-sm font-medium text-black/55" aria-live="polite">{filteredProducts.length} styles</p>
+          <div className="flex items-center gap-3">
+            <p className="text-sm font-medium text-black/55" aria-live="polite">{filteredProducts.length} styles</p>
+            <label htmlFor="collection-sort" className="sr-only">Sort by</label>
+            <select id="collection-sort" value={sort} onChange={(event) => setSort(event.target.value as SortMode)} className="font-ui min-h-11 rounded-full border border-black/20 bg-white px-3 text-sm font-bold focus:outline-none focus:ring-2 focus:ring-black focus:ring-offset-2">
+              {sortOptions.map(({ value, label }) => <option key={value} value={value}>{label}</option>)}
+            </select>
+          </div>
         </div>
         <ActiveFilters selected={selected} inStockOnly={inStockOnly} onRemove={toggleFacet} onRemoveInStock={() => setInStockOnly(false)} onClear={clearFilters} />
       </div>
 
-      {filteredProducts.length ? (
-        <div className={view === "expanded" ? "grid min-w-0 grid-cols-1 gap-8" : view === "default" ? "grid grid-cols-2 gap-x-3 gap-y-9 sm:grid-cols-3 sm:gap-x-5 md:grid-cols-4" : "grid grid-cols-3 gap-px bg-black/15 sm:grid-cols-4 md:grid-cols-5"}>
-          {filteredProducts.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < 2} />)}
+      {filteredProducts.length > 0 && sections ? (
+        sections.map((section) => (
+          // Section labels come from the catalog, so the heading id is slugified
+          // rather than used raw: an id may not contain whitespace.
+          <section key={section.key} className="mb-10 last:mb-0 md:mb-16" aria-labelledby={`section-${slugifyProductValue(section.key)}`}>
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 pb-2 md:mb-6">
+              <h2 id={`section-${slugifyProductValue(section.key)}`} className="font-ui text-xl font-bold tracking-[-0.045em] sm:text-2xl">
+                {section.label}
+                <span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{section.products.length}</span>
+              </h2>
+              {section.key === UNGROUPED_SECTION_KEY ? null : (
+                <button type="button" onClick={() => showOnlyType(section.label)} className="text-sm font-semibold underline underline-offset-4 hover:text-[#183247]">
+                  View all<span className="sr-only"> {section.label.toLowerCase()}</span>
+                </button>
+              )}
+            </div>
+            <div className={gridClass(view)}>
+              {section.products.map((product) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={priorityIds.has(product.id)} />)}
+            </div>
+          </section>
+        ))
+      ) : filteredProducts.length ? (
+        <div className={gridClass(view)}>
+          {filteredProducts.map((product) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={priorityIds.has(product.id)} />)}
         </div>
       ) : (
         <div className="py-20 text-center"><h2 className="font-ui text-2xl font-bold">No products match these filters.</h2><button type="button" className="mt-4 underline underline-offset-4" onClick={clearFilters}>Clear filters</button></div>
@@ -296,8 +351,34 @@ function ActiveFilters({ selected, inStockOnly, onRemove, onRemoveInStock, onCle
   );
 }
 
+function TypeChip({ label, pressed, onClick }: { label: string; pressed: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      aria-pressed={pressed}
+      onClick={onClick}
+      className={`font-ui inline-flex min-h-10 items-center whitespace-nowrap rounded-full border px-4 text-sm font-bold transition ${pressed ? "border-black bg-[#161616] text-white" : "border-black/20 bg-white text-black/70 hover:border-black hover:text-black"}`}
+    >
+      {label}
+    </button>
+  );
+}
+
 function unique(values: Array<string | undefined>) {
   return [...new Set(values.filter((value): value is string => Boolean(value?.trim())))].sort((a, b) => a.localeCompare(b, undefined, { numeric: true }));
+}
+
+function ViewIcon({ columns }: { columns: number }) {
+  const gap = 1.6;
+  const width = (14 - gap * (columns - 1)) / columns;
+
+  return (
+    <svg aria-hidden="true" viewBox="0 0 14 14" fill="currentColor" className="size-3.5">
+      {Array.from({ length: columns }, (_, index) => (
+        <rect key={index} x={index * (width + gap)} y="0" width={width} height="14" rx="0.8" />
+      ))}
+    </svg>
+  );
 }
 
 function FilterIcon() {

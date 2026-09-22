@@ -54,7 +54,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
         </>
       ) : null}
       {!products.length && category.kind === "collection" ? <div className="mx-auto max-w-6xl px-4 py-12 md:px-6"><EmptyCollection pageTitle={pageTitle} /></div> : null}
-      <div className="mx-auto max-w-7xl px-3 pb-12 md:px-6 md:pb-20"><ShopBrowseSections settings={settings} className="border-t border-black/10 pt-11 md:pt-20" /></div>
+      <div className="mx-auto max-w-7xl px-3 pb-12 md:px-6 md:pb-20"><ShopBrowseSections settings={settings} className="border-t border-black/10 pt-11 md:pt-20" showProductTypes /></div>
     </>
   );
 }

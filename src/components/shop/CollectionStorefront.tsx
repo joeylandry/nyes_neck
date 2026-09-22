@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useDialog } from "@/hooks/useDialog";
 import { formatCurrency } from "@/lib/formatCurrency";
-import { byFamilyThenLabel, groupByProductType, GROUPING_THRESHOLD, OTHER_FAMILY_LABEL, typeFamilies, UNGROUPED_SECTION_KEY } from "@/lib/collectionSections";
+import { groupByProductType, GROUPING_THRESHOLD, OTHER_FAMILY_LABEL, typeFamilies, UNGROUPED_SECTION_KEY } from "@/lib/collectionSections";
 import { getProductDefaultColor } from "@/lib/productImages";
 import { slugifyProductValue } from "@/lib/productSlugs";
 import type { Product } from "@/types/product";
@@ -216,7 +216,6 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
       return Number(b.featured) - Number(a.featured);
     }), [products, selected, inStockOnly, sort]);
   const activeFilterCount = Object.values(selected).reduce((total, values) => total + values.length, 0) + Number(inStockOnly);
-  const typeChips = useMemo(() => [...options.type].sort(byFamilyThenLabel), [options.type]);
   // Headings only make sense while the grid is in its natural order: once a type
   // is chosen or a sort is applied, one uninterrupted grid is the clearer answer.
   const sections = useMemo(
@@ -233,7 +232,6 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
     }));
   };
   const showOnlyType = (value: string) => setSelected((current) => ({ ...current, type: [value] }));
-  const clearTypes = () => setSelected((current) => ({ ...current, type: [] }));
   const clearFilters = () => {
     setSelected(EMPTY_FACETS);
     setInStockOnly(false);
@@ -250,19 +248,7 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
             <FilterIcon /> Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
           </button>
         </div>
-        {typeChips.length > 1 ? (
-          <div className="-mx-3 mt-6 overflow-x-auto px-3 pb-1 md:mx-0 md:px-0">
-            <ul className="flex w-max items-center gap-2 md:w-auto md:flex-wrap" aria-label="Filter by product type">
-              <li><TypeChip label="All" pressed={!selected.type.length} onClick={clearTypes} /></li>
-              {typeChips.map((value) => (
-                <li key={value}>
-                  <TypeChip label={value} pressed={selected.type.includes(value)} onClick={() => (selected.type.includes(value) ? toggleFacet("type", value) : showOnlyType(value))} />
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
-        <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex overflow-hidden rounded-full border border-black/20 p-1" role="radiogroup" aria-label="Collection view">
             {viewOptions.map((option) => (
               <button key={option.value} type="button" role="radio" aria-checked={view === option.value} onClick={() => setView(option.value)} aria-label={option.label} className={`grid h-9 min-w-11 place-items-center rounded-full px-2 transition ${view === option.value ? "bg-[#161616] text-white" : "text-black/60 hover:bg-black/5"}`}>
@@ -348,19 +334,6 @@ function ActiveFilters({ selected, inStockOnly, onRemove, onRemoveInStock, onCle
         <button type="button" onClick={onClear} className="min-h-9 px-2 text-sm font-semibold underline underline-offset-4 hover:text-[#183247]">Clear all</button>
       </li>
     </ul>
-  );
-}
-
-function TypeChip({ label, pressed, onClick }: { label: string; pressed: boolean; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      aria-pressed={pressed}
-      onClick={onClick}
-      className={`font-ui inline-flex min-h-10 items-center whitespace-nowrap rounded-full border px-4 text-sm font-bold transition ${pressed ? "border-black bg-[#161616] text-white" : "border-black/20 bg-white text-black/70 hover:border-black hover:text-black"}`}
-    >
-      {label}
-    </button>
   );
 }
 

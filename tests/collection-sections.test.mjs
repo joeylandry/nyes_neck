@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
-import { byFamilyThenLabel, groupByProductType, OTHER_FAMILY_LABEL, UNGROUPED_SECTION_KEY } from "../src/lib/collectionSections.ts";
+import { groupByProductType, OTHER_FAMILY_LABEL, UNGROUPED_SECTION_KEY } from "../src/lib/collectionSections.ts";
 
 const item = (id, categoryLabel) => ({ id, categoryLabel });
 
@@ -57,10 +57,4 @@ test("a lone single-product type keeps its own heading", () => {
   const sections = groupByProductType([item("a", "T-shirts"), item("b", "T-shirts"), item("c", "Hats")]);
 
   assert.deepEqual(sections.map((section) => section.label), ["T-shirts", "Hats"]);
-});
-
-test("quick filter chips are ordered by family, then naturally by label", () => {
-  const chips = ["Tumblers", "Stickers", "Hats", "T-shirts", "Hoodies"].sort(byFamilyThenLabel);
-
-  assert.deepEqual(chips, ["Hoodies", "T-shirts", "Hats", "Tumblers", "Stickers"]);
 });

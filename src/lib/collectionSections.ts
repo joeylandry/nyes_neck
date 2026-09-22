@@ -27,10 +27,6 @@ export function familyRank(label: string) {
   return index === -1 ? typeFamilies.length : index;
 }
 
-export function byFamilyThenLabel(a: string, b: string) {
-  return familyRank(a) - familyRank(b) || a.localeCompare(b, undefined, { numeric: true });
-}
-
 /**
  * Splits a collection into one section per product type. Types holding a single
  * product are pooled into a trailing section so the page does not turn into a

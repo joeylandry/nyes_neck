@@ -1,6 +1,6 @@
-# NYES NECK
+# Nyes Neck
 
-A premium, responsive starter website for NYES NECK, a Cape Cod lifestyle apparel brand rooted in North Falmouth and the Upper Cape.
+A premium, responsive starter website for Nyes Neck, a Cape Cod lifestyle apparel brand rooted in North Falmouth and the Upper Cape.
 
 ## Install and run
 

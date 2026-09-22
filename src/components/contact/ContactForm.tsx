@@ -41,7 +41,7 @@ export function ContactForm() {
 
   return (
     <form ref={formRef} onSubmit={handleSubmit} className="rounded-[22px] border border-black/10 bg-white p-5 shadow-sm md:rounded-[30px] md:p-9" aria-describedby="form-status">
-      <input type="hidden" name="_subject" value="New NYES NECK inquiry" />
+      <input type="hidden" name="_subject" value="New Nyes Neck inquiry" />
       <label className="hidden">
         Leave this field blank
         <input name="_gotcha" tabIndex={-1} autoComplete="off" />

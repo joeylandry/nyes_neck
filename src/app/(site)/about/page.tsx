@@ -4,7 +4,7 @@ import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
   title: "About",
-  description: "Joey Landry's story and the community purpose behind NYES NECK.",
+  description: "Joey Landry's story and the community purpose behind Nyes Neck.",
 };
 
 type StoryFeature = {

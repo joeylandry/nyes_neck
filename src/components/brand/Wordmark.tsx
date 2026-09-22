@@ -10,7 +10,7 @@ export function Wordmark({ tone = "dark", className = "" }: WordmarkProps) {
         tone === "light" ? "text-white" : "text-[#161616]"
       } ${className}`}
     >
-      NYES NECK
+      Nyes Neck
     </span>
   );
 }

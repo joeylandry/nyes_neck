@@ -333,7 +333,7 @@ function mapPrintfulProduct(
     ],
     name: syncProduct.name,
     shortDescription: `${collectionTileLabel(collection.label)} ${productType.label.toLowerCase()}.`,
-    description: catalogDescription ?? `A NYES NECK ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
+    description: catalogDescription ?? `A Nyes Neck ${productType.label.toLowerCase()} from the ${collectionTileLabel(collection.label)} collection.`,
     category: productType.value,
     categoryLabel: productType.label,
     collection: collection.value,

@@ -68,7 +68,7 @@ export function HeroGallery() {
     ({ "--mobile-position": mobile, "--desktop-position": desktop } as CSSProperties);
 
   return (
-    <section className="hero-height relative isolate w-full overflow-hidden" aria-label="NYES NECK introduction">
+    <section className="hero-height relative isolate w-full overflow-hidden" aria-label="Nyes Neck introduction">
       <div className="absolute inset-0">
         {heroImages.map((image, index) => (
           <Image

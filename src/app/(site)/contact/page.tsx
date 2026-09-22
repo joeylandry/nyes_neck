@@ -4,7 +4,7 @@ import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
   title: "Contact",
-  description: "Contact NYES NECK about products, local partnerships, and our giving-back mission.",
+  description: "Contact Nyes Neck about products, local partnerships, and our giving-back mission.",
 };
 
 const topics = [
@@ -23,7 +23,7 @@ export default function ContactPage() {
           <div>
             <h2 className="font-heading text-[2rem] font-semibold tracking-[-0.045em] md:text-5xl">Let’s connect</h2>
             <p className="mt-4 text-base leading-7 text-black/65 md:mt-5 md:text-lg md:leading-8">
-              Questions about NYES NECK, future products, local partnerships, or our giving-back mission? Choose the topic that best fits your note.
+              Questions about Nyes Neck, future products, local partnerships, or our giving-back mission? Choose the topic that best fits your note.
             </p>
             <div className="mt-7 grid gap-2.5 sm:grid-cols-2 md:mt-9 md:gap-3 lg:grid-cols-1">
               {topics.map(([title, copy]) => (

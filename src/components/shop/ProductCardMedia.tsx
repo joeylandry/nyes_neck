@@ -97,17 +97,21 @@ export function ProductCardMedia({
         }}
       >
         <div className={`relative ${aspectClass} touch-pan-y select-none overflow-hidden rounded-[inherit] bg-white`}>
-          <Image
-            key={selectedImage.id}
-            src={selectedImage.src}
-            alt={selectedImage.alt}
-            fill
-            priority={priority}
-            sizes={sizes}
-            draggable={false}
-            className="pointer-events-none object-cover transition duration-500 group-hover:scale-[1.025] motion-reduce:transform-none"
-          />
-          {!product.available ? <span className="absolute left-3 top-3 bg-white/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] backdrop-blur">Coming soon</span> : null}
+          {/* `fill` sizes against the padding box, so the inset lives on this
+              wrapper to keep the garment clear of the rounded corners. */}
+          <div className="absolute inset-2 md:inset-3">
+            <Image
+              key={selectedImage.id}
+              src={selectedImage.src}
+              alt={selectedImage.alt}
+              fill
+              priority={priority}
+              sizes={sizes}
+              draggable={false}
+              className="pointer-events-none object-contain transition duration-500 group-hover:scale-[1.025] motion-reduce:transform-none"
+            />
+            {!product.available ? <span className="absolute left-0 top-0 bg-white/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] backdrop-blur">Coming soon</span> : null}
+          </div>
         </div>
       </Link>
 

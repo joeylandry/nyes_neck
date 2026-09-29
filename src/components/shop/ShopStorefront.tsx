@@ -12,13 +12,14 @@ export async function ShopStorefront() {
     <>
       <div className="mx-auto max-w-7xl px-3 py-10 md:px-6 md:py-16">
         <section aria-labelledby="featured-heading">
-          <div className="mb-8 md:mb-10">
-            <h2 id="featured-heading" className="font-ui max-w-[13ch] text-[2.9rem] font-normal leading-[0.95] tracking-[-0.07em] sm:text-6xl md:max-w-[15ch] md:text-7xl">
+          <div className="mb-5 flex items-end justify-between gap-4 md:mb-7">
+            <h2 id="featured-heading" className="font-ui text-[1.9rem] font-semibold leading-none tracking-[-0.04em] md:text-5xl">
               The Nyes Neck Collection
             </h2>
             {featuredCategory ? (
-              <Link href={`/shop/category/${featuredCategory.slug}`} className="font-ui mt-7 inline-flex min-h-12 items-center rounded-full bg-[#161616] px-7 text-base font-bold !text-white transition hover:bg-[#183247] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-3">
-                Shop Nyes Neck Collection
+              <Link href={`/shop/category/${featuredCategory.slug}`} className="font-ui group inline-flex shrink-0 items-center gap-1.5 pb-1 text-sm font-bold underline-offset-4 hover:underline md:text-base">
+                Shop all
+                <span aria-hidden="true" className="transition-transform duration-300 group-hover:translate-x-1">→</span>
               </Link>
             ) : null}
           </div>

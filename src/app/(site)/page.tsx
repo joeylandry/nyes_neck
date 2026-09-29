@@ -1,13 +1,11 @@
-import { HeroGallery } from "@/components/home/HeroGallery";
+import { HomeHero } from "@/components/home/HomeHero";
 import { ShopStorefront } from "@/components/shop/ShopStorefront";
 
 export default function HomePage() {
   return (
     <>
-      <HeroGallery />
-      <div id="mini-shop" className="scroll-mt-[var(--site-header-height)]">
-        <ShopStorefront />
-      </div>
+      <HomeHero />
+      <ShopStorefront />
     </>
   );
 }

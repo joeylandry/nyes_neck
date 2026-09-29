@@ -155,8 +155,8 @@ textarea {
   outline-color: #ffffff;
 }
 
-.hero-height {
-  height: calc(100svh - var(--site-header-height));
+.home-hero {
+  height: min(78svh, 46rem);
 }
 
 .hero-image {
@@ -185,8 +185,8 @@ textarea {
     --site-header-height: calc(var(--desktop-header-height) + var(--announcement-offset));
   }
 
-  .hero-height {
-    height: calc(100dvh - var(--site-header-height));
+  .home-hero {
+    height: min(80dvh, 52rem);
   }
 
   .hero-image {

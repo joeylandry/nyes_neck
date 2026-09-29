@@ -13,7 +13,7 @@
   --desktop-header-height: 73px;
   --mobile-header-height: 70px;
   --announcement-height: 42px;
-  --announcement-offset: var(--announcement-height);
+  --announcement-offset: 0px;
   --site-header-height: calc(var(--mobile-header-height) + var(--announcement-offset));
 }
 
@@ -118,12 +118,18 @@ textarea {
 }
 
 /*
- * Set before first paint by the inline script in the root layout, so a visitor
- * who already dismissed the banner gets the correct header offset on the very
- * first frame instead of a jump once React hydrates.
+ * The header only makes room for the banner while the banner is actually on
+ * the page. Keying the offset off the banner's presence (rather than a flag
+ * that can drift out of sync with React, e.g. when hydration resets <html>
+ * attributes or the banner is dismissed in another tab) keeps the fixed header
+ * flush with whatever sits above it.
+ *
+ * `data-announcement="dismissed"` is set before first paint by the inline
+ * script in the root layout, so a visitor who already dismissed the banner
+ * never sees it flash in before React hydrates.
  */
-:root[data-announcement="dismissed"] {
-  --announcement-offset: 0px;
+:root:not([data-announcement="dismissed"]):has([data-announcement-banner]) {
+  --announcement-offset: var(--announcement-height);
 }
 
 :root[data-announcement="dismissed"] [data-announcement-banner] {

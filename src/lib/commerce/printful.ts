@@ -4,7 +4,8 @@ import { getShopifyCartUrl } from "@/lib/commerce/shopify";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { makeProductSlug, slugifyProductValue } from "@/lib/productSlugs";
 import { inferManufacturer, inferProductTypeCategory } from "@/lib/productTaxonomy";
-import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
+import { detectProductImageView, orderFrontViewsFirst } from "@/lib/productImages";
+import type { Product, ProductImage, ProductImageView, ProductVariant, ShopCategory } from "@/types/product";
 
 type PrintfulPaging = {
   total?: number;
@@ -38,7 +39,7 @@ type PrintfulSyncVariant = {
   availability_status?: string;
   variant_id?: number;
   product?: { product_id?: number; image?: string };
-  files?: { type?: string; preview_url?: string; thumbnail_url?: string; status?: string }[];
+  files?: { type?: string; filename?: string; preview_url?: string; thumbnail_url?: string; status?: string }[];
   color_code?: string;
 
 };
@@ -285,14 +286,14 @@ function mapPrintfulProduct(
   const sizes = Array.from(new Set(variants.map((variant) => variant.size).filter((size): size is string => Boolean(size))));
   const colors = Array.from(new Set(variants.map((variant) => variant.color).filter((color): color is string => Boolean(color))));
   const images: ProductImage[] = [];
-  const addImage = (src: string | undefined, color?: string) => {
+  const addImage = (src: string | undefined, color?: string, view?: ProductImageView) => {
     if (!src) return;
     // Identical fallback URLs must remain separate for each color. Otherwise a
     // generic image assigned to Black would also leak into every other color.
     if (images.some((image) => image.src === src && image.colors?.[0] === color)) return;
     images.push({ id: `printful-${syncProduct.id}-${images.length}`, src,
       alt: `${syncProduct.name}${color ? ` — ${color}` : ""}`,
-      role: images.length ? "gallery" : "main", colors: color ? [color] : undefined });
+      role: images.length ? "gallery" : "main", colors: color ? [color] : undefined, view });
   };
   const hasImageForColor = (color?: string) => images.some((image) => (
     color ? image.colors?.includes(color) : !image.colors?.length
@@ -307,7 +308,7 @@ function mapPrintfulProduct(
     // preview for that color so both the product page and the card carousel
     // can browse the full color-specific gallery.
     for (const file of variant.files ?? []) {
-      if (file.type === "preview") addImage(file.preview_url, color);
+      if (file.type === "preview") addImage(file.preview_url, color, detectProductImageView(file.filename, file.preview_url));
     }
   }
 
@@ -342,7 +343,7 @@ function mapPrintfulProduct(
     brand: inferManufacturer(`${catalogProduct?.title ?? ""} ${syncProduct.name}`, catalogProduct?.brand ?? catalogProduct?.manufacturer ?? syncProduct.brand ?? syncProduct.manufacturer),
     priceCents: parsePriceCents(detail.sync_variants ?? []),
     currency: "USD",
-    images,
+    images: orderFrontViewsFirst(images),
     sizes,
     colors,
     variants,

@@ -15,12 +15,16 @@ export type ShopCategory = {
 
 export type ProductImageRole = "main" | "hover" | "gallery";
 
+/** Which side of the product a mockup shows, when it can be detected. */
+export type ProductImageView = "front" | "angled-front" | "other";
+
 export type ProductImage = {
   id: string;
   src: string;
   alt: string;
   role: ProductImageRole;
   colors?: string[];
+  view?: ProductImageView;
 };
 
 export type ShopTile = {

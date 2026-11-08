@@ -120,3 +120,19 @@ test("synchronized products keep Shopify's front for colors Printful did not moc
   );
   assert.deepEqual(images.filter((image) => image.colors?.includes("Red")).map((image) => image.id), ["shopify-red-front", "shopify-red-back"]);
 });
+
+test("drinkware keeps Shopify's named front when Printful's preview is an unnamed angle", () => {
+  const images = mergeSynchronizedProductImages(
+    [
+      { id: "printful-white-preview", src: "https://files.cdn.printful.com/files/a1/a1_preview.png", alt: "", role: "main", colors: ["White"] },
+      { id: "printful-black-preview", src: "https://files.cdn.printful.com/files/b2/b2_preview.png", alt: "", role: "gallery", colors: ["Black"] },
+    ],
+    [
+      { id: "shopify-white-right", src: "https://cdn.shopify.com/s/files/1/water-bottle-white-17oz-right-6a.png", alt: "", role: "main", colors: ["White"] },
+      { id: "shopify-white-front", src: "https://cdn.shopify.com/s/files/1/water-bottle-white-17oz-front-6a.png", alt: "", role: "gallery", colors: ["White"] },
+      { id: "shopify-white-left", src: "https://cdn.shopify.com/s/files/1/water-bottle-white-17oz-left-6a.png", alt: "", role: "gallery", colors: ["White"] },
+    ],
+  );
+  assert.deepEqual(images.map((image) => image.id), ["shopify-white-front", "printful-black-preview", "shopify-white-right", "shopify-white-left"]);
+  assert.equal(images[0].role, "main");
+});

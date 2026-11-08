@@ -79,11 +79,21 @@ export function mergeSynchronizedProductImages(
   shopifyImages: ProductImage[],
 ): ProductImage[] {
   const shopifyMain = shopifyImages.find((image) => image.role === "main");
-  const seenSources = new Set<string>();
-
-  const isShopifyFrontView = (image: ProductImage) => (image.view ?? detectProductImageView(image.src)) === "front";
+  const isFrontView = (image: ProductImage) => (image.view ?? detectProductImageView(image.src)) === "front";
+  const frontColors = (images: ProductImage[]) => new Set(images.filter(isFrontView).flatMap((image) => image.colors ?? []));
+  const printfulFrontColors = frontColors(printfulImages);
+  const shopifyFrontColors = frontColors(shopifyImages);
   const printfulColors = new Set(printfulImages.flatMap((image) => image.colors ?? []));
 
+  // Shopify holds the same Printful mockups under descriptive file names
+  // (`...-front-...`), while Printful's own previews often have no view in
+  // their name. When only Shopify can say which mockup is the front (common
+  // for drinkware, whose default preview is often a side angle), use
+  // Shopify's images for that color so the centered front is never lost.
+  const preferShopify = (image: ProductImage) => Boolean(image.colors?.length) &&
+    image.colors!.every((color) => shopifyFrontColors.has(color) && !printfulFrontColors.has(color));
+
+  const seenSources = new Set<string>();
   const merged: ProductImage[] = [];
   const addImage = (image: ProductImage) => {
     if (seenSources.has(image.src)) return;
@@ -95,8 +105,10 @@ export function mergeSynchronizedProductImages(
 
   let skippedMatchingPrintfulFront = false;
   for (const image of printfulImages) {
+    if (preferShopify(image)) continue;
     const matchesPrimaryColor = Boolean(shopifyMain?.colors?.some((color) => image.colors?.includes(color)));
-    if (shopifyMain && isShopifyFrontView(shopifyMain) && matchesPrimaryColor && !skippedMatchingPrintfulFront) {
+    // Shopify's primary front and Printful's front for that color are the same mockup.
+    if (shopifyMain && isFrontView(shopifyMain) && matchesPrimaryColor && !skippedMatchingPrintfulFront && isFrontView(image)) {
       skippedMatchingPrintfulFront = true;
       continue;
     }
@@ -105,12 +117,12 @@ export function mergeSynchronizedProductImages(
 
   for (const image of shopifyImages) {
     if (image.id === shopifyMain?.id) continue;
-    // Printful's previews already cover the front of every color it mocked up.
-    // Keep Shopify's front only for colors Printful has no images for.
+    // Drop Shopify's front only when Printful already supplies that color's
+    // images and they are kept; otherwise it is the only front for the color.
     const coveredByPrintful = image.colors?.length
-      ? image.colors.some((color) => printfulColors.has(color))
+      ? image.colors.some((color) => printfulColors.has(color)) && !preferShopify(image)
       : printfulImages.length > 0;
-    if (isShopifyFrontView(image) && coveredByPrintful) continue;
+    if (isFrontView(image) && coveredByPrintful) continue;
     addImage(image);
   }
 

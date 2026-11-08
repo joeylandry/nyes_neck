@@ -1,21 +1,19 @@
 import Link from "next/link";
 import { Garland } from "@/components/holiday/Garland";
-import { FAVORITES_SUBSECTION_THRESHOLD, getFavoriteGroups } from "@/lib/favorites";
+import { getFavoriteProducts } from "@/lib/favorites";
 import { HOLIDAY_DECOR } from "@/lib/holiday";
 import { getFeaturedShopProducts, getShopSettings } from "@/lib/products";
-import { ProductReel } from "./ProductReel";
+import { PicksGrid } from "./CollectionStorefront";
 import { ShopBrowseSections } from "./ShopBrowseSections";
 
 export async function ShopStorefront() {
   const settings = await getShopSettings();
   const featuredProducts = await getFeaturedShopProducts(settings);
   const featuredCategory = settings.featuredCategory;
-  const favoriteGroups = getFavoriteGroups(featuredProducts);
-  const favoriteCount = favoriteGroups.reduce((total, group) => total + group.products.length, 0);
+  const favorites = getFavoriteProducts(featuredProducts);
   // Until the catalog has products matching the staples, keep showing the
-  // featured collection so the homepage never opens on an empty row.
-  const showSubsections = favoriteCount > FAVORITES_SUBSECTION_THRESHOLD && favoriteGroups.length > 1;
-  const reelProducts = favoriteCount ? favoriteGroups.flatMap((group) => group.products) : featuredProducts;
+  // featured collection so the homepage never opens on an empty grid.
+  const gridProducts = favorites.length ? favorites : featuredProducts;
 
   return (
     <>
@@ -33,20 +31,7 @@ export async function ShopStorefront() {
               </Link>
             ) : null}
           </div>
-          {showSubsections ? (
-            <div className="space-y-9 md:space-y-12">
-              {favoriteGroups.map((group, index) => (
-                <section key={group.label} aria-labelledby={`favorites-${index}-heading`}>
-                  <h3 id={`favorites-${index}-heading`} className="font-ui mb-3 text-lg font-bold tracking-[-0.03em] md:mb-4 md:text-2xl">
-                    {group.label}
-                  </h3>
-                  <ProductReel products={group.products} prioritizeFirst={index === 0} />
-                </section>
-              ))}
-            </div>
-          ) : (
-            <ProductReel products={reelProducts} />
-          )}
+          <PicksGrid products={gridProducts} returnTo={featuredCategory?.slug ?? "shop"} />
         </section>
 
         <ShopBrowseSections settings={settings} className="mt-14 md:mt-20" showProductTypes />

@@ -14,7 +14,7 @@ const wire = `url("data:image/svg+xml,${encodeURIComponent(
 
 export function ChristmasLights() {
   return (
-    <div aria-hidden="true" className="holiday-lights pointer-events-none absolute inset-x-0 top-full h-10 overflow-hidden" style={{ backgroundImage: wire }}>
+    <div aria-hidden="true" className="holiday-lights pointer-events-none absolute inset-x-0 top-full h-10 overflow-hidden" style={{ backgroundImage: wire, backgroundRepeat: "repeat-x" }}>
       <div className="flex">
         {Array.from({ length: BULB_COUNT }, (_, index) => {
           const color = BULB_COLORS[index % BULB_COLORS.length];

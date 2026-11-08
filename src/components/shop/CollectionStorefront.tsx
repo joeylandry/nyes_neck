@@ -45,6 +45,15 @@ function gridClass(view: ViewMode) {
   return "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 [&>*]:outline [&>*]:outline-[0.5px] [&>*]:-outline-offset-[0.5px] [&>*]:outline-black/15";
 }
 
+/** The "Our picks" grid, shared with the homepage's Our Favorites. */
+export function PicksGrid({ products, returnTo, view = "default", priorityCount = 2 }: { products: Product[]; returnTo: string; view?: ViewMode; priorityCount?: number }) {
+  return (
+    <div className={gridClass(view)}>
+      {products.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < priorityCount} />)}
+    </div>
+  );
+}
+
 function CollectionProductCard({ product, returnTo, view, priority }: { product: Product; returnTo: string; view: ViewMode; priority: boolean }) {
   const [selectedColor, setSelectedColor] = useState(() => getProductDefaultColor(product));
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
@@ -281,9 +290,7 @@ export function CollectionStorefront({ products, picks = [], returnTo, title }: 
               <span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{picks.length}</span>
             </h2>
           </div>
-          <div className={gridClass(view)}>
-            {picks.map((product) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={priorityIds.has(product.id)} />)}
-          </div>
+          <PicksGrid products={picks} returnTo={returnTo} view={view} />
         </section>
       ) : null}
       {filteredProducts.length > 0 && sections ? (

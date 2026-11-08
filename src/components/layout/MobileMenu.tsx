@@ -8,7 +8,7 @@ import { CartLink } from "@/components/shop/CartLink";
 import { useDialog } from "@/hooks/useDialog";
 import { useActivePath, type NavLink } from "./navigation";
 
-export function MobileMenu({ links }: { links: NavLink[] }) {
+export function MobileMenu({ links, decoration }: { links: NavLink[]; decoration?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const isActive = useActivePath();
   const panelRef = useDialog({ open, onClose: () => setOpen(false) });
@@ -36,6 +36,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
             </span>
           </button>
         </div>
+        {decoration}
       </div>
 
       <div

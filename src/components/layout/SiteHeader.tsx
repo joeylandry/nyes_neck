@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { HeaderBrand } from "@/components/brand/HeaderBrand";
+import { ChristmasLights } from "@/components/holiday/ChristmasLights";
 import { CartLink } from "@/components/shop/CartLink";
+import { HOLIDAY_DECOR } from "@/lib/holiday";
 import { AnnouncementBanner } from "./AnnouncementBanner";
 import { MobileMenu } from "./MobileMenu";
 import { PrimaryNav } from "./PrimaryNav";
@@ -20,8 +22,9 @@ export function SiteHeader() {
             <CartLink />
           </div>
         </div>
+        {HOLIDAY_DECOR ? <ChristmasLights /> : null}
       </div>
-      <MobileMenu links={primaryNavLinks} />
+      <MobileMenu links={primaryNavLinks} decoration={HOLIDAY_DECOR ? <ChristmasLights /> : null} />
     </header>
   );
 }

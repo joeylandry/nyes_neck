@@ -210,3 +210,21 @@ textarea {
     animation-iteration-count: 1 !important;
   }
 }
+
+/* Retro Christmas bulbs under the header (see src/lib/holiday.ts). */
+@keyframes holiday-bulb-twinkle {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 1px 5px currentColor); }
+  50% { opacity: 0.38; filter: none; }
+}
+
+.holiday-bulb {
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: holiday-bulb-twinkle 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holiday-bulb {
+    animation: none;
+  }
+}

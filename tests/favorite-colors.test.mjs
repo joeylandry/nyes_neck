@@ -33,3 +33,15 @@ test("only colors with a photo that can be bought are used", () => {
   const picks = assignFavoriteColors([product("a", ["Black", "Red", "Navy"], { soldOut: ["Red"], noPhoto: ["Navy"] })]);
   assert.equal(picks.a, "Black");
 });
+
+test("a hand-chosen start color wins when it can be shown", () => {
+  const catalog = [
+    product("a", ["Black", "Navy", "Red"]),
+    { ...product("b", ["Black", "Navy"]), externalId: "shop-b" },
+    product("c", ["Black", "Red"], { soldOut: ["Red"] }),
+  ];
+  const picks = assignFavoriteColors(catalog, { a: "black", "shop-b": "Navy", c: "Red" });
+  assert.equal(picks.a, "Black");
+  assert.equal(picks.b, "Navy");
+  assert.equal(picks.c, "Black");
+});

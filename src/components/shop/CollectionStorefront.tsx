@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useMemo, useState } from "react";
 import { WreathText } from "@/components/holiday/Wreath";
 import { useDialog } from "@/hooks/useDialog";
@@ -69,11 +70,15 @@ function CollectionProductCard({ product, returnTo, view, priority, initialColor
   return (
     <article className={`font-ui ${isExpanded ? "grid min-w-0 grid-cols-1 gap-4 border-b border-black/15 pb-8 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.6fr)] sm:gap-7" : "min-w-0"}`}>
       <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={isExpanded ? "(max-width: 640px) 100vw, 60vw" : "(max-width: 640px) 50vw, 33vw"} aspectClass={isExpanded ? "aspect-[4/5]" : "aspect-[3/4]"} />
-      <div className={`${isExpanded ? "flex flex-col justify-end" : "pt-3"}`}>
+      <div className={`${isExpanded ? "flex flex-col justify-end" : ""}`}>
+        {/* Everything from the photo down to the price opens the product; only
+            the color swatches below stay separate. */}
+        <Link href={href} className={`block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2 ${isExpanded ? "" : "pt-3"}`}>
         <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-black/45">{[product.collectionLabel, product.decoration].filter(Boolean).join(" · ")}</p>
         <h2 className={`${isExpanded ? "text-2xl sm:text-3xl" : "text-[0.95rem] sm:text-lg"} font-bold leading-[1.18] tracking-[-0.035em]`}>{product.name}</h2>
         {isExpanded ? <p className="mt-3 max-w-[34ch] text-sm leading-5 text-black/65">{product.shortDescription}</p> : null}
         <p className={`${isExpanded ? "mt-4 text-lg" : "mt-2 text-sm"} font-medium text-black/85`}>{product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}</p>
+        </Link>
         {product.colors.length ? <ProductSwatches colors={product.colors} selectedColor={selectedColor} onColorChange={setSelectedColor} colorCodes={colorCodes} className={`${isExpanded ? "mt-2.5" : "mt-1.5"}`} /> : null}
       </div>
     </article>

@@ -1,3 +1,4 @@
+import { FAVORITE_START_COLORS } from "@/data/favoritePicks";
 import type { Product } from "@/types/product";
 
 /**
@@ -59,7 +60,13 @@ function showableColors(product: Product) {
 // Muted families read as "black and stuff"; they are a last resort.
 const FAMILY_PENALTY: Partial<Record<ColorFamily, number>> = { dark: 6, gray: 2 };
 
-export function assignFavoriteColors(products: Product[]): Record<string, string> {
+/** A hand-chosen start color, when it is one the shopper can open on. */
+function chosenColor(product: Product, options: string[], chosen: Record<string, string>) {
+  const color = chosen[product.id] ?? (product.externalId ? chosen[product.externalId] : undefined);
+  return color ? options.find((option) => option.toLowerCase() === color.trim().toLowerCase()) : undefined;
+}
+
+export function assignFavoriteColors(products: Product[], chosen: Record<string, string> = FAVORITE_START_COLORS): Record<string, string> {
   const used = new Map<ColorFamily | "other", number>();
   const picks: Record<string, string> = {};
   const recent: Array<ColorFamily | "other"> = [];
@@ -67,9 +74,10 @@ export function assignFavoriteColors(products: Product[]): Record<string, string
   for (const product of products) {
     const options = showableColors(product);
     if (!options.length) continue;
-    let best = options[0];
+    const picked = chosenColor(product, options, chosen);
+    let best = picked ?? options[0];
     let bestScore = Number.POSITIVE_INFINITY;
-    options.forEach((color, index) => {
+    if (!picked) options.forEach((color, index) => {
       const code = product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode;
       const family = colorFamily(color, code) ?? "other";
       const score = (used.get(family) ?? 0) * 3 +

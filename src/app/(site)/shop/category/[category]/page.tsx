@@ -40,7 +40,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     ? await getProductsByCollection(category.value)
     : await getProductsByCategory(category.value);
   const settings = await getShopSettings();
-  // The main collection (where "Shop" lands) opens with our picks.
+  // The main collection (where "Shop" lands) opens with Our Favorites.
   const isMainCollection = category.kind === "collection" && category.slug === (settings.featuredCategory?.slug ?? "nyes-neck-collection");
   const picks = isMainCollection ? getFavoriteProducts(products) : [];
   const pageTitle = category.kind === "collection" ? collectionPageLabel(category.label) : category.label;

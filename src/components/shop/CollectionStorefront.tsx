@@ -45,7 +45,7 @@ function gridClass(view: ViewMode) {
   return "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 [&>*]:outline [&>*]:outline-[0.5px] [&>*]:-outline-offset-[0.5px] [&>*]:outline-black/15";
 }
 
-/** The "Our picks" grid, shared with the homepage's Our Favorites. */
+/** The Our Favorites grid, shared by the homepage and the shop. */
 export function PicksGrid({ products, returnTo, view = "default", priorityCount = 2 }: { products: Product[]; returnTo: string; view?: ViewMode; priorityCount?: number }) {
   return (
     <div className={gridClass(view)}>
@@ -233,7 +233,7 @@ export function CollectionStorefront({ products, picks = [], returnTo, title }: 
     () => (sort === "featured" && !selected.type.length && filteredProducts.length > GROUPING_THRESHOLD ? groupByProductType(filteredProducts) : null),
     [filteredProducts, selected.type, sort],
   );
-  // Our picks lead the unfiltered collection. Once a visitor filters or sorts,
+  // Our Favorites lead the unfiltered collection. Once a visitor filters or sorts,
   // they are asking for a specific slice, so the picks step aside.
   const showPicks = Boolean(sections) && activeFilterCount === 0 && picks.length > 0;
   const renderOrder = [...(showPicks ? picks : []), ...(sections ? sections.flatMap((section) => section.products) : filteredProducts)];
@@ -284,7 +284,7 @@ export function CollectionStorefront({ products, picks = [], returnTo, title }: 
         <section className="mb-10 md:mb-16" aria-labelledby="section-our-picks">
           <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 pb-2 md:mb-6">
             <h2 id="section-our-picks" className="font-ui text-xl font-bold tracking-[-0.045em] sm:text-2xl">
-              Our picks
+              {HOLIDAY_DECOR ? <WreathText text="Our Favorites" /> : "Our Favorites"}
               <span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{picks.length}</span>
             </h2>
           </div>

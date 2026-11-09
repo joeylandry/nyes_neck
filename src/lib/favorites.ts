@@ -3,7 +3,7 @@ import type { Product } from "@/types/product";
 
 /**
  * The staple products shown under "Our Favorites" on the homepage and as
- * "Our picks" at the top of the main collection. Products are matched by name,
+ * at the top of the main collection. Products are matched by name,
  * type and brand, so a new Comfort Colors tee or retro hat is picked up
  * automatically. Rules run in order and a product is only used once.
  */

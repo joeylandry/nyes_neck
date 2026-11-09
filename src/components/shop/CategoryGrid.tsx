@@ -1,8 +1,18 @@
 import Image from "next/image";
 import Link from "next/link";
+import { HOLIDAY_DECOR } from "@/lib/holiday";
 import type { ShopTile } from "@/types/product";
 
-const tileColors = [
+// The same red, amber, green, blue and yellow as the bulbs under the header.
+const holidayTileColors = [
+  "bg-[#c8202f] text-white",
+  "bg-[#f29a16] text-[#161616]",
+  "bg-[#1f7a40] text-white",
+  "bg-[#2d68d8] text-white",
+  "bg-[#f4cf2d] text-[#161616]",
+];
+
+const coastalTileColors = [
   "bg-[#183247] text-white",
   "bg-[#7899a8] text-white",
   "bg-[#d8c7a8] text-[#161616]",
@@ -10,10 +20,20 @@ const tileColors = [
   "bg-[#e9e1d3] text-[#161616]",
 ];
 
-export function CategoryGrid({ tiles, ariaLabel }: { tiles: ShopTile[]; ariaLabel: string }) {
+/**
+ * `solid` tiles are plain blocks of color: any tile image is left out, and
+ * during the holidays they take the Christmas-light colors.
+ */
+export function CategoryGrid({ tiles, ariaLabel, solid = false }: { tiles: ShopTile[]; ariaLabel: string; solid?: boolean }) {
+  const tileColors = solid && HOLIDAY_DECOR ? holidayTileColors : coastalTileColors;
   return (
     <nav aria-label={ariaLabel} className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
-      {tiles.map((tile, index) => {
+      {tiles.map((sourceTile, index) => {
+        const tile = solid ? { ...sourceTile, image: undefined } : sourceTile;
+        const [backgroundClass, colorClass] = tileColors[index % tileColors.length].split(" ");
+        // The global `a { color: inherit }` rule outranks utilities on the link
+        // itself, so the label and arrow carry their color directly.
+        const textClass = tile.image ? "text-white" : colorClass;
         const content = (
           <>
             {tile.image ? (
@@ -27,11 +47,11 @@ export function CategoryGrid({ tiles, ariaLabel }: { tiles: ShopTile[]; ariaLabe
             ) : null}
             {tile.image ? <span className={`absolute inset-0 ${tile.comingSoon ? "bg-black/55" : "bg-gradient-to-t from-black/65 via-black/5 to-black/10"}`} aria-hidden="true" /> : null}
             <span className="relative z-10 flex flex-col gap-1.5">
-              <span className={`font-heading max-w-[12ch] text-[1.15rem] font-semibold leading-[1.05] tracking-[-0.04em] md:text-2xl ${tile.image ? "text-white" : ""}`}>
+              <span className={`font-heading max-w-[12ch] text-[1.15rem] font-semibold leading-[1.05] tracking-[-0.04em] md:text-2xl ${textClass}`}>
                 {tile.name}
               </span>
               {tile.comingSoon ? (
-                <span className={`text-xs font-bold uppercase tracking-[0.16em] ${tile.image ? "text-white/85" : "text-current/70"}`}>
+                <span className={`text-xs font-bold uppercase tracking-[0.16em] ${tile.image ? "text-white/85" : `${textClass} opacity-75`}`}>
                   Coming soon
                 </span>
               ) : null}
@@ -39,14 +59,14 @@ export function CategoryGrid({ tiles, ariaLabel }: { tiles: ShopTile[]; ariaLabe
             {!tile.comingSoon ? (
               <span
                 aria-hidden="true"
-                className={`absolute right-3 top-3 z-10 text-lg transition-transform duration-300 group-hover:translate-x-1 md:right-5 md:top-5 md:text-xl ${tile.image ? "text-white" : ""}`}
+                className={`absolute right-3 top-3 z-10 text-lg transition-transform duration-300 group-hover:translate-x-1 md:right-5 md:top-5 md:text-xl ${textClass}`}
               >
                 →
               </span>
             ) : null}
           </>
         );
-        const className = `group product-pattern relative flex aspect-[4/3] items-end overflow-hidden rounded-[17px] border border-black/10 p-3.5 shadow-[0_10px_28px_rgba(22,22,22,0.05)] md:rounded-[22px] md:p-5 ${tileColors[index % tileColors.length]} ${tile.comingSoon ? "cursor-default" : "transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(22,22,22,0.12)]"}`;
+        const className = `group ${solid ? "" : "product-pattern"} relative flex aspect-[4/3] items-end overflow-hidden rounded-[17px] border border-black/10 p-3.5 shadow-[0_10px_28px_rgba(22,22,22,0.05)] md:rounded-[22px] md:p-5 ${backgroundClass} ${tile.comingSoon ? "cursor-default" : "transition duration-300 hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(22,22,22,0.12)]"}`;
 
         return tile.comingSoon ? (
           <div key={tile.id} className={className} aria-label={`${tile.name}, coming soon`}>

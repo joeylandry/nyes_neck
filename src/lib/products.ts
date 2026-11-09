@@ -274,7 +274,9 @@ async function loadProducts(): Promise<Product[]> {
     return [...merged, ...printfulByExternalId.values()].sort((a, b) => a.name.localeCompare(b.name));
   }
 
-  return printfulProducts ?? shopifyProducts ?? (await fetchSanityProducts()) ?? localProducts;
+  if (printfulProducts?.length) return printfulProducts;
+  if (shopifyProducts?.length) return shopifyProducts;
+  return (await fetchSanityProducts()) ?? localProducts;
 }
 
 export async function getFeaturedProducts(): Promise<Product[]> {

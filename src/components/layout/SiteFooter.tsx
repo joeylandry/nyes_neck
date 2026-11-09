@@ -4,11 +4,11 @@ import { Wordmark } from "@/components/brand/Wordmark";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-black/10 bg-[#e9e1d3] px-4 py-8 md:px-6 md:py-10">
+    <footer className="bg-[#183247] px-4 text-white py-8 md:px-6 md:py-10">
       <div className="mx-auto flex max-w-6xl flex-col gap-7 md:flex-row md:items-end md:justify-between md:gap-8">
         <div>
           <div className="inline-flex items-center gap-2">
-            <Wordmark className="text-lg" />
+            <Wordmark tone="light" className="text-lg" />
             <span aria-hidden="true" className="relative block h-5 w-8 shrink-0">
               <Image
                 src="/images/retro_logo.png"
@@ -21,20 +21,20 @@ export function SiteFooter() {
               />
             </span>
           </div>
-          <p className="mt-3 text-sm text-black/65">Nyes Neck Clothing and Apparel</p>
-          <p className="mt-1 text-sm text-black/65">North Falmouth, Massachusetts</p>
-          <p className="mt-1 max-w-xs text-xs leading-5 text-black/55">
+          <p className="mt-3 text-sm text-white/75">Nyes Neck Clothing and Apparel</p>
+          <p className="mt-1 text-sm text-white/75">North Falmouth, Massachusetts</p>
+          <p className="mt-1 max-w-xs text-xs leading-5 text-white/60">
             Proceeds support St. Jude Children&apos;s Research Hospital
           </p>
         </div>
         <div className="flex flex-col gap-5 md:items-end">
-          <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-5 gap-y-3 text-sm">
+          <nav aria-label="Footer navigation" className="flex flex-wrap gap-x-5 gap-y-3 text-sm [&_a]:transition [&_a:hover]:text-[#a8c2bc] [&_a:focus-visible]:outline-white">
             <Link href="/">Home</Link>
             <Link href="/about">About</Link>
             <Link href="/shop">Shop</Link>
             <Link href="/contact">Contact</Link>
           </nav>
-          <p className="text-xs text-black/55">© {new Date().getFullYear()} Nyes Neck</p>
+          <p className="text-xs text-white/60">© {new Date().getFullYear()} Nyes Neck</p>
         </div>
       </div>
     </footer>

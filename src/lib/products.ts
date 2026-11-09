@@ -1,4 +1,5 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
+import { productDecorations } from "@/data/productDecorations";
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { mergeSynchronizedProductImages } from "@/lib/productImages";
@@ -227,6 +228,15 @@ async function fetchSanityProducts(): Promise<Product[] | null> {
 }
 
 export async function getProducts(): Promise<Product[]> {
+  return (await loadProducts()).map(withDecoration);
+}
+
+function withDecoration(product: Product): Product {
+  const decoration = productDecorations[product.externalId ?? product.id] ?? productDecorations[product.id];
+  return decoration ? { ...product, decoration } : product;
+}
+
+async function loadProducts(): Promise<Product[]> {
   const categories = await getShopCategories();
   const [printfulProducts, shopifyProducts] = await Promise.all([
     fetchPrintfulProducts(categories),

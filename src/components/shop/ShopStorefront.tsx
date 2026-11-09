@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Garland } from "@/components/holiday/Garland";
+import { WreathText } from "@/components/holiday/Wreath";
 import { getFavoriteProducts } from "@/lib/favorites";
 import { HOLIDAY_DECOR } from "@/lib/holiday";
 import { getFeaturedShopProducts, getShopSettings } from "@/lib/products";
@@ -19,10 +19,9 @@ export async function ShopStorefront() {
     <>
       <div className="mx-auto max-w-7xl px-3 py-10 md:px-6 md:py-16">
         <section aria-labelledby="featured-heading">
-          {HOLIDAY_DECOR ? <Garland className="mb-3 md:mb-4" /> : null}
           <div className="mb-5 flex items-end justify-between gap-4 md:mb-7">
             <h2 id="featured-heading" className="font-ui text-[1.9rem] font-semibold leading-none tracking-[-0.04em] md:text-5xl">
-              Our Favorites
+              {HOLIDAY_DECOR ? <WreathText text="Our Favorites" /> : "Our Favorites"}
             </h2>
             {featuredCategory ? (
               <Link href={`/shop/category/${featuredCategory.slug}`} className="font-ui group inline-flex shrink-0 items-center gap-1.5 pb-1 text-sm font-bold underline-offset-4 hover:underline md:text-base">

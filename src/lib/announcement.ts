@@ -1,6 +1,8 @@
 // Server-safe: the root layout inlines the script below, so this module must
 // not reach into client-only code.
-export const ANNOUNCEMENT_STORAGE_KEY = "nyes-neck-daily-drops-banner-dismissed";
+// Change the key whenever the message changes, so visitors who closed the
+// previous announcement still see the new one.
+export const ANNOUNCEMENT_STORAGE_KEY = "nyes-neck-holiday-2026-banner-dismissed";
 
 /**
  * Runs before first paint so a returning visitor who already dismissed the

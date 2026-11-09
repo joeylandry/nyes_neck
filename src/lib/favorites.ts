@@ -1,3 +1,4 @@
+import { FAVORITE_PRODUCT_IDS } from "@/data/favoritePicks";
 import type { Product } from "@/types/product";
 
 /**
@@ -55,7 +56,7 @@ const MAX_FAVORITES_PER_GROUP: Record<FavoriteGroupLabel, number> = {
 };
 
 function searchText(product: Product) {
-  return `${product.name} ${product.categoryLabel} ${product.brand ?? ""}`.toLowerCase();
+  return `${product.name} ${product.categoryLabel} ${product.brand ?? ""} ${product.decoration ?? ""}`.toLowerCase();
 }
 
 /** The staple group a product belongs to, so brand picks respect the same caps. */
@@ -66,7 +67,12 @@ function stapleGroup(text: string): FavoriteGroupLabel | undefined {
   return undefined;
 }
 
-export function getFavoriteProducts(products: Product[]): Product[] {
+export function getFavoriteProducts(products: Product[], pickedIds: string[] = FAVORITE_PRODUCT_IDS): Product[] {
+  if (pickedIds.length) {
+    const byId = new Map(products.flatMap((product) => [[product.id, product], ...(product.externalId ? [[product.externalId, product] as const] : [])]));
+    const picked = pickedIds.map((id) => byId.get(id)).filter((product): product is Product => Boolean(product));
+    if (picked.length) return [...new Set(picked)];
+  }
   const used = new Set<string>();
   const counts = new Map<FavoriteGroupLabel, number>();
   const favorites: Product[] = [];
@@ -86,4 +92,11 @@ export function getFavoriteProducts(products: Product[]): Product[] {
     }
   }
   return favorites;
+}
+
+/** "Retro" or "Classic" when the product name says so, for the catalog list. */
+export function productStyle(product: Pick<Product, "name">): "Retro" | "Classic" | undefined {
+  if (isRetro.test(product.name.toLowerCase())) return "Retro";
+  if (/\bclassic\b/i.test(product.name)) return "Classic";
+  return undefined;
 }

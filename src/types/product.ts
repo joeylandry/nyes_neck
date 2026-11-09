@@ -53,6 +53,8 @@ export type ProductVariant = {
   available: boolean;
 };
 
+export type ProductDecoration = "Embroidered" | "Printed";
+
 export type Product = {
   id: string;
   /** Stable ID from the connected commerce platform (Shopify for Printful sync stores). */
@@ -72,6 +74,8 @@ export type Product = {
   // present, it is deliberately kept with the synchronized product rather
   // than maintained as a storefront-only list.
   brand?: string;
+  /** Whether the design is embroidered or printed (see src/data/productDecorations.ts). */
+  decoration?: ProductDecoration;
   priceCents: number | null;
   currency: "USD";
   externalLink?: string;

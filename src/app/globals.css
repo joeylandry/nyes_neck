@@ -12,7 +12,7 @@
   --font-ui: var(--font-dm-sans), "Avenir Next", Avenir, sans-serif;
   --desktop-header-height: 73px;
   --mobile-header-height: 70px;
-  --announcement-height: 42px;
+  --announcement-height: 52px;
   --announcement-offset: 0px;
   --site-header-height: calc(var(--mobile-header-height) + var(--announcement-offset));
 }

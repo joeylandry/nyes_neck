@@ -26,7 +26,7 @@ export function ProductCard({ product, returnTo, priority = false, compact = fal
     <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={compact ? "(max-width: 640px) 72vw, 260px" : "(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"} aspectClass="aspect-[4/5]" roundedClass={compact ? "rounded-[16px] md:rounded-[20px]" : "rounded-[20px] md:rounded-[30px]"} touchSwipeFallback={touchSwipeFallback} />
     <Link href={href} className="block rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-3">
       <div className={`px-0.5 pb-2 md:px-1 ${compact ? "pt-3 md:pt-4" : "pt-4 md:pt-5"}`}>
-        {product.collectionLabel ? <p className={`font-bold uppercase tracking-[0.13em] text-black/45 ${compact ? "mb-1 text-[0.62rem] md:text-xs" : "mb-1.5 text-xs md:text-[0.8rem]"}`}>{product.collectionLabel}</p> : null}
+        {product.collectionLabel || product.decoration ? <p className={`font-bold uppercase tracking-[0.13em] text-black/45 ${compact ? "mb-1 text-[0.62rem] md:text-xs" : "mb-1.5 text-xs md:text-[0.8rem]"}`}>{[product.collectionLabel, product.decoration].filter(Boolean).join(" · ")}</p> : null}
         <h2 className={`font-ui font-bold leading-[1.2] tracking-[-0.025em] ${compact ? "text-[0.9rem] md:text-base" : "text-lg md:text-xl"}`}>{product.name}</h2>
         <p className={`font-ui font-medium text-black/80 ${compact ? "mt-1.5 text-sm" : "mt-2 text-base"}`}>{product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}</p>
       </div>

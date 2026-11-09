@@ -30,3 +30,8 @@ test("one style cannot crowd out the rest", () => {
   const favorites = getFavoriteProducts([...tees, product("spirit", "Spirit Tee", "T-Shirts")]).map((item) => item.id);
   assert.deepEqual(favorites, ["spirit", "cc-0", "cc-1", "cc-2"]); // the brand pass tops tees up to their cap of 4
 });
+
+test("hand-picked favorites override the automatic rules, in the order given", () => {
+  const catalog = [product("a", "Spirit Tee", "T-Shirts"), product("b", "Harbor Mug", "Drinkware"), product("c", "Beach Towel", "Towels")];
+  assert.deepEqual(getFavoriteProducts(catalog, ["c", "missing", "b"]).map((item) => item.id), ["c", "b"]);
+});

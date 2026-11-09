@@ -24,6 +24,12 @@ const holidayRibbons = [
   { ribbon: "#f3efe7", shade: "#cfc6b4" },
 ];
 
+// The gifts tile gets its own combination, used by no other tile: harbor
+// gold wrapped in a navy ribbon.
+const giftTileColor = "bg-[#c99a2e] text-[#161616]";
+const giftTileRibbon = { ribbon: "#183247", shade: "#0d1d2b" };
+const isGiftTile = (tile: ShopTile) => /gift/i.test(`${tile.id} ${tile.name}`);
+
 const coastalTileColors = [
   "bg-[#183247] text-white",
   "bg-[#7899a8] text-white",
@@ -42,11 +48,12 @@ export function CategoryGrid({ tiles, ariaLabel, solid = false }: { tiles: ShopT
     <nav aria-label={ariaLabel} className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
       {tiles.map((sourceTile, index) => {
         const tile = solid ? { ...sourceTile, image: undefined } : sourceTile;
-        const [backgroundClass, colorClass] = tileColors[index % tileColors.length].split(" ");
+        const holidayGift = solid && HOLIDAY_DECOR && isGiftTile(sourceTile);
+        const [backgroundClass, colorClass] = (holidayGift ? giftTileColor : tileColors[index % tileColors.length]).split(" ");
         // The global `a { color: inherit }` rule outranks utilities on the link
         // itself, so the label and arrow carry their color directly.
         const textClass = tile.image ? "text-white" : colorClass;
-        const giftRibbon = solid && HOLIDAY_DECOR ? holidayRibbons[index % holidayRibbons.length] : undefined;
+        const giftRibbon = holidayGift ? giftTileRibbon : solid && HOLIDAY_DECOR ? holidayRibbons[index % holidayRibbons.length] : undefined;
         const content = (
           <>
             {giftRibbon ? <GiftWrap {...giftRibbon} /> : null}

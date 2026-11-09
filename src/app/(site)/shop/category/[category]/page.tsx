@@ -5,6 +5,7 @@ import { ProductGrid } from "@/components/shop/ProductGrid";
 import { ShopBackLink } from "@/components/shop/ShopBackLink";
 import { ShopBrowseSections } from "@/components/shop/ShopBrowseSections";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { assignFavoriteColors } from "@/lib/favoriteColors";
 import { getFavoriteProducts } from "@/lib/favorites";
 import { getProductsByCategory, getProductsByCollection, getShopCategories, getShopSettings } from "@/lib/products";
 import { collectionPageLabel } from "@/lib/shopLabels";
@@ -47,7 +48,7 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
 
   return (
     <>
-      {category.kind === "collection" && products.length ? <CollectionStorefront products={products} picks={picks} returnTo={category.slug} title={pageTitle} /> : null}
+      {category.kind === "collection" && products.length ? <CollectionStorefront products={products} picks={picks} pickColors={assignFavoriteColors(picks)} returnTo={category.slug} title={pageTitle} /> : null}
       {category.kind !== "collection" ? (
         <>
           <PageHeader title={pageTitle} tone="blue" />

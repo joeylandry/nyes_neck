@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import { GiftWrap } from "@/components/holiday/GiftWrap";
 import { HOLIDAY_DECOR } from "@/lib/holiday";
 import type { ShopTile } from "@/types/product";
 
@@ -10,6 +11,17 @@ const holidayTileColors = [
   "bg-[#3d5a45] text-white",
   "bg-[#e9e1d3] text-[#161616]",
   "bg-[#7899a8] text-white",
+];
+
+// Ribbon and its darker edge for each holiday tile, in the same order:
+// cranberry on navy, gold on cranberry, cranberry on evergreen, evergreen on
+// sand, and cream on harbor blue.
+const holidayRibbons = [
+  { ribbon: "#c8202f", shade: "#8f1622" },
+  { ribbon: "#d9a92c", shade: "#a87d17" },
+  { ribbon: "#c8202f", shade: "#8f1622" },
+  { ribbon: "#2f5a3c", shade: "#1d3b27" },
+  { ribbon: "#f3efe7", shade: "#cfc6b4" },
 ];
 
 const coastalTileColors = [
@@ -34,8 +46,10 @@ export function CategoryGrid({ tiles, ariaLabel, solid = false }: { tiles: ShopT
         // The global `a { color: inherit }` rule outranks utilities on the link
         // itself, so the label and arrow carry their color directly.
         const textClass = tile.image ? "text-white" : colorClass;
+        const giftRibbon = solid && HOLIDAY_DECOR ? holidayRibbons[index % holidayRibbons.length] : undefined;
         const content = (
           <>
+            {giftRibbon ? <GiftWrap {...giftRibbon} /> : null}
             {tile.image ? (
               <Image
                 src={tile.image.src}

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { WreathText } from "@/components/holiday/Wreath";
+import { assignFavoriteColors } from "@/lib/favoriteColors";
 import { getFavoriteProducts } from "@/lib/favorites";
 import { HOLIDAY_DECOR } from "@/lib/holiday";
 import { getFeaturedShopProducts, getShopSettings } from "@/lib/products";
@@ -30,7 +31,7 @@ export async function ShopStorefront() {
               </Link>
             ) : null}
           </div>
-          <PicksGrid products={gridProducts} returnTo={featuredCategory?.slug ?? "shop"} />
+          <PicksGrid products={gridProducts} returnTo={featuredCategory?.slug ?? "shop"} colors={favorites.length ? assignFavoriteColors(gridProducts) : undefined} />
         </section>
 
         <ShopBrowseSections settings={settings} className="mt-14 md:mt-20" showProductTypes />

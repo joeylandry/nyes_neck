@@ -46,16 +46,16 @@ function gridClass(view: ViewMode) {
 }
 
 /** The Our Favorites grid, shared by the homepage and the shop. */
-export function PicksGrid({ products, returnTo, view = "default", priorityCount = 2 }: { products: Product[]; returnTo: string; view?: ViewMode; priorityCount?: number }) {
+export function PicksGrid({ products, returnTo, view = "default", priorityCount = 2, colors = {} }: { products: Product[]; returnTo: string; view?: ViewMode; priorityCount?: number; colors?: Record<string, string> }) {
   return (
     <div className={gridClass(view)}>
-      {products.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < priorityCount} />)}
+      {products.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < priorityCount} initialColor={colors[product.id]} />)}
     </div>
   );
 }
 
-function CollectionProductCard({ product, returnTo, view, priority }: { product: Product; returnTo: string; view: ViewMode; priority: boolean }) {
-  const [selectedColor, setSelectedColor] = useState(() => getProductDefaultColor(product));
+function CollectionProductCard({ product, returnTo, view, priority, initialColor }: { product: Product; returnTo: string; view: ViewMode; priority: boolean; initialColor?: string }) {
+  const [selectedColor, setSelectedColor] = useState(() => initialColor ?? getProductDefaultColor(product));
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
   const colorCodes = useMemo(() => Object.fromEntries(product.colors.map((color) => [color, product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode])), [product.colors, product.variants]);
 
@@ -204,7 +204,7 @@ function sizeGroups(values: string[]): FilterGroup[] {
   return groups;
 }
 
-export function CollectionStorefront({ products, picks = [], returnTo, title }: { products: Product[]; picks?: Product[]; returnTo: string; title: string }) {
+export function CollectionStorefront({ products, picks = [], pickColors = {}, returnTo, title }: { products: Product[]; picks?: Product[]; pickColors?: Record<string, string>; returnTo: string; title: string }) {
   const [view, setView] = useState<ViewMode>("default");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selected, setSelected] = useState<SelectedFacets>(EMPTY_FACETS);
@@ -288,7 +288,7 @@ export function CollectionStorefront({ products, picks = [], returnTo, title }: 
               <span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{picks.length}</span>
             </h2>
           </div>
-          <PicksGrid products={picks} returnTo={returnTo} view={view} />
+          <PicksGrid products={picks} returnTo={returnTo} view={view} colors={pickColors} />
         </section>
       ) : null}
       {filteredProducts.length > 0 && sections ? (

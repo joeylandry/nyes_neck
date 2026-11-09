@@ -2,10 +2,10 @@ import { FAVORITE_PRODUCT_IDS } from "@/data/favoritePicks";
 import type { Product } from "@/types/product";
 
 /**
- * The staple products shown under "Our Favorites" on the homepage and as
- * at the top of the main collection. Products are matched by name,
- * type and brand, so a new Comfort Colors tee or retro hat is picked up
- * automatically. Rules run in order and a product is only used once.
+ * The products shown under "Our Favorites" on the homepage and at the top of
+ * the main collection. Hand-picked IDs in src/data/favoritePicks.ts win; with
+ * none listed, products are matched by name, type and brand by the rules
+ * below. Rules run in order and a product is only used once.
  */
 type FavoriteGroupLabel = "T-shirts" | "Sweatshirts" | "Hats" | "Beach towels" | "Wine glasses" | "Top brands";
 type FavoriteRule = { group: FavoriteGroupLabel; test: (text: string) => boolean };

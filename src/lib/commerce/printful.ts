@@ -38,7 +38,7 @@ type PrintfulSyncVariant = {
   color?: string;
   availability_status?: string;
   variant_id?: number;
-  product?: { product_id?: number; image?: string };
+  product?: { product_id?: number; image?: string; name?: string };
   files?: { type?: string; filename?: string; preview_url?: string; thumbnail_url?: string; status?: string }[];
   color_code?: string;
 
@@ -73,6 +73,7 @@ type PrintfulCatalogProduct = {
     description?: string;
     brand?: string;
     manufacturer?: string;
+    model?: string;
     product_type?: string;
     type?: string;
     type_name?: string;
@@ -340,7 +341,12 @@ function mapPrintfulProduct(
     collection: collection.value,
     collectionLabel: collectionTileLabel(collection.label),
     collections: [collection.value],
-    brand: inferManufacturer(`${catalogProduct?.title ?? ""} ${syncProduct.name}`, catalogProduct?.brand ?? catalogProduct?.manufacturer ?? syncProduct.brand ?? syncProduct.manufacturer),
+    // Printful's catalog names usually carry the blank's brand and model
+    // ("… | Comfort Colors 1717 (Black / S)") even when `brand` is empty.
+    brand: inferManufacturer(
+      [catalogProduct?.title, catalogProduct?.model, ...(detail.sync_variants ?? []).slice(0, 1).map((variant) => variant.product?.name), syncProduct.name].filter(Boolean).join(" "),
+      catalogProduct?.brand ?? catalogProduct?.manufacturer ?? syncProduct.brand ?? syncProduct.manufacturer,
+    ),
     priceCents: parsePriceCents(detail.sync_variants ?? []),
     currency: "USD",
     images: orderFrontViewsFirst(images),

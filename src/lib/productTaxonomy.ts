@@ -66,14 +66,50 @@ export function inferProductTypeCategory({
 const manufacturerFallbacks = [
   "Under Armour",
   "Comfort Colors",
+  "Columbia",
+  "Adidas",
+  "Nike",
+  "Patagonia",
+  "The North Face",
+  "Carhartt",
+  "Champion",
+  "Bella + Canvas",
+  "Gildan",
+  "Next Level",
+  "Independent Trading Co.",
+  "Cotton Heritage",
+  "Lane Seven",
+  "AS Colour",
+  "Alternative Apparel",
+  "Los Angeles Apparel",
+  "American Apparel",
+  "Port Authority",
+  "Sport-Tek",
+  "Russell Athletic",
+  "Hanes",
+  "Jerzees",
+  "Tultex",
+  "Threadfast",
   "Stanley/Stella",
   "Liberty Bags",
   "Otto Cap",
-  "Columbia",
-  "Adidas",
+  "Yupoong",
+  "Flexfit",
+  "Richardson",
+  "Decky",
+  "Big Accessories",
+  "Beechfield",
+  "Atlantis Headwear",
+  "Capstone",
+  "Econscious",
+  "Libbey",
 ];
+
+// Catalog names spell some brands differently ("Bella+Canvas", "Bella Canvas").
+const normalize = (value: string) => value.toLowerCase().replace(/[^a-z0-9]+/g, "");
 
 export function inferManufacturer(searchText: string, authoritative?: string) {
   if (authoritative?.trim()) return authoritative.trim();
-  return manufacturerFallbacks.find((brand) => searchText.toLowerCase().includes(brand.toLowerCase()));
+  const text = normalize(searchText);
+  return manufacturerFallbacks.find((brand) => text.includes(normalize(brand)));
 }

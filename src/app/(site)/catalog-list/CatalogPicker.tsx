@@ -56,7 +56,7 @@ export function CatalogPicker({ rows }: { rows: CatalogRow[] }) {
                 </td>
                 <td className="py-2 pr-3 font-semibold">{row.name}</td>
                 <td className="py-2 pr-3 text-black/70">{row.type}</td>
-                <td className="py-2 pr-3 text-black/70">{row.brand || "—"}</td>
+                <td className="py-2 pr-3 text-black/70">{row.brand || <span className="text-black/40">No brand listed</span>}</td>
                 <td className="py-2 pr-3 text-black/70">{row.decoration || "—"}</td>
                 <td className="py-2 pr-3 text-black/70">{row.style || "—"}</td>
               </tr>

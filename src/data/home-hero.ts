@@ -20,5 +20,5 @@ export const homeHero: HomeHero = {
     mobilePosition: "56% center",
   },
   eyebrow: "The Nyes Neck Collection",
-  headline: "Inspired by our Home",
+  headline: "Inspired By Our Home",
 };

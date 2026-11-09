@@ -136,3 +136,10 @@ test("drinkware keeps Shopify's named front when Printful's preview is an unname
   assert.deepEqual(images.map((image) => image.id), ["shopify-white-front", "printful-black-preview", "shopify-white-right", "shopify-white-left"]);
   assert.equal(images[0].role, "main");
 });
+
+test("brands are found in Printful catalog names when the brand field is empty", () => {
+  assert.equal(inferManufacturer("Unisex Garment-Dyed Heavyweight T-Shirt | Comfort Colors 1717 (Black / S)"), "Comfort Colors");
+  assert.equal(inferManufacturer("Unisex Staple T-Shirt | Bella+Canvas 3001"), "Bella + Canvas");
+  assert.equal(inferManufacturer("Classic Dad Hat | Yupoong 6245CM"), "Yupoong");
+  assert.equal(inferManufacturer("Wine glass"), undefined);
+});

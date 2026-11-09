@@ -71,11 +71,56 @@ export function WreathText({ text }: { text: string }) {
       <span className="sr-only">{text}</span>
       <span aria-hidden="true">
         {parts.map((part, index) => {
-          if (part === "O") return <Wreath key={index} viewBox="3 3 42 51" className="mx-[0.02em] h-[0.86em] align-[-0.15em]" />;
+          if (part === "O") return <Wreath key={index} viewBox="3 3 42 51" className="mx-[0.03em] h-[1.08em] align-[-0.22em]" />;
           if (part === "o") return <Wreath key={index} viewBox="3 3 42 51" className="mx-[0.02em] h-[0.64em] align-[-0.11em]" />;
           return part;
         })}
       </span>
     </>
+  );
+}
+
+/** A wide-holed wreath that frames the header logo. */
+function buildLogoWreath() {
+  const random = seededRandom(2512);
+  const needles: Array<{ x1: number; y1: number; x2: number; y2: number; color: string }> = [];
+  for (let step = 0; step < 90; step += 1) {
+    const around = (step / 90) * Math.PI * 2;
+    for (let n = 0; n < 4; n += 1) {
+      const radius = 41 + (random() - 0.5) * 6;
+      const x = 50 + Math.cos(around) * radius;
+      const y = 50 + Math.sin(around) * radius;
+      const angle = around + Math.PI / 2 + (random() - 0.5) * 2.2;
+      const length = 4 + random() * 4;
+      needles.push({ x1: x, y1: y, x2: x + Math.cos(angle) * length, y2: y + Math.sin(angle) * length, color: GREENS[Math.floor(random() * GREENS.length)] });
+    }
+  }
+  const berries = [-160, -125, -90, -55, -20, 20, 160].flatMap((degrees) => {
+    const angle = (degrees * Math.PI) / 180;
+    const x = 50 + Math.cos(angle) * 41;
+    const y = 50 + Math.sin(angle) * 41;
+    return [{ x, y }, { x: x + 3, y: y + 1.6 }];
+  });
+  return { needles, berries };
+}
+
+const logoWreath = buildLogoWreath();
+
+export function LogoWreath({ className = "" }: { className?: string }) {
+  return (
+    <svg aria-hidden="true" viewBox="0 0 100 104" className={`pointer-events-none ${className}`}>
+      <g strokeLinecap="round" strokeWidth="2.6">
+        {logoWreath.needles.map((needle, index) => (
+          <line key={index} x1={needle.x1.toFixed(1)} y1={needle.y1.toFixed(1)} x2={needle.x2.toFixed(1)} y2={needle.y2.toFixed(1)} stroke={needle.color} />
+        ))}
+      </g>
+      {logoWreath.berries.map((berry, index) => <circle key={index} cx={berry.x.toFixed(1)} cy={berry.y.toFixed(1)} r="2.6" fill="#d4252f" />)}
+      <g transform="translate(50 91)">
+        <path d="M-1.5 1 L-10 18 L-5 16 L-2.5 20.5 Z M1.5 1 L10 18 L5 16 L2.5 20.5 Z" fill="#a8172a" />
+        <ellipse cx="-8" cy="-1" rx="9" ry="5.6" transform="rotate(-18 -8 -1)" fill="#c8202f" />
+        <ellipse cx="8" cy="-1" rx="9" ry="5.6" transform="rotate(18 8 -1)" fill="#c8202f" />
+        <circle r="3.8" fill="#e23a45" />
+      </g>
+    </svg>
   );
 }

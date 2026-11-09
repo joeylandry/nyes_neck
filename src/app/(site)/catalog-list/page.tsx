@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { CatalogPicker, type CatalogRow } from "./CatalogPicker";
 import { getFavoriteProducts, productStyle } from "@/lib/favorites";
+import { productDetails } from "@/data/productDetails";
 import { getProducts } from "@/lib/products";
 
 // An unlinked working page for choosing "Our Favorites". Kept out of search.
@@ -12,15 +13,21 @@ export const metadata: Metadata = {
 export default async function CatalogListPage() {
   const products = await getProducts();
   const current = new Set(getFavoriteProducts(products).map((product) => product.id));
-  const rows: CatalogRow[] = products.map((product) => ({
+  const rows: CatalogRow[] = products.map((product) => {
+    const details = productDetails[product.externalId ?? product.id];
+    const mainImage = product.images.find((image) => image.role === "main") ?? product.images[0];
+    return {
     id: product.externalId ?? product.id,
     name: product.name,
+    image: mainImage?.src ?? "",
     type: product.categoryLabel,
-    brand: product.brand ?? "",
+    brand: details?.brand ?? product.brand ?? "",
+    model: details?.model ?? product.model ?? "",
     decoration: product.decoration ?? "",
     style: productStyle(product) ?? "",
     favorite: current.has(product.id),
-  }));
+    };
+  });
 
   return (
     <div className="mx-auto max-w-6xl px-3 py-10 md:px-6 md:py-14">

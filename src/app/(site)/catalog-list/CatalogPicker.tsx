@@ -1,8 +1,9 @@
 "use client";
 
+import Image from "next/image";
 import { useState } from "react";
 
-export type CatalogRow = { id: string; name: string; type: string; brand: string; decoration: string; style: string; favorite: boolean };
+export type CatalogRow = { id: string; name: string; image: string; type: string; brand: string; model: string; decoration: string; style: string; favorite: boolean };
 
 export function CatalogPicker({ rows }: { rows: CatalogRow[] }) {
   const [selected, setSelected] = useState(() => new Set(rows.filter((row) => row.favorite).map((row) => row.id)));
@@ -37,13 +38,15 @@ export function CatalogPicker({ rows }: { rows: CatalogRow[] }) {
         </button>
       </div>
       <div className="mt-4 overflow-x-auto">
-        <table className="w-full min-w-[40rem] text-left text-sm">
+        <table className="w-full min-w-[52rem] text-left text-sm">
           <thead className="border-b border-black/20 text-xs uppercase tracking-[0.12em] text-black/55">
             <tr>
               <th className="py-2 pr-3 font-bold"><span className="sr-only">Favorite</span></th>
+              <th className="py-2 pr-3 font-bold"><span className="sr-only">Photo</span></th>
               <th className="py-2 pr-3 font-bold">Title</th>
               <th className="py-2 pr-3 font-bold">Type</th>
               <th className="py-2 pr-3 font-bold">Brand</th>
+              <th className="py-2 pr-3 font-bold">Model</th>
               <th className="py-2 pr-3 font-bold">Embroidered / Printed</th>
               <th className="py-2 pr-3 font-bold">Classic / Retro</th>
             </tr>
@@ -54,9 +57,17 @@ export function CatalogPicker({ rows }: { rows: CatalogRow[] }) {
                 <td className="py-2 pr-3">
                   <input type="checkbox" className="size-4 accent-black" checked={selected.has(row.id)} onChange={() => toggle(row.id)} aria-label={`Include ${row.name}`} />
                 </td>
+                <td className="py-2 pr-3">
+                  {row.image ? (
+                    <span className="relative block size-16 overflow-hidden rounded-lg border border-black/10 bg-white">
+                      <Image src={row.image} alt="" fill sizes="64px" className="object-contain p-1" />
+                    </span>
+                  ) : null}
+                </td>
                 <td className="py-2 pr-3 font-semibold">{row.name}</td>
                 <td className="py-2 pr-3 text-black/70">{row.type}</td>
                 <td className="py-2 pr-3 text-black/70">{row.brand || <span className="text-black/40">No brand listed</span>}</td>
+                <td className="py-2 pr-3 text-black/70">{row.model || "—"}</td>
                 <td className="py-2 pr-3 text-black/70">{row.decoration || "—"}</td>
                 <td className="py-2 pr-3 text-black/70">{row.style || "—"}</td>
               </tr>

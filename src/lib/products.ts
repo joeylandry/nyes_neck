@@ -1,5 +1,5 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
-import { productDecorations } from "@/data/productDecorations";
+import { productDetails } from "@/data/productDetails";
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { mergeSynchronizedProductImages } from "@/lib/productImages";
@@ -232,8 +232,15 @@ export async function getProducts(): Promise<Product[]> {
 }
 
 function withDecoration(product: Product): Product {
-  const decoration = productDecorations[product.externalId ?? product.id] ?? productDecorations[product.id];
-  return decoration ? { ...product, decoration } : product;
+  const details = productDetails[product.externalId ?? product.id] ?? productDetails[product.id];
+  if (!details) return product;
+  const branded = !/^unbranded/i.test(details.brand);
+  return {
+    ...product,
+    decoration: details.decoration,
+    model: details.model,
+    brand: branded ? details.brand.replace(/^Bella\+Canvas$/, "Bella + Canvas") : undefined,
+  };
 }
 
 async function loadProducts(): Promise<Product[]> {

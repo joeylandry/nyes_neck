@@ -76,6 +76,8 @@ export type Product = {
   brand?: string;
   /** Whether the design is embroidered or printed (see src/data/productDecorations.ts). */
   decoration?: ProductDecoration;
+  /** The blank's model number, e.g. Comfort Colors "1717". */
+  model?: string;
   priceCents: number | null;
   currency: "USD";
   externalLink?: string;

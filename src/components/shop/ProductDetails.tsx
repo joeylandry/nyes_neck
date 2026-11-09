@@ -45,7 +45,10 @@ export function ProductDetails({ product }: { product: Product }) {
         )}
       </div>
       <div className="md:sticky md:top-24 md:py-3">
-        <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#183247]/60">{product.collectionLabel || product.categoryLabel}</p>
+        <div className="flex flex-wrap items-center gap-2.5">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[#183247]/60">{product.collectionLabel || product.categoryLabel}</p>
+          {product.decoration ? <span className="rounded-full border border-[#183247]/25 px-2.5 py-0.5 text-[0.7rem] font-bold uppercase tracking-[0.12em] text-[#183247]">{product.decoration}</span> : null}
+        </div>
         <h1 className="font-heading mt-3 text-[2.4rem] font-semibold leading-[1.06] tracking-[-0.045em] lg:text-5xl">{product.name}</h1>
         <p className="mt-5 text-2xl font-medium" aria-live="polite">{price === null ? "Pricing to be announced" : formatCurrency(price, product.currency)}</p>
         <div className="mt-7 space-y-6 border-y border-black/10 py-7">

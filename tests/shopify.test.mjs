@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { getShopifyOrigin, getShopifyCartUrl, applyLaunchAvailability } from "../src/lib/commerce/shopify.ts";
 import { makeProductSlug, productMatchesSlug } from "../src/lib/productSlugs.ts";
 import { inferManufacturer, inferProductTypeCategory } from "../src/lib/productTaxonomy.ts";
-import { getProductDefaultColor, mergeSynchronizedProductImages } from "../src/lib/productImages.ts";
+import { detectProductImageView, getProductDefaultColor, mergeSynchronizedProductImages, orderFrontViewsFirst } from "../src/lib/productImages.ts";
 
 test("cart links accept numeric Shopify IDs and only a Shopify HTTPS domain", () => {
   const previous = process.env.SHOPIFY_STORE_DOMAIN;
@@ -85,4 +85,61 @@ test("the published primary image controls the initial product color", () => {
       { id: "blue-small", color: "Blue", size: "S", available: true },
     ],
   }), "Blue");
+});
+
+test("mockup file names reveal which side of the product they show", () => {
+  assert.equal(detectProductImageView("https://cdn.shopify.com/s/files/1/unisex-hoodie-navy-front-65f1a2.png?v=1"), "front");
+  assert.equal(detectProductImageView("https://cdn.shopify.com/s/files/1/unisex-hoodie-navy-back-2-65f1a2.png"), "other");
+  assert.equal(detectProductImageView("https://cdn.shopify.com/s/files/1/unisex-hoodie-navy-left-front-65f1a2.png"), "angled-front");
+  assert.equal(detectProductImageView("mockup_Front_Black.png"), "front");
+  assert.equal(detectProductImageView("https://cdn.shopify.com/s/files/1/back-bay-tee-white-front-65f1.png"), "front");
+  assert.equal(detectProductImageView("https://files.cdn.printful.com/files/abc/abc_preview.png"), undefined);
+  assert.equal(detectProductImageView(undefined, "https://cdn.shopify.com/s/files/1/tee-black-back-65f1.png"), "other");
+});
+
+test("each color opens on its front mockup without changing the primary color", () => {
+  const images = orderFrontViewsFirst([
+    { id: "navy-back", src: "https://shopify.test/hoodie-navy-back-1.png", alt: "", role: "main", colors: ["Navy"] },
+    { id: "black-sleeve", src: "https://shopify.test/hoodie-black-left-1.png", alt: "", role: "gallery", colors: ["Black"] },
+    { id: "navy-front", src: "https://shopify.test/hoodie-navy-front-1.png", alt: "", role: "gallery", colors: ["Navy"] },
+    { id: "black-preview", src: "https://printful.test/abc_preview.png", alt: "", role: "gallery", colors: ["Black"], view: "front" },
+    { id: "black-back", src: "https://shopify.test/hoodie-black-back-1.png", alt: "", role: "gallery", colors: ["Black"] },
+  ]);
+  assert.deepEqual(images.map((image) => image.id), ["navy-front", "black-preview", "navy-back", "black-sleeve", "black-back"]);
+  assert.deepEqual(images.map((image) => image.role), ["main", "gallery", "gallery", "gallery", "gallery"]);
+});
+
+test("synchronized products keep Shopify's front for colors Printful did not mock up", () => {
+  const images = mergeSynchronizedProductImages(
+    [{ id: "printful-blue-back", src: "https://printful.test/blue-back.png", alt: "", role: "main", colors: ["Blue"] }],
+    [
+      { id: "shopify-blue-back", src: "https://shopify.test/tee-blue-back-1.png", alt: "", role: "main", colors: ["Blue"] },
+      { id: "shopify-red-back", src: "https://shopify.test/tee-red-back-1.png", alt: "", role: "gallery", colors: ["Red"] },
+      { id: "shopify-red-front", src: "https://shopify.test/tee-red-front-1.png", alt: "", role: "gallery", colors: ["Red"] },
+    ],
+  );
+  assert.deepEqual(images.filter((image) => image.colors?.includes("Red")).map((image) => image.id), ["shopify-red-front", "shopify-red-back"]);
+});
+
+test("drinkware keeps Shopify's named front when Printful's preview is an unnamed angle", () => {
+  const images = mergeSynchronizedProductImages(
+    [
+      { id: "printful-white-preview", src: "https://files.cdn.printful.com/files/a1/a1_preview.png", alt: "", role: "main", colors: ["White"] },
+      { id: "printful-black-preview", src: "https://files.cdn.printful.com/files/b2/b2_preview.png", alt: "", role: "gallery", colors: ["Black"] },
+    ],
+    [
+      { id: "shopify-white-right", src: "https://cdn.shopify.com/s/files/1/water-bottle-white-17oz-right-6a.png", alt: "", role: "main", colors: ["White"] },
+      { id: "shopify-white-front", src: "https://cdn.shopify.com/s/files/1/water-bottle-white-17oz-front-6a.png", alt: "", role: "gallery", colors: ["White"] },
+      { id: "shopify-white-left", src: "https://cdn.shopify.com/s/files/1/water-bottle-white-17oz-left-6a.png", alt: "", role: "gallery", colors: ["White"] },
+    ],
+  );
+  assert.deepEqual(images.map((image) => image.id), ["shopify-white-front", "printful-black-preview", "shopify-white-right", "shopify-white-left"]);
+  assert.equal(images[0].role, "main");
+});
+
+test("brands are found in Printful catalog names when the brand field is empty", () => {
+  assert.equal(inferManufacturer("Unisex Garment-Dyed Heavyweight T-Shirt | Comfort Colors 1717 (Black / S)"), "Comfort Colors");
+  assert.equal(inferManufacturer("Unisex Staple T-Shirt | Bella+Canvas 3001"), "Bella + Canvas");
+  assert.equal(inferManufacturer("Classic Dad Hat | Yupoong 6245CM"), "Yupoong");
+  assert.equal(inferManufacturer("Wine glass"), undefined);
 });

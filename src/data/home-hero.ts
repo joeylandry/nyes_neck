@@ -7,7 +7,7 @@ export type HomeHero = {
   };
   eyebrow: string;
   headline: string;
-  subhead: string;
+  subhead?: string;
 };
 
 // Swap `image` for a photo of someone wearing the apparel once one exists —
@@ -20,6 +20,5 @@ export const homeHero: HomeHero = {
     mobilePosition: "56% center",
   },
   eyebrow: "The Nyes Neck Collection",
-  headline: "Made for life on the Cape",
-  subhead: "Everyday apparel inspired by the water, the jetty, and long summer evenings on Nyes Neck.",
+  headline: "Inspired By Our Home",
 };

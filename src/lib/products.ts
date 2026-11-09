@@ -1,4 +1,5 @@
 import { collectionCategories, productTypeCategories, products as localProducts, shopCategories as localShopCategories } from "@/data/products";
+import { productDetails } from "@/data/productDetails";
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { mergeSynchronizedProductImages } from "@/lib/productImages";
@@ -227,6 +228,22 @@ async function fetchSanityProducts(): Promise<Product[] | null> {
 }
 
 export async function getProducts(): Promise<Product[]> {
+  return (await loadProducts()).map(withDecoration);
+}
+
+function withDecoration(product: Product): Product {
+  const details = productDetails[product.externalId ?? product.id] ?? productDetails[product.id];
+  if (!details) return product;
+  const branded = !/^unbranded/i.test(details.brand);
+  return {
+    ...product,
+    decoration: details.decoration,
+    model: details.model,
+    brand: branded ? details.brand.replace(/^Bella\+Canvas$/, "Bella + Canvas") : undefined,
+  };
+}
+
+async function loadProducts(): Promise<Product[]> {
   const categories = await getShopCategories();
   const [printfulProducts, shopifyProducts] = await Promise.all([
     fetchPrintfulProducts(categories),

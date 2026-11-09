@@ -12,7 +12,7 @@
   --font-ui: var(--font-dm-sans), "Avenir Next", Avenir, sans-serif;
   --desktop-header-height: 73px;
   --mobile-header-height: 70px;
-  --announcement-height: 42px;
+  --announcement-height: 52px;
   --announcement-offset: 0px;
   --site-header-height: calc(var(--mobile-header-height) + var(--announcement-offset));
 }
@@ -208,5 +208,23 @@ textarea {
     transition-duration: 0.01ms !important;
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
+  }
+}
+
+/* Retro Christmas bulbs under the header (see src/lib/holiday.ts). */
+@keyframes holiday-bulb-twinkle {
+  0%, 100% { opacity: 1; filter: drop-shadow(0 0 3px currentColor) drop-shadow(0 1px 5px currentColor); }
+  50% { opacity: 0.38; filter: none; }
+}
+
+.holiday-bulb {
+  transform-origin: 50% 0;
+  filter: drop-shadow(0 0 3px currentColor);
+  animation: holiday-bulb-twinkle 2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .holiday-bulb {
+    animation: none;
   }
 }

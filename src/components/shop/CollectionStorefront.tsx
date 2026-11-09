@@ -1,9 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { WreathText } from "@/components/holiday/Wreath";
 import { useDialog } from "@/hooks/useDialog";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { groupByProductType, GROUPING_THRESHOLD, OTHER_FAMILY_LABEL, typeFamilies, UNGROUPED_SECTION_KEY } from "@/lib/collectionSections";
+import { HOLIDAY_DECOR } from "@/lib/holiday";
 import { getProductDefaultColor } from "@/lib/productImages";
 import { slugifyProductValue } from "@/lib/productSlugs";
 import type { Product } from "@/types/product";
@@ -43,8 +45,17 @@ function gridClass(view: ViewMode) {
   return "grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 [&>*]:outline [&>*]:outline-[0.5px] [&>*]:-outline-offset-[0.5px] [&>*]:outline-black/15";
 }
 
-function CollectionProductCard({ product, returnTo, view, priority }: { product: Product; returnTo: string; view: ViewMode; priority: boolean }) {
-  const [selectedColor, setSelectedColor] = useState(() => getProductDefaultColor(product));
+/** The Our Favorites grid, shared by the homepage and the shop. */
+export function PicksGrid({ products, returnTo, view = "default", priorityCount = 2, colors = {} }: { products: Product[]; returnTo: string; view?: ViewMode; priorityCount?: number; colors?: Record<string, string> }) {
+  return (
+    <div className={gridClass(view)}>
+      {products.map((product, index) => <CollectionProductCard key={product.id} product={product} returnTo={returnTo} view={view} priority={index < priorityCount} initialColor={colors[product.id]} />)}
+    </div>
+  );
+}
+
+function CollectionProductCard({ product, returnTo, view, priority, initialColor }: { product: Product; returnTo: string; view: ViewMode; priority: boolean; initialColor?: string }) {
+  const [selectedColor, setSelectedColor] = useState(() => initialColor ?? getProductDefaultColor(product));
   const href = { pathname: `/shop/${product.slug}`, query: { from: returnTo } };
   const colorCodes = useMemo(() => Object.fromEntries(product.colors.map((color) => [color, product.variants.find((variant) => variant.color === color && variant.colorCode)?.colorCode])), [product.colors, product.variants]);
 
@@ -59,7 +70,7 @@ function CollectionProductCard({ product, returnTo, view, priority }: { product:
     <article className={`font-ui ${isExpanded ? "grid min-w-0 grid-cols-1 gap-4 border-b border-black/15 pb-8 sm:grid-cols-[minmax(0,1.4fr)_minmax(12rem,0.6fr)] sm:gap-7" : "min-w-0"}`}>
       <ProductCardMedia key={selectedColor} product={product} selectedColor={selectedColor} href={href} priority={priority} sizes={isExpanded ? "(max-width: 640px) 100vw, 60vw" : "(max-width: 640px) 50vw, 33vw"} aspectClass={isExpanded ? "aspect-[4/5]" : "aspect-[3/4]"} />
       <div className={`${isExpanded ? "flex flex-col justify-end" : "pt-3"}`}>
-        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-black/45">{product.collectionLabel}</p>
+        <p className="mb-2 text-[0.65rem] font-bold uppercase tracking-[0.14em] text-black/45">{[product.collectionLabel, product.decoration].filter(Boolean).join(" · ")}</p>
         <h2 className={`${isExpanded ? "text-2xl sm:text-3xl" : "text-[0.95rem] sm:text-lg"} font-bold leading-[1.18] tracking-[-0.035em]`}>{product.name}</h2>
         {isExpanded ? <p className="mt-3 max-w-[34ch] text-sm leading-5 text-black/65">{product.shortDescription}</p> : null}
         <p className={`${isExpanded ? "mt-4 text-lg" : "mt-2 text-sm"} font-medium text-black/85`}>{product.priceCents === null ? "Pricing to be announced" : formatCurrency(product.priceCents, product.currency)}</p>
@@ -193,7 +204,7 @@ function sizeGroups(values: string[]): FilterGroup[] {
   return groups;
 }
 
-export function CollectionStorefront({ products, returnTo, title }: { products: Product[]; returnTo: string; title: string }) {
+export function CollectionStorefront({ products, picks = [], pickColors = {}, returnTo, title }: { products: Product[]; picks?: Product[]; pickColors?: Record<string, string>; returnTo: string; title: string }) {
   const [view, setView] = useState<ViewMode>("default");
   const [filterOpen, setFilterOpen] = useState(false);
   const [selected, setSelected] = useState<SelectedFacets>(EMPTY_FACETS);
@@ -222,7 +233,10 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
     () => (sort === "featured" && !selected.type.length && filteredProducts.length > GROUPING_THRESHOLD ? groupByProductType(filteredProducts) : null),
     [filteredProducts, selected.type, sort],
   );
-  const renderOrder = sections ? sections.flatMap((section) => section.products) : filteredProducts;
+  // Our Favorites lead the unfiltered collection. Once a visitor filters or sorts,
+  // they are asking for a specific slice, so the picks step aside.
+  const showPicks = Boolean(sections) && activeFilterCount === 0 && picks.length > 0;
+  const renderOrder = [...(showPicks ? picks : []), ...(sections ? sections.flatMap((section) => section.products) : filteredProducts)];
   const priorityIds = new Set(renderOrder.slice(0, 2).map((product) => product.id));
 
   const toggleFacet = (key: FacetKey, value: string) => {
@@ -239,11 +253,10 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
   };
 
   return (
-    <section className="mx-auto max-w-7xl px-3 py-8 md:px-6 md:py-14" aria-labelledby="collection-title">
+    <section className={`mx-auto max-w-7xl px-3 md:px-6 md:pb-14 ${HOLIDAY_DECOR ? "pb-8 pt-12 md:pt-16" : "py-8 md:py-14"}`} aria-labelledby="collection-title">
       <div className="mb-7 border-b border-black/15 pb-5 md:mb-10 md:pb-7">
-        <p className="mb-3 text-xs font-bold uppercase tracking-[0.14em] text-black/45">New arrivals</p>
         <div className="flex flex-wrap items-end justify-between gap-5">
-          <h1 id="collection-title" className="font-ui text-[2.5rem] font-normal leading-none tracking-[-0.07em] sm:text-6xl">{title}<span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{products.length}</span></h1>
+          <h1 id="collection-title" className="font-ui text-[2.5rem] font-normal leading-none tracking-[-0.07em] sm:text-6xl">{HOLIDAY_DECOR ? <WreathText text={title} /> : title}<span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{products.length}</span></h1>
           <button type="button" onClick={() => setFilterOpen(true)} className="font-ui inline-flex min-h-11 items-center gap-2 rounded-full border border-black px-4 text-sm font-bold hover:bg-black hover:text-white">
             <FilterIcon /> Filters{activeFilterCount ? ` (${activeFilterCount})` : ""}
           </button>
@@ -267,6 +280,17 @@ export function CollectionStorefront({ products, returnTo, title }: { products: 
         <ActiveFilters selected={selected} inStockOnly={inStockOnly} onRemove={toggleFacet} onRemoveInStock={() => setInStockOnly(false)} onClear={clearFilters} />
       </div>
 
+      {showPicks ? (
+        <section className="mb-10 md:mb-16" aria-labelledby="section-our-picks">
+          <div className="mb-4 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-1 border-b border-black/10 pb-2 md:mb-6">
+            <h2 id="section-our-picks" className="font-ui text-xl font-bold tracking-[-0.045em] sm:text-2xl">
+              {HOLIDAY_DECOR ? <WreathText text="Our Favorites" /> : "Our Favorites"}
+              <span className="ml-2 align-middle text-sm font-normal tracking-normal text-black/45">{picks.length}</span>
+            </h2>
+          </div>
+          <PicksGrid products={picks} returnTo={returnTo} view={view} colors={pickColors} />
+        </section>
+      ) : null}
       {filteredProducts.length > 0 && sections ? (
         sections.map((section) => (
           // Section labels come from the catalog, so the heading id is slugified

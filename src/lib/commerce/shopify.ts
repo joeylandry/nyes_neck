@@ -3,6 +3,7 @@ import "server-only";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { makeProductSlug, slugifyProductValue } from "@/lib/productSlugs";
 import { inferManufacturer, inferProductTypeCategory } from "@/lib/productTaxonomy";
+import { detectProductImageView, orderFrontViewsFirst } from "@/lib/productImages";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
 
 type ShopifyProduct = {
@@ -131,6 +132,7 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
       alt: image.alt?.trim() || product.title,
       role: index === 0 ? "main" : "gallery",
       colors: [...matchingColors],
+      view: detectProductImageView(image.src),
     };
   });
   if (!images.length) return null;
@@ -155,7 +157,7 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
     ),
     priceCents: prices.length ? Math.min(...prices) : null,
     currency: "USD",
-    images,
+    images: orderFrontViewsFirst(images),
     sizes: Array.from(new Set(variants.map((variant) => variant.size).filter((size): size is string => Boolean(size)))),
     colors,
     variants,

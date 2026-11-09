@@ -32,9 +32,11 @@ export async function HomeHero() {
           <h1 id="home-hero-heading" className="font-ui mt-3 text-balance text-[2.6rem] font-semibold leading-[0.98] tracking-[-0.045em] md:text-7xl">
             {headline}
           </h1>
-          <p className="font-ui mt-4 max-w-md text-base leading-snug text-white/90 md:text-lg">
-            {subhead}
-          </p>
+          {subhead ? (
+            <p className="font-ui mt-4 max-w-md text-base leading-snug text-white/90 md:text-lg">
+              {subhead}
+            </p>
+          ) : null}
           <div className="mt-6 flex gap-3">
             <Link
               href={shopHref}

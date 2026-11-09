@@ -1,11 +1,8 @@
-import type { Metadata } from "next";
-import { ShopStorefront } from "@/components/shop/ShopStorefront";
+import { redirect } from "next/navigation";
+import { getShopSettings } from "@/lib/products";
 
-export const metadata: Metadata = {
-  title: "Shop",
-  description: "Explore the first Nyes Neck Upper Cape apparel and lifestyle collection.",
-};
-
-export default function ShopPage() {
-  return <ShopStorefront />;
+// "Shop" opens straight onto the main collection, which starts with Our Favorites.
+export default async function ShopPage() {
+  const settings = await getShopSettings();
+  redirect(`/shop/category/${settings.featuredCategory?.slug ?? "nyes-neck-collection"}`);
 }

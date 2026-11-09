@@ -18,9 +18,9 @@ export function AnnouncementBanner() {
     <div
       data-announcement-banner
       data-site-header-offset
-      className="fixed inset-x-0 top-0 z-[55] flex h-[var(--announcement-height)] items-center justify-center bg-[#183247] px-12 text-center text-[0.98rem] font-semibold leading-tight text-white shadow-sm md:text-[1.05rem]"
+      className="fixed inset-x-0 top-0 z-[55] flex h-[var(--announcement-height)] items-center justify-center bg-[#183247] px-12 text-center text-[0.84rem] font-semibold leading-tight text-white shadow-sm md:text-[1.05rem]"
     >
-      <p>Fresh drops are landing daily—see what&apos;s new!</p>
+      <p>The holiday season is almost here! Shop early for the holidays &amp; Happy Thanksgiving!</p>
       <button
         type="button"
         aria-label="Dismiss announcement"

@@ -7,7 +7,7 @@ export default function robots(): MetadataRoute.Robots {
       userAgent: "*",
       allow: "/",
       // The embedded Sanity Studio and the cart are per-visitor, not content.
-      disallow: ["/studio", "/studio/", "/cart", "/api/"],
+      disallow: ["/studio", "/studio/", "/cart", "/api/", "/catalog-list"],
     },
     sitemap: new URL("/sitemap.xml", getSiteUrl()).toString(),
   };

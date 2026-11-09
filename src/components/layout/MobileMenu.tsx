@@ -6,9 +6,10 @@ import { HeaderBrand } from "@/components/brand/HeaderBrand";
 import { Wordmark } from "@/components/brand/Wordmark";
 import { CartLink } from "@/components/shop/CartLink";
 import { useDialog } from "@/hooks/useDialog";
+import { HOLIDAY_DECOR } from "@/lib/holiday";
 import { useActivePath, type NavLink } from "./navigation";
 
-export function MobileMenu({ links }: { links: NavLink[] }) {
+export function MobileMenu({ links, decoration }: { links: NavLink[]; decoration?: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const isActive = useActivePath();
   const panelRef = useDialog({ open, onClose: () => setOpen(false) });
@@ -17,7 +18,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
     <div className="md:hidden">
       <div data-site-header-offset className="fixed inset-x-0 top-[var(--announcement-offset)] z-50 flex h-[var(--mobile-header-height)] items-center justify-between border-b border-black/10 bg-white px-3 shadow-sm">
         <Link href="/" aria-label="Nyes Neck home" className="flex min-h-12 min-w-0 items-center">
-          <HeaderBrand logoSize="mobileHeader" wordmarkClassName="text-[0.98rem] tracking-[0.16em]" />
+          <HeaderBrand logoSize="mobileHeader" wordmarkClassName="text-[0.98rem] tracking-[0.16em]" wreath={HOLIDAY_DECOR} />
         </Link>
         <div className="flex items-center gap-1">
           <CartLink />
@@ -36,6 +37,7 @@ export function MobileMenu({ links }: { links: NavLink[] }) {
             </span>
           </button>
         </div>
+        {decoration}
       </div>
 
       <div

@@ -15,12 +15,16 @@ export type ShopCategory = {
 
 export type ProductImageRole = "main" | "hover" | "gallery";
 
+/** Which side of the product a mockup shows, when it can be detected. */
+export type ProductImageView = "front" | "angled-front" | "other";
+
 export type ProductImage = {
   id: string;
   src: string;
   alt: string;
   role: ProductImageRole;
   colors?: string[];
+  view?: ProductImageView;
 };
 
 export type ShopTile = {
@@ -49,6 +53,8 @@ export type ProductVariant = {
   available: boolean;
 };
 
+export type ProductDecoration = "Embroidered" | "Printed";
+
 export type Product = {
   id: string;
   /** Stable ID from the connected commerce platform (Shopify for Printful sync stores). */
@@ -68,6 +74,10 @@ export type Product = {
   // present, it is deliberately kept with the synchronized product rather
   // than maintained as a storefront-only list.
   brand?: string;
+  /** Whether the design is embroidered or printed (see src/data/productDecorations.ts). */
+  decoration?: ProductDecoration;
+  /** The blank's model number, e.g. Comfort Colors "1717". */
+  model?: string;
   priceCents: number | null;
   currency: "USD";
   externalLink?: string;

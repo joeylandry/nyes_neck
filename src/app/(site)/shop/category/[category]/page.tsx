@@ -5,6 +5,8 @@ import { ProductGrid } from "@/components/shop/ProductGrid";
 import { ShopBackLink } from "@/components/shop/ShopBackLink";
 import { ShopBrowseSections } from "@/components/shop/ShopBrowseSections";
 import { PageHeader } from "@/components/ui/PageHeader";
+import { assignFavoriteColors } from "@/lib/favoriteColors";
+import { getFavoriteProducts } from "@/lib/favorites";
 import { getProductsByCategory, getProductsByCollection, getShopCategories, getShopSettings } from "@/lib/products";
 import { collectionPageLabel } from "@/lib/shopLabels";
 
@@ -39,11 +41,14 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     ? await getProductsByCollection(category.value)
     : await getProductsByCategory(category.value);
   const settings = await getShopSettings();
+  // The main collection (where "Shop" lands) opens with Our Favorites.
+  const isMainCollection = category.kind === "collection" && category.slug === (settings.featuredCategory?.slug ?? "nyes-neck-collection");
+  const picks = isMainCollection ? getFavoriteProducts(products) : [];
   const pageTitle = category.kind === "collection" ? collectionPageLabel(category.label) : category.label;
 
   return (
     <>
-      {category.kind === "collection" && products.length ? <CollectionStorefront products={products} returnTo={category.slug} title={pageTitle} /> : null}
+      {category.kind === "collection" && products.length ? <CollectionStorefront products={products} picks={picks} pickColors={assignFavoriteColors(picks)} returnTo={category.slug} title={pageTitle} /> : null}
       {category.kind !== "collection" ? (
         <>
           <PageHeader title={pageTitle} tone="blue" />

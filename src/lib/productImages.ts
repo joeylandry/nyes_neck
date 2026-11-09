@@ -1,3 +1,4 @@
+import { FAVORITE_START_COLORS } from "@/data/favoritePicks";
 import type { Product, ProductImage, ProductImageView } from "@/types/product";
 
 const nonFrontViewTokens = new Set([
@@ -64,7 +65,15 @@ export function orderFrontViewsFirst(images: ProductImage[]): ProductImage[] {
   });
 }
 
-export function getProductDefaultColor(product: Pick<Product, "colors" | "images" | "variants">) {
+export function getProductDefaultColor(product: Pick<Product, "colors" | "images" | "variants"> & Partial<Pick<Product, "id" | "externalId">>) {
+  // A hand-picked cover color wins when it has a photo and can be bought.
+  const chosen = (product.id && FAVORITE_START_COLORS[product.id]) || (product.externalId && FAVORITE_START_COLORS[product.externalId]);
+  const cover = chosen ? product.colors.find((color) => color.toLowerCase() === chosen.trim().toLowerCase()) : undefined;
+  if (cover && product.images.some((image) => image.colors?.includes(cover)) &&
+    (!product.variants.length || product.variants.some((variant) => variant.color === cover && variant.available))) {
+    return cover;
+  }
+
   const primaryImage = product.images.find((image) => image.role === "main") ?? product.images[0];
   const primaryColor = primaryImage?.colors?.find((color) => product.colors.includes(color));
   if (primaryColor && (!product.variants.length || product.variants.some((variant) => variant.color === primaryColor && variant.available))) {

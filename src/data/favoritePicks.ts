@@ -42,9 +42,10 @@ export const FAVORITE_PRODUCT_IDS: string[] = [
 ];
 
 /**
- * The color each favorite opens on, by the same Shopify product ID. Use the
- * color's name exactly as it appears in the store. Favorites left out here
- * get a color picked automatically so the grid stays varied.
+ * The color each product opens on (its "cover") everywhere in the shop, by
+ * Shopify product ID. Use the color's name as it appears in the store.
+ * Favorites left out here get a color picked automatically so the grid stays
+ * varied; other products open on their main photo's color.
  */
 export const FAVORITE_START_COLORS: Record<string, string> = {
   "15405137330461": "Navy", // Classic Spirit Tee
@@ -57,7 +58,7 @@ export const FAVORITE_START_COLORS: Record<string, string> = {
   "10388785791261": "Fossil", // Retro Columbia booney hat
   "15405152436509": "G. Dyed Black Rock", // Classic embroidered hoodie
   "10388751745309": "Grey One Heather", // adidas retro polo
-  "15420575154461": "Denim", // Classic sweatshirt
+  "15420575154461": "Crimson", // Classic sweatshirt
   "15420310421789": "Collegiate Navy", // Classic Men's Columbia fleece vest
   "10388681752861": "Crimson", // Retro quarter-zip sweatshirt
   "10388809122077": "White", // Under Armour retro dad hat
@@ -65,6 +66,7 @@ export const FAVORITE_START_COLORS: Record<string, string> = {
   "15420363276573": "Black", // Classic quarter zip pullover
   "10388738015517": "Sandstone", // Retro Coastal Washed Cap
   "10386431279389": "Collegiate Navy", // Retro Men's Columbia Jacket
-  "15420465479965": "Pepper", // Classic fleece crewneck sweatshirt
+  "15420465479965": "Blue Jean", // Classic fleece crewneck sweatshirt
+  "10388712292637": "Blue Jean", // Retro hoodie
   "10316107022621": "Grey", // Retro Under Armour men's polo
 };

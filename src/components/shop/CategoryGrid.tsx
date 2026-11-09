@@ -24,10 +24,10 @@ const holidayRibbons = [
   { ribbon: "#f3efe7", shade: "#cfc6b4" },
 ];
 
-// The gifts tile gets its own combination, used by no other tile: harbor
-// gold wrapped in a navy ribbon.
-const giftTileColor = "bg-[#c99a2e] text-[#161616]";
-const giftTileRibbon = { ribbon: "#183247", shade: "#0d1d2b" };
+// The gifts tile swaps the Wine & cocktails colors: a cream tile (that tile's
+// ribbon) tied with a harbor blue ribbon (that tile's background).
+const giftTileColor = "bg-[#f3efe7] text-[#161616]";
+const giftTileRibbon = { ribbon: "#7899a8", shade: "#557685" };
 const isGiftTile = (tile: ShopTile) => /gift/i.test(`${tile.id} ${tile.name}`);
 
 const coastalTileColors = [

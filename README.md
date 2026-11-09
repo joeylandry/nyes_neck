@@ -87,13 +87,24 @@ PRINTFUL_PRODUCT_OVERRIDES='{"123456789":{"category":"hoodies","collection":"old
 
 ## Contact form
 
-The contact form posts to `/api/contact`, which forwards submissions to Formspree. Set `CONTACT_FORM_ENDPOINT` in `.env.local` and in production using the endpoint from the Formspree dashboard, for example:
+The contact form posts to `/api/contact`. Every inquiry is saved in Sanity as a
+**Contact submission** document (visible in `/studio`), using the same
+`SANITY_API_WRITE_TOKEN` as the newsletter signup. That token needs Editor
+(write) access and must be set in `.env.local` and in production.
+
+To also get each inquiry by email, set `CONTACT_FORM_ENDPOINT` to the endpoint
+from the Formspree dashboard:
 
 ```bash
 CONTACT_FORM_ENDPOINT=https://formspree.io/f/your-form-id
 ```
 
-`FORMSPREE_ENDPOINT` is still supported as a legacy alias.
+`FORMSPREE_ENDPOINT` is still supported as a legacy alias. The visitor sees a
+success message when at least one of the two deliveries works; failures are
+logged on the server.
+
+After changing the schema, run `npm run schema:deploy` (and `npm run studio:deploy`
+if you use the hosted Studio) so the new document type shows up.
 
 ## Future cart and checkout
 

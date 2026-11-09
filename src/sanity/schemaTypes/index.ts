@@ -1,4 +1,5 @@
 import { collection } from "./collection";
+import { contactSubmission } from "./contactSubmission";
 import { homepageAnnouncement } from "./homepageAnnouncement";
 import { newsletterSubscriber } from "./newsletterSubscriber";
 import { product } from "./product";
@@ -14,6 +15,7 @@ export const schemaTypes = [
   shopSettings,
   homepageAnnouncement,
   newsletterSubscriber,
+  contactSubmission,
   productImage,
   productVariant,
 ];

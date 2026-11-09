@@ -3,13 +3,13 @@ import Link from "next/link";
 import { HOLIDAY_DECOR } from "@/lib/holiday";
 import type { ShopTile } from "@/types/product";
 
-// The same red, amber, green, blue and yellow as the bulbs under the header.
+// Cape Cod Christmas: brand navy, cranberry, evergreen, sand and harbor blue.
 const holidayTileColors = [
-  "bg-[#c8202f] text-white",
-  "bg-[#f29a16] text-[#161616]",
-  "bg-[#1f7a40] text-white",
-  "bg-[#2d68d8] text-white",
-  "bg-[#f4cf2d] text-[#161616]",
+  "bg-[#183247] text-white",
+  "bg-[#9b2335] text-white",
+  "bg-[#3d5a45] text-white",
+  "bg-[#e9e1d3] text-[#161616]",
+  "bg-[#7899a8] text-white",
 ];
 
 const coastalTileColors = [
@@ -22,7 +22,7 @@ const coastalTileColors = [
 
 /**
  * `solid` tiles are plain blocks of color: any tile image is left out, and
- * during the holidays they take the Christmas-light colors.
+ * during the holidays they take the Cape Cod Christmas colors.
  */
 export function CategoryGrid({ tiles, ariaLabel, solid = false }: { tiles: ShopTile[]; ariaLabel: string; solid?: boolean }) {
   const tileColors = solid && HOLIDAY_DECOR ? holidayTileColors : coastalTileColors;

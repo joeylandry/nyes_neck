@@ -27,10 +27,12 @@ const holidayRibbons = [
 // Tiles with their own holiday colors, matched by name or id wherever they
 // sit in the grid. Gifts & more and Sweatshirts trade colors: Gifts & more
 // takes the cranberry tile with the gold ribbon, and Sweatshirts the cream
-// tile with the harbor blue ribbon.
+// tile with the harbor blue ribbon. Beach towels is gold with a navy ribbon,
+// so it doesn't sit next to the cream Sweatshirts tile in a light pair.
 const holidayTileOverrides: Array<{ match: RegExp; color: string; ribbon: { ribbon: string; shade: string } }> = [
   { match: /gift/i, color: "bg-[#9b2335] text-white", ribbon: { ribbon: "#d9a92c", shade: "#a87d17" } },
   { match: /sweatshirt/i, color: "bg-[#f3efe7] text-[#161616]", ribbon: { ribbon: "#7899a8", shade: "#557685" } },
+  { match: /beach|towel/i, color: "bg-[#c99a2e] text-[#161616]", ribbon: { ribbon: "#183247", shade: "#0d1d2b" } },
 ];
 const holidayOverride = (tile: ShopTile) => holidayTileOverrides.find(({ match }) => match.test(`${tile.id} ${tile.name}`));
 

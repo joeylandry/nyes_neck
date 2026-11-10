@@ -24,15 +24,20 @@ const holidayRibbons = [
   { ribbon: "#f3efe7", shade: "#cfc6b4" },
 ];
 
-// Tiles with their own holiday colors, matched by name or id wherever they
-// sit in the grid. Gifts & more and Sweatshirts trade colors: Gifts & more
-// takes the cranberry tile with the gold ribbon, and Sweatshirts the cream
-// tile with the harbor blue ribbon. Beach towels is gold with a navy ribbon,
-// so it doesn't sit next to the cream Sweatshirts tile in a light pair.
+// Each product tile's own holiday colors, matched by name or id wherever it
+// sits in the grid (first match wins, so Sweatshirts is checked before
+// T-shirts). Laid out two to a row on phones, neighbors never share a
+// background or ribbon color, and cream is the only light tile:
+//   T-shirts: navy, red ribbon        Sweatshirts: cream, harbor blue ribbon
+//   Hats: evergreen, gold ribbon      Beach towels: harbor blue, navy ribbon
+//   Wine & cocktails: plum, cream     Gifts & more: cranberry, gold ribbon
 const holidayTileOverrides: Array<{ match: RegExp; color: string; ribbon: { ribbon: string; shade: string } }> = [
-  { match: /gift/i, color: "bg-[#9b2335] text-white", ribbon: { ribbon: "#d9a92c", shade: "#a87d17" } },
   { match: /sweatshirt/i, color: "bg-[#f3efe7] text-[#161616]", ribbon: { ribbon: "#7899a8", shade: "#557685" } },
-  { match: /beach|towel/i, color: "bg-[#c99a2e] text-[#161616]", ribbon: { ribbon: "#183247", shade: "#0d1d2b" } },
+  { match: /\bt-?shirt/i, color: "bg-[#183247] text-white", ribbon: { ribbon: "#c8202f", shade: "#8f1622" } },
+  { match: /\bhats?\b/i, color: "bg-[#3d5a45] text-white", ribbon: { ribbon: "#d9a92c", shade: "#a87d17" } },
+  { match: /beach|towel/i, color: "bg-[#7899a8] text-white", ribbon: { ribbon: "#183247", shade: "#0d1d2b" } },
+  { match: /wine|cocktail/i, color: "bg-[#5b2a4a] text-white", ribbon: { ribbon: "#f3efe7", shade: "#cfc6b4" } },
+  { match: /gift/i, color: "bg-[#9b2335] text-white", ribbon: { ribbon: "#d9a92c", shade: "#a87d17" } },
 ];
 const holidayOverride = (tile: ShopTile) => holidayTileOverrides.find(({ match }) => match.test(`${tile.id} ${tile.name}`));
 

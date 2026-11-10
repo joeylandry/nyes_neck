@@ -421,6 +421,15 @@ export async function fetchPrintfulProducts(categories: ShopCategory[]): Promise
       })
       .sort((a, b) => a.name.localeCompare(b.name));
 
+    // An empty result here means Printful failed to answer (for example a
+    // rate-limited burst of detail requests), not that the store is empty.
+    // Report it as a failure so the storefront falls back to another source
+    // instead of rendering — and caching — every collection as "coming soon".
+    if (!products.length) {
+      if (visibleSummaries.length) console.error(`Printful returned ${visibleSummaries.length} products but none could be loaded`);
+      return null;
+    }
+
     return ensureUniqueSlugs(products);
   } catch (error) {
     console.error("Could not fetch Printful products:", error);

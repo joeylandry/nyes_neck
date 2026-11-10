@@ -24,11 +24,15 @@ const holidayRibbons = [
   { ribbon: "#f3efe7", shade: "#cfc6b4" },
 ];
 
-// The gifts tile swaps the Wine & cocktails colors: a cream tile (that tile's
-// ribbon) tied with a harbor blue ribbon (that tile's background).
-const giftTileColor = "bg-[#f3efe7] text-[#161616]";
-const giftTileRibbon = { ribbon: "#7899a8", shade: "#557685" };
-const isGiftTile = (tile: ShopTile) => /gift/i.test(`${tile.id} ${tile.name}`);
+// Tiles with their own holiday colors, matched by name or id wherever they
+// sit in the grid. Gifts & more and Sweatshirts trade colors: Gifts & more
+// takes the cranberry tile with the gold ribbon, and Sweatshirts the cream
+// tile with the harbor blue ribbon.
+const holidayTileOverrides: Array<{ match: RegExp; color: string; ribbon: { ribbon: string; shade: string } }> = [
+  { match: /gift/i, color: "bg-[#9b2335] text-white", ribbon: { ribbon: "#d9a92c", shade: "#a87d17" } },
+  { match: /sweatshirt/i, color: "bg-[#f3efe7] text-[#161616]", ribbon: { ribbon: "#7899a8", shade: "#557685" } },
+];
+const holidayOverride = (tile: ShopTile) => holidayTileOverrides.find(({ match }) => match.test(`${tile.id} ${tile.name}`));
 
 const coastalTileColors = [
   "bg-[#183247] text-white",
@@ -48,12 +52,12 @@ export function CategoryGrid({ tiles, ariaLabel, solid = false }: { tiles: ShopT
     <nav aria-label={ariaLabel} className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:gap-5 lg:grid-cols-4">
       {tiles.map((sourceTile, index) => {
         const tile = solid ? { ...sourceTile, image: undefined } : sourceTile;
-        const holidayGift = solid && HOLIDAY_DECOR && isGiftTile(sourceTile);
-        const [backgroundClass, colorClass] = (holidayGift ? giftTileColor : tileColors[index % tileColors.length]).split(" ");
+        const override = solid && HOLIDAY_DECOR ? holidayOverride(sourceTile) : undefined;
+        const [backgroundClass, colorClass] = (override?.color ?? tileColors[index % tileColors.length]).split(" ");
         // The global `a { color: inherit }` rule outranks utilities on the link
         // itself, so the label and arrow carry their color directly.
         const textClass = tile.image ? "text-white" : colorClass;
-        const giftRibbon = holidayGift ? giftTileRibbon : solid && HOLIDAY_DECOR ? holidayRibbons[index % holidayRibbons.length] : undefined;
+        const giftRibbon = override ? override.ribbon : solid && HOLIDAY_DECOR ? holidayRibbons[index % holidayRibbons.length] : undefined;
         const content = (
           <>
             {giftRibbon ? <GiftWrap {...giftRibbon} /> : null}

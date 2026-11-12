@@ -3,7 +3,7 @@ import { test } from "node:test";
 import { getShopifyOrigin, getShopifyCartUrl, applyLaunchAvailability } from "../src/lib/commerce/shopify.ts";
 import { makeProductSlug, productMatchesSlug } from "../src/lib/productSlugs.ts";
 import { inferManufacturer, inferProductTypeCategory } from "../src/lib/productTaxonomy.ts";
-import { detectProductImageView, getProductDefaultColor, mergeSynchronizedProductImages, orderFrontViewsFirst } from "../src/lib/productImages.ts";
+import { detectProductImageView, getProductDefaultColor, isPersonPhoto, mergeSynchronizedProductImages, orderFrontViewsFirst } from "../src/lib/productImages.ts";
 
 test("cart links accept numeric Shopify IDs and only a Shopify HTTPS domain", () => {
   const previous = process.env.SHOPIFY_STORE_DOMAIN;
@@ -107,6 +107,43 @@ test("each color opens on its front mockup without changing the primary color", 
   ]);
   assert.deepEqual(images.map((image) => image.id), ["navy-front", "black-preview", "navy-back", "black-sleeve", "black-back"]);
   assert.deepEqual(images.map((image) => image.role), ["main", "gallery", "gallery", "gallery", "gallery"]);
+});
+
+test("photos of people never become a color's front image", () => {
+  assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/classic-mens-columbia-jacket-black-front-65f1.png" }), false);
+  assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/unisex-hoodie-navy-lifestyle-1-65f1.jpg" }), true);
+  assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/tee-navy-front-65f1.jpg", alt: "Model wearing the navy tee" }), true);
+  assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/tee-navy-front-65f1.jpg", alt: "Classic Men's tee — Navy" }), false);
+
+  const images = orderFrontViewsFirst([
+    { id: "navy-model-front", src: "https://shopify.test/tee-navy-front-on-model-1.png", alt: "", role: "main", colors: ["Navy"] },
+    { id: "navy-back", src: "https://shopify.test/tee-navy-back-1.png", alt: "", role: "gallery", colors: ["Navy"] },
+    { id: "navy-flat-front", src: "https://shopify.test/tee-navy-front-2-1.png", alt: "", role: "gallery", colors: ["Navy"] },
+  ]);
+  assert.deepEqual(images.map((image) => image.id), ["navy-flat-front", "navy-back", "navy-model-front"]);
+  assert.equal(images[0].role, "main");
+});
+
+test("a person-photo Shopify main does not hide Printful's product-only front", () => {
+  const images = mergeSynchronizedProductImages(
+    [{ id: "printful-front", src: "https://printful.test/tee-blue-front.png", alt: "", role: "main", colors: ["Blue"] }],
+    [{ id: "shopify-model", src: "https://shopify.test/tee-blue-front-lifestyle.png", alt: "", role: "main", colors: ["Blue"] }],
+  );
+  assert.deepEqual(images.map((image) => image.id), ["printful-front", "shopify-model"]);
+});
+
+test("products open on a color with a product-only photo", () => {
+  assert.equal(getProductDefaultColor({
+    colors: ["Blue", "Black"],
+    images: [
+      { id: "blue-model", src: "https://shopify.test/tee-blue-front-lifestyle.png", alt: "", role: "main", colors: ["Blue"] },
+      { id: "black", src: "https://shopify.test/tee-black-front.png", alt: "", role: "gallery", colors: ["Black"] },
+    ],
+    variants: [
+      { id: "blue-s", color: "Blue", size: "S", available: true },
+      { id: "black-s", color: "Black", size: "S", available: true },
+    ],
+  }), "Black");
 });
 
 test("synchronized products keep Shopify's front for colors Printful did not mock up", () => {

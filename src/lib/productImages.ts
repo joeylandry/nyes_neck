@@ -1,4 +1,5 @@
 import { FAVORITE_START_COLORS } from "@/data/favoritePicks";
+import { PERSON_PHOTO_FILES } from "@/data/personPhotos";
 import type { Product, ProductImage, ProductImageView } from "@/types/product";
 
 const nonFrontViewTokens = new Set([
@@ -6,7 +7,7 @@ const nonFrontViewTokens = new Set([
 ]);
 const viewTokens = new Set([...nonFrontViewTokens, "front"]);
 
-function imageFileName(source: string) {
+export function imageFileName(source: string) {
   let path = source;
   try { path = new URL(source).pathname; } catch { /* treat as a plain path or file name */ }
   try { path = decodeURIComponent(path); } catch { /* keep the encoded path */ }
@@ -31,14 +32,37 @@ export function detectProductImageView(...sources: Array<string | undefined>): P
   return undefined;
 }
 
+// Words that mark a lifestyle or on-model mockup. "men", "mens", "women" and
+// "youth" are left out on purpose: they are part of many product names
+// ("Classic Men's Columbia Jacket") and say nothing about the photo itself.
+const personTokens = new Set(["model", "models", "onmodel", "lifestyle", "person", "people", "human", "wearing", "worn"]);
+const personAltPattern = /\b(model|on-model|lifestyle|person|people|wearing|worn)\b/i;
+const normalizeFileName = (name: string) => name.trim().toLowerCase().replace(/\?.*$/, "");
+const flaggedPersonPhotos = new Set(PERSON_PHOTO_FILES.map((name) => normalizeFileName(imageFileName(name))).filter(Boolean));
+
+/**
+ * Whether a product photo shows a person rather than the product by itself:
+ * either it is listed in src/data/personPhotos.ts, or its file name or alt
+ * text says it is a lifestyle or on-model shot.
+ */
+export function isPersonPhoto(image: Pick<ProductImage, "src"> & Partial<Pick<ProductImage, "alt">>): boolean {
+  const fileName = normalizeFileName(imageFileName(image.src));
+  if (flaggedPersonPhotos.has(fileName)) return true;
+  if (fileName.replace(/[^a-z0-9]+/g, " ").split(" ").some((token) => personTokens.has(token))) return true;
+  return Boolean(image.alt && personAltPattern.test(image.alt));
+}
+
 const viewRank = (image: ProductImage) => {
+  // Photos of people always come last so they never become the front image.
+  if (isPersonPhoto(image)) return 4;
   const view = image.view ?? detectProductImageView(image.src);
   return view === "front" ? 0 : view === "angled-front" ? 1 : view === "other" ? 3 : 2;
 };
 
 /**
  * Puts each color's front mockup first so cards and product pages open on the
- * front of the garment. Images only move within the slots their own color
+ * front of the garment, and moves photos of people to the end so the first
+ * image always shows the product by itself. Images only move within the slots their own color
  * already occupies, so the published primary image keeps deciding which color
  * a product opens on.
  */
@@ -76,9 +100,15 @@ export function getProductDefaultColor(product: Pick<Product, "colors" | "images
 
   const primaryImage = product.images.find((image) => image.role === "main") ?? product.images[0];
   const primaryColor = primaryImage?.colors?.find((color) => product.colors.includes(color));
-  if (primaryColor && (!product.variants.length || product.variants.some((variant) => variant.color === primaryColor && variant.available))) {
+  const purchasable = (color: string) => !product.variants.length || product.variants.some((variant) => variant.color === color && variant.available);
+  // Open on a color that has a photo of the product by itself, when there is one.
+  const hasProductOnlyPhoto = (color: string) => product.images.some((image) => image.colors?.includes(color) && !isPersonPhoto(image));
+  if (primaryColor && purchasable(primaryColor) && (hasProductOnlyPhoto(primaryColor) || !product.colors.some(hasProductOnlyPhoto))) {
     return primaryColor;
   }
+  const productOnlyColor = product.colors.find((color) => hasProductOnlyPhoto(color) && purchasable(color));
+  if (productOnlyColor) return productOnlyColor;
+  if (primaryColor && purchasable(primaryColor)) return primaryColor;
 
   return product.variants.find((variant) => variant.available && variant.color)?.color ?? primaryColor ?? product.colors[0] ?? "";
 }
@@ -116,8 +146,10 @@ export function mergeSynchronizedProductImages(
   for (const image of printfulImages) {
     if (preferShopify(image)) continue;
     const matchesPrimaryColor = Boolean(shopifyMain?.colors?.some((color) => image.colors?.includes(color)));
-    // Shopify's primary front and Printful's front for that color are the same mockup.
-    if (shopifyMain && isFrontView(shopifyMain) && matchesPrimaryColor && !skippedMatchingPrintfulFront && isFrontView(image)) {
+    // Shopify's primary front and Printful's front for that color are the same
+    // mockup, unless Shopify's shows a person: then Printful's is a different
+    // photo, and the one to open on.
+    if (shopifyMain && isFrontView(shopifyMain) && !isPersonPhoto(shopifyMain) && matchesPrimaryColor && !skippedMatchingPrintfulFront && isFrontView(image)) {
       skippedMatchingPrintfulFront = true;
       continue;
     }

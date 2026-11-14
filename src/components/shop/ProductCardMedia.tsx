@@ -110,7 +110,7 @@ export function ProductCardMedia({
               draggable={false}
               className="pointer-events-none object-contain transition duration-500 group-hover:scale-[1.025] motion-reduce:transform-none"
             />
-            {!product.available ? <span className="absolute left-0 top-0 bg-white/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] backdrop-blur">Coming soon</span> : null}
+            {!product.available ? <span className="absolute left-0 top-0 bg-white/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-[0.1em] backdrop-blur">{product.soldOut ? "Sold out" : "Coming soon"}</span> : null}
           </div>
         </div>
       </Link>

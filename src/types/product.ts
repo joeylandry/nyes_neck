@@ -45,12 +45,16 @@ export type ShopSettings = {
 
 export type ProductVariant = {
   id: string;
+  /** Supplier SKU, shared by Printful and Shopify (see src/lib/variantAvailability.ts). */
+  sku?: string;
   cartUrl?: string;
   size?: string;
   color?: string;
   colorCode?: string;
   priceCents?: number;
   available: boolean;
+  /** Shopify reports this variant as not available for sale (sold out). */
+  storeSoldOut?: boolean;
 };
 
 export type ProductDecoration = "Embroidered" | "Printed";
@@ -87,4 +91,6 @@ export type Product = {
   variants: ProductVariant[];
   featured: boolean;
   available: boolean;
+  /** Nothing purchasable is left because of stock, so show "Sold out" rather than "Coming soon". */
+  soldOut?: boolean;
 };

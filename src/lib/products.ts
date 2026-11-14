@@ -5,6 +5,7 @@ import { fetchPrintfulProducts } from "@/lib/commerce/printful";
 import { mergeSynchronizedProductImages } from "@/lib/productImages";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { productMatchesSlug } from "@/lib/productSlugs";
+import { applyVariantAvailability, mergeShopifyVariantState } from "@/lib/variantAvailability";
 import { getSanityClient } from "@/sanity/client";
 import { sanityImageUrl } from "@/sanity/image";
 import type {
@@ -166,6 +167,7 @@ function mapProduct(record: SanityProduct): Product | null {
     colors: record.colors ?? [],
     variants: (record.variants ?? []).map((variant, index) => ({
       id: variant.sku ?? variant._key ?? `${record._id}-variant-${index}`,
+      sku: variant.sku,
       size: variant.size,
       color: variant.color,
       available: Boolean(variant.available),
@@ -228,7 +230,9 @@ async function fetchSanityProducts(): Promise<Product[] | null> {
 }
 
 export async function getProducts(): Promise<Product[]> {
-  return (await loadProducts()).map(withDecoration);
+  // Hidden SKUs and Shopify sold-out state are applied here, after every data
+  // source, so no page, picker, or cart action can reach a hidden variant.
+  return (await loadProducts()).map(applyVariantAvailability).map(withDecoration);
 }
 
 function withDecoration(product: Product): Product {
@@ -257,6 +261,9 @@ async function loadProducts(): Promise<Product[]> {
       if (!printfulProduct) return shopifyProduct;
       printfulByExternalId.delete(shopifyProduct.externalId!);
 
+      // Shopify decides whether each synchronized variant is for sale.
+      const variants = mergeShopifyVariantState(printfulProduct.variants, shopifyProduct.variants);
+
       // Printful's Sync API does not expose the connected storefront's
       // product-level description. Keep that synchronized Shopify copy, while
       // Printful remains authoritative for catalog type, manufacturer, color
@@ -269,6 +276,7 @@ async function loadProducts(): Promise<Product[]> {
         brand: printfulProduct.brand || shopifyProduct.brand,
         legacySlugs: [...new Set([...(printfulProduct.legacySlugs ?? []), ...(shopifyProduct.legacySlugs ?? [])])],
         images: mergeSynchronizedProductImages(printfulProduct.images, shopifyProduct.images),
+        variants,
       };
     });
     return [...merged, ...printfulByExternalId.values()].sort((a, b) => a.name.localeCompare(b.name));

@@ -272,6 +272,7 @@ function mapPrintfulProduct(
     const options = parseVariantOptions(variant, syncProduct.name);
     return {
       id: variant.external_id ?? `printful-${variant.id}`,
+      sku: variant.sku?.trim() || undefined,
       // Printful keeps the linked Shopify IDs as external IDs. The cart helper
       // validates both values, so retain the synchronized product's external
       // ID instead of the internal `printful-*` storefront ID.

@@ -40,22 +40,28 @@ export function applyStoreAvailability(variant: ProductVariant, storeAvailable: 
 /**
  * Removes hidden variants and recomputes everything derived from the variant
  * list, so no picker, default selection, or cart action can reach them:
- * - sizes/colors that no longer have any variant are dropped (their swatch is hidden);
+ * - sizes that no longer have any variant are dropped;
+ * - colors with no purchasable size are hidden (while anything at all can be
+ *   bought; a fully unavailable product keeps its colors to stay browsable);
  * - the product is unavailable when nothing purchasable is left, and is marked
  *   sold out (rather than "coming soon") when that is because of stock.
  */
 export function applyVariantAvailability(product: Product): Product {
   const hiddenCount = product.variants.filter(isHiddenVariant).length;
   const storeSoldOut = product.variants.some((variant) => variant.storeSoldOut);
-  if (!hiddenCount && !storeSoldOut) return product;
+  const variants = hiddenCount ? product.variants.filter((variant) => !isHiddenVariant(variant)) : product.variants;
+  const purchasable = variants.filter((variant) => variant.available);
+  const available = product.available && purchasable.length > 0;
 
-  const variants = product.variants.filter((variant) => !isHiddenVariant(variant));
   // Only narrow an option list when variants actually carry that option.
   const variantsHaveSizes = product.variants.some((variant) => variant.size);
   const variantsHaveColors = product.variants.some((variant) => variant.color);
   const sizes = variantsHaveSizes ? product.sizes.filter((size) => variants.some((variant) => variant.size === size)) : product.sizes;
-  const colors = variantsHaveColors ? product.colors.filter((color) => variants.some((variant) => variant.color === color)) : product.colors;
-  const available = product.available && variants.some((variant) => variant.available);
+  const colorSource = available ? purchasable : variants;
+  const colors = variantsHaveColors ? product.colors.filter((color) => colorSource.some((variant) => variant.color === color)) : product.colors;
+
+  const unchanged = !hiddenCount && !storeSoldOut && sizes.length === product.sizes.length && colors.length === product.colors.length;
+  if (unchanged) return product;
 
   return {
     ...product,
@@ -65,6 +71,26 @@ export function applyVariantAvailability(product: Product): Product {
     available,
     soldOut: !available && (product.available || hiddenCount > 0 || storeSoldOut),
   };
+}
+
+/** A variant a customer can actually add and check out. */
+export function isPurchasable(variant: ProductVariant) {
+  return variant.available && Boolean(variant.cartUrl) && !isHiddenVariant(variant);
+}
+
+/**
+ * Cart lines (saved in the browser) whose variant can no longer be bought:
+ * hidden, sold out in Shopify, or gone. Lines for products that did not load
+ * are left alone so a catalog outage never blocks checkout.
+ */
+export function findUnavailableCartLines(products: Product[], lines: { id: string; productId: string }[]): string[] {
+  const byId = new Map(products.flatMap((product) => [[product.id, product] as const, ...(product.externalId ? [[product.externalId, product] as const] : [])]));
+  return lines.flatMap((line) => {
+    const product = byId.get(line.productId);
+    if (!product) return [];
+    const variant = product.variants.find((item) => item.id === line.id);
+    return variant && product.available && isPurchasable(variant) ? [] : [line.id];
+  });
 }
 
 /**

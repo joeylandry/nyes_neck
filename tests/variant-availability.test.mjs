@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { mapShopifyProduct } from "../src/lib/commerce/shopify.ts";
-import { HIDDEN_VARIANT_SKUS, applyStoreAvailability, applyVariantAvailability, mergeShopifyVariantState } from "../src/lib/variantAvailability.ts";
+import { HIDDEN_VARIANT_SKUS, applyStoreAvailability, applyVariantAvailability, findUnavailableCartLines, mergeShopifyVariantState } from "../src/lib/variantAvailability.ts";
 import { getProductDefaultColor } from "../src/lib/productImages.ts";
 import { classicUaHoodie, shopCategories } from "./fixtures/ua-hoodie.mjs";
 
@@ -25,8 +25,8 @@ test("Classic Under Armour hoodie only offers Black / S", () => {
     for (const sku of HIDDEN_VARIANT_SKUS) assert.ok(!skus.includes(sku), `${sku} must be removed`);
     const purchasable = result.variants.filter((v) => v.available && v.cartUrl).map((v) => `${v.color} / ${v.size}`);
     assert.deepEqual(purchasable, ["Black / S"]);
-    // Navy keeps sold-out sizes, so its swatch stays but is disabled.
-    assert.deepEqual(result.colors, ["Black", "Navy"]);
+    // Navy has no size left to buy, so its swatch is hidden.
+    assert.deepEqual(result.colors, ["Black"]);
     assert.deepEqual(result.sizes, ["S", "M", "XL"]);
     assert.equal(result.available, true);
     assert.equal(getProductDefaultColor(result), "Black");
@@ -58,9 +58,10 @@ test("a product with nothing purchasable left is sold out, not an error", () => 
   assert.equal(storeSoldOut.soldOut, true);
 });
 
-test("Shopify sold-out variants stay visible but disabled", () => {
+test("Shopify sold-out sizes stay visible but disabled; sold-out colors are hidden", () => {
   const result = applyVariantAvailability(product([variant("1", "Moss", "One size"), variant("2", "Khaki", "One size")].map((v, i) => applyStoreAvailability(v, i !== 0))));
-  assert.deepEqual(result.colors, ["Moss", "Khaki"]);
+  assert.deepEqual(result.colors, ["Khaki"]);
+  assert.deepEqual(result.sizes, ["One size"]);
   assert.deepEqual(result.variants.map((v) => v.available), [false, true]);
   assert.equal(result.available, true);
   assert.equal(result.soldOut, false);
@@ -81,7 +82,29 @@ test("Printful variants pick up Shopify's sold-out state and SKU", () => {
   assert.deepEqual(merged.map((v) => [v.sku, v.available]), [["moss", false], ["pf", true], ["7725255_19713", true]]);
   const result = applyVariantAvailability(product(merged));
   assert.deepEqual(result.variants.map((v) => v.id), ["101", "102"]);
+  assert.deepEqual(result.colors, ["Khaki"]);
+});
+
+test("a product with nothing to buy keeps its colors so it stays browsable", () => {
+  const result = applyVariantAvailability(product([variant("1", "Moss", "One size", { available: false, storeSoldOut: true }), variant("2", "Khaki", "One size", { available: false, storeSoldOut: true })], { available: true }));
   assert.deepEqual(result.colors, ["Moss", "Khaki"]);
+  assert.equal(result.soldOut, true);
+});
+
+test("saved cart lines that can no longer be bought are flagged", () => {
+  const products = [
+    { ...product([variant("1", "Black", "S"), variant("2", "Black", "M", { available: false }), variant("3", "Black", "L", { sku: "7715585_19721" })]), id: "hoodie", externalId: "15420252913949" },
+    { ...product([variant("9", "Black", "S")]), id: "tee", available: false },
+  ];
+  const lines = [
+    { id: "1", productId: "hoodie" },          // still for sale
+    { id: "2", productId: "15420252913949" },  // sold out in Shopify
+    { id: "3", productId: "hoodie" },          // hidden SKU
+    { id: "4", productId: "hoodie" },          // variant no longer listed
+    { id: "9", productId: "tee" },             // product unavailable
+    { id: "7", productId: "not-loaded" },      // unknown product: left alone
+  ];
+  assert.deepEqual(findUnavailableCartLines(products, lines), ["2", "3", "4", "9"]);
 });
 
 function previousDomain(run) {

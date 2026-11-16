@@ -33,6 +33,7 @@ export function SiteFooter() {
             <Link href="/about">About</Link>
             <Link href="/shop">Shop</Link>
             <Link href="/contact">Contact</Link>
+            <Link href="/returns">Returns</Link>
           </nav>
           <p className="text-xs text-white/60">© {new Date().getFullYear()} Nyes Neck</p>
         </div>

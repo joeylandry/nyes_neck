@@ -2,6 +2,7 @@ import { defineField, defineType } from "sanity";
 
 const inquiryTypes = [
   { title: "General questions", value: "general" },
+  { title: "Order help / returns", value: "order" },
   { title: "Product inquiries", value: "product" },
   { title: "Wholesale / local partnerships", value: "wholesale" },
   { title: "Giving-back partnerships", value: "giving" },

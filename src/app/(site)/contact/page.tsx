@@ -9,7 +9,8 @@ export const metadata: Metadata = {
 
 const topics = [
   ["General questions", "Notes about the brand and what is ahead."],
-  ["Product inquiries", "Questions about future apparel and coastal goods."],
+  ["Order help / returns", "Damaged, misprinted or missing items. Include your order number and a photo."],
+  ["Product inquiries", "Questions about sizing, colors and our apparel."],
   ["Wholesale / local", "Ideas for thoughtful Upper Cape partnerships."],
   ["Giving back", "Conversations aligned with our charitable purpose."],
 ];
@@ -23,7 +24,7 @@ export default function ContactPage() {
           <div>
             <h2 className="font-heading text-[2rem] font-semibold tracking-[-0.045em] md:text-5xl">Let’s connect</h2>
             <p className="mt-4 text-base leading-7 text-black/65 md:mt-5 md:text-lg md:leading-8">
-              Questions about Nyes Neck, future products, local partnerships, or our giving-back mission? Choose the topic that best fits your note.
+              Questions about an order, our products, local partnerships, or our giving-back mission? Choose the topic that best fits your note.
             </p>
             <div className="mt-7 grid gap-2.5 sm:grid-cols-2 md:mt-9 md:gap-3 lg:grid-cols-1">
               {topics.map(([title, copy]) => (

@@ -60,6 +60,7 @@ export function ContactForm() {
         Inquiry type
         <select className={fieldClass} name="inquiryType" defaultValue="general">
           <option value="general">General questions</option>
+          <option value="order">Order help / returns</option>
           <option value="product">Product inquiries</option>
           <option value="wholesale">Wholesale / local partnerships</option>
           <option value="giving">Giving-back partnerships</option>

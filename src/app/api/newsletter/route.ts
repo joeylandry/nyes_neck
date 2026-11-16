@@ -5,7 +5,7 @@ import { getSanityWriteClient } from "@/sanity/writeClient";
 export const runtime = "nodejs";
 
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-const successMessage = "You’re on the list. We’ll be in touch before launch.";
+const successMessage = "You’re on the list. Watch your inbox for new drops and news from Nyes Neck.";
 const maxContentLength = 2048;
 
 type NewsletterRequestBody = {

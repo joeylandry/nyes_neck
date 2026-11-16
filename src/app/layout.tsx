@@ -37,11 +37,15 @@ export const metadata: Metadata = {
     title: "Nyes Neck Shop",
     description,
     locale: "en_US",
+    // Shown when the homepage or any page without its own image is shared;
+    // product pages override it with the product photo.
+    images: [{ url: "/images/og-image.jpg", width: 1200, height: 630, alt: "Nyes Neck at sunset, North Falmouth, Cape Cod" }],
   },
   twitter: {
     card: "summary_large_image",
     title: "Nyes Neck Shop",
     description,
+    images: ["/images/og-image.jpg"],
   },
 };
 

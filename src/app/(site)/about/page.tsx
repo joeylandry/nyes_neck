@@ -41,7 +41,7 @@ const storyFeatures: StoryFeature[] = [
   {
     title: "Over $20K for Make-A-Wish",
     body:
-      "I raised more than $20,000 for Make-A-Wish Massachusetts and Rhode Island with support from the Nyes Neck community. That same purpose now carries into Nyes Neck Clothing and Apparel.",
+      "I raised more than $20,000 for Make-A-Wish Massachusetts and Rhode Island with support from the Nyes Neck community. Today, proceeds from Nyes Neck Clothing and Apparel go to St. Jude Children’s Research Hospital.",
     image: "/images/about/Thank you graphic.png",
     width: 2000,
     height: 1428,
@@ -91,10 +91,10 @@ export default function AboutPage() {
           </h2>
           <div className="space-y-6 text-base leading-7 text-black/70 md:space-y-7 md:text-lg md:leading-8">
             <p>
-              Hi, I&apos;m Joey Landry. I started fundraising in Nyes Neck when I was nine, and over the years that work grew into more than $20,000 raised for Make-A-Wish Massachusetts and Rhode Island. I&apos;m carrying that same purpose into Nyes Neck Clothing and Apparel, with the goal of helping people affected by domestic violence and children in need.
+              Hi, I&apos;m Joey Landry. I started fundraising in Nyes Neck when I was nine, and over the years that work grew into more than $20,000 raised for Make-A-Wish Massachusetts and Rhode Island. Now I&apos;m carrying that same purpose into Nyes Neck Clothing and Apparel: proceeds go to St. Jude Children&apos;s Research Hospital.
             </p>
             <p>
-              My long-term goal is to build a nonprofit around this work. In the meantime, Nyes Neck Clothing and Apparel will continue giving back, including support for St. Jude Children&apos;s Research Hospital.
+              My long-term goal is to build a nonprofit around this work, helping people affected by domestic violence and children in need.
             </p>
             <p className="font-semibold text-[#183247]">
               Reflecting on the work, I said, &quot;I have been given an amazing opportunity to help provide life-changing experiences for wish children.&quot; That same purpose remains part of Nyes Neck Clothing and Apparel today.
@@ -110,7 +110,7 @@ export default function AboutPage() {
 
         <section className="border-t border-black/10 pt-8 text-center md:pt-12">
           <p className="mx-auto max-w-3xl font-heading text-3xl font-semibold leading-tight text-[#183247] md:text-5xl">
-            Thank you to everyone who has supported Nyes Neck, Make-A-Wish, and every fundraiser along the way.
+            Thank you to everyone who has supported Nyes Neck, Make-A-Wish, St. Jude, and every fundraiser along the way.
           </p>
         </section>
       </div>

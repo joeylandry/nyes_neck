@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { getSanityWriteClient } from "@/sanity/writeClient";
 
@@ -5,7 +6,7 @@ export const runtime = "nodejs";
 
 const successMessage = "Thanks. Your inquiry has been sent.";
 const deliveryErrorMessage = "We could not send your inquiry. Please try again.";
-const inquiryTypes = new Set(["general", "product", "wholesale", "giving"]);
+const inquiryTypes = new Set(["general", "order", "product", "wholesale", "giving"]);
 const fieldLimits = { name: 120, email: 254, message: 5000 } as const;
 
 function getText(formData: FormData, key: string) {
@@ -31,7 +32,10 @@ function getFormspreeEndpoint() {
 type Inquiry = { name: string; email: string; inquiryType: string; message: string };
 
 async function saveToSanity(inquiry: Inquiry) {
+  // An ID with a "." keeps the document private: the dataset is public, and
+  // only Studio and token holders can read IDs in a path like this one.
   await getSanityWriteClient().create({
+    _id: `contactSubmission.${randomUUID()}`,
     _type: "contactSubmission",
     ...inquiry,
     submittedAt: new Date().toISOString(),

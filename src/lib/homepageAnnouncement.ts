@@ -44,7 +44,7 @@ export const fallbackHomepageAnnouncement: HomepageAnnouncementSettings = {
   newsletterDescription: "",
   emailPlaceholder: "Enter your email",
   buttonText: "Join the List",
-  successMessage: "You’re on the list. We’ll be in touch before launch.",
+  successMessage: "You’re on the list. Watch your inbox for new drops and news from Nyes Neck.",
   privacyNote: "No spam—only occasional Nyes Neck updates.",
   theme: "dune",
 };

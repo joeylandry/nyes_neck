@@ -4,6 +4,7 @@ import { collectionTileLabel } from "@/lib/shopLabels";
 import { makeProductSlug, slugifyProductValue } from "@/lib/productSlugs";
 import { inferManufacturer, inferProductTypeCategory } from "@/lib/productTaxonomy";
 import { detectProductImageView, orderFrontViewsFirst } from "@/lib/productImages";
+import { applyStoreAvailability } from "@/lib/variantAvailability";
 import type { Product, ProductImage, ProductVariant, ShopCategory } from "@/types/product";
 
 type ShopifyProduct = {
@@ -18,6 +19,7 @@ type ShopifyProduct = {
   variants?: Array<{
     id: number;
     title?: string;
+    sku?: string | null;
     price?: string;
     available?: boolean;
     option1?: string | null;
@@ -85,7 +87,7 @@ function variantOptions(product: ShopifyProduct, variant: NonNullable<ShopifyPro
   return { size, color };
 }
 
-function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]): Product | null {
+export function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]): Product | null {
   const productType = classifyProduct(product, categories);
   const collection = categories.find((category) => category.kind === "collection" && category.value === "nyes-neck") ?? categories.find((category) => category.kind === "collection");
   if (!productType || !collection || !product.handle) return null;
@@ -93,14 +95,15 @@ function mapShopifyProduct(product: ShopifyProduct, categories: ShopCategory[]):
   const variants: ProductVariant[] = (product.variants ?? []).map((variant) => {
     const { size, color } = variantOptions(product, variant);
     const price = Number.parseFloat(variant.price ?? "");
-    return {
+    return applyStoreAvailability({
       id: String(variant.id),
+      sku: variant.sku?.trim() || undefined,
       cartUrl: getShopifyCartUrl(String(product.id), String(variant.id)),
       size,
       color,
       priceCents: Number.isFinite(price) ? Math.round(price * 100) : undefined,
       available: Boolean(variant.available),
-    };
+    }, variant.available);
   });
   const colorByVariantId = new Map(variants.map((variant) => [Number(variant.id), variant.color]));
   const colors = Array.from(new Set(variants.map((variant) => variant.color).filter((color): color is string => Boolean(color))));

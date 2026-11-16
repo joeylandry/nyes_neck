@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useMemo, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { formatCurrency } from "@/lib/formatCurrency";
 import { useCart } from "./CartProvider";
 
@@ -28,7 +28,44 @@ function checkoutUrl(items: ReturnType<typeof useCart>["items"]) {
   }
 }
 
-function CheckoutAction({ checkout }: { checkout?: string }) {
+/**
+ * Cart lines are saved in the browser, so one can outlive its variant (sold
+ * out in Shopify or hidden on the site). Ask the server which lines can no
+ * longer be bought; until it answers, or if it can't, nothing is blocked.
+ */
+function useUnavailableCartItems(items: ReturnType<typeof useCart>["items"]) {
+  const [result, setResult] = useState<{ key: string; ids: string[] }>({ key: "", ids: [] });
+  const key = items.map((item) => `${item.productId}:${item.id}`).sort().join(",");
+
+  useEffect(() => {
+    if (!key) return;
+    const controller = new AbortController();
+    const lines = key.split(",").map((entry) => {
+      const separator = entry.lastIndexOf(":");
+      return { productId: entry.slice(0, separator), id: entry.slice(separator + 1) };
+    });
+    fetch("/api/cart/availability", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lines }),
+      signal: controller.signal,
+    })
+      .then((response) => (response.ok ? response.json() : { unavailable: [] }))
+      .then((data: { unavailable?: unknown }) => {
+        const ids = Array.isArray(data.unavailable) ? data.unavailable.filter((id): id is string => typeof id === "string") : [];
+        setResult({ key, ids });
+      })
+      .catch(() => { /* Leave checkout as it is when the check can't run. */ });
+    return () => controller.abort();
+  }, [key]);
+
+  return useMemo(() => new Set(result.key === key ? result.ids : []), [result, key]);
+}
+
+function CheckoutAction({ checkout, allUnavailable = false }: { checkout?: string; allUnavailable?: boolean }) {
+  if (allUnavailable) {
+    return <p className="mt-6 rounded-2xl bg-white/60 p-4 text-sm leading-6">The items in your cart are no longer available. Remove them to keep shopping.</p>;
+  }
   if (!checkout) {
     return <p className="mt-6 rounded-2xl bg-white/60 p-4 text-sm leading-6">This cart can’t be checked out right now. Please remove and add the item again.</p>;
   }
@@ -100,8 +137,14 @@ function EmptyCart({ browse }: { browse?: ReactNode }) {
 
 export function CartContents({ browse }: { browse?: ReactNode }) {
   const { items, updateQuantity, removeItem } = useCart();
-  const checkout = useMemo(() => checkoutUrl(items), [items]);
-  const subtotal = items.reduce((total, item) => total + (item.priceCents ?? 0) * item.quantity, 0);
+  const unavailable = useUnavailableCartItems(items);
+  const purchasableItems = useMemo(() => items.filter((item) => !unavailable.has(item.id)), [items, unavailable]);
+  const checkout = useMemo(() => checkoutUrl(purchasableItems), [purchasableItems]);
+  const allUnavailable = items.length > 0 && !purchasableItems.length;
+  const unavailableNotice = unavailable.size && !allUnavailable
+    ? <p role="status" className="mt-4 text-sm leading-6 text-[#8a2c1f]">{unavailable.size === 1 ? "1 item is" : `${unavailable.size} items are`} no longer available and won’t be included at checkout.</p>
+    : null;
+  const subtotal = purchasableItems.reduce((total, item) => total + (item.priceCents ?? 0) * item.quantity, 0);
 
   if (!items.length) return <EmptyCart browse={browse} />;
 
@@ -118,6 +161,7 @@ export function CartContents({ browse }: { browse?: ReactNode }) {
                 <div className="min-w-0">
                   <h2 className="font-heading text-xl font-semibold leading-tight sm:text-2xl">{item.name}</h2>
                   {item.options ? <p className="mt-1 text-sm text-black/60 sm:text-base">{item.options}</p> : null}
+                  {unavailable.has(item.id) ? <p className="mt-2 text-sm font-semibold text-[#8a2c1f]">Sold out — no longer available. Please remove it.</p> : null}
                   <p className="mt-2 font-semibold sm:hidden">{item.priceCents === null ? "Price at checkout" : formatCurrency(item.priceCents * item.quantity, item.currency)}</p>
                   <p className="mt-1 hidden text-sm text-black/55 sm:block">{item.priceCents === null ? "Price at checkout" : `${formatCurrency(item.priceCents, item.currency)} each`}</p>
                   <div className="mt-4 flex flex-wrap items-center gap-x-3 gap-y-2">
@@ -138,7 +182,8 @@ export function CartContents({ browse }: { browse?: ReactNode }) {
             <h2 className="font-heading text-3xl font-semibold tracking-[-0.04em]">Order summary</h2>
             <div className="mt-5 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
             <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
-            <CheckoutAction checkout={checkout} />
+            {unavailableNotice}
+            <CheckoutAction checkout={checkout} allUnavailable={allUnavailable} />
             <Link href="/shop" className="mt-5 block text-center font-semibold underline underline-offset-4 hover:text-[#183247]">Continue shopping</Link>
           </aside>
         </div>
@@ -160,7 +205,8 @@ export function CartContents({ browse }: { browse?: ReactNode }) {
           </ul>
           <div className="mt-6 flex items-center justify-between border-y border-black/10 py-4 text-xl font-semibold"><span>Subtotal</span><span>{formatCurrency(subtotal, "USD")}</span></div>
           <p className="mt-4 text-sm leading-6 text-black/55">Taxes and shipping are calculated securely during checkout.</p>
-          <CheckoutAction checkout={checkout} />
+          {unavailableNotice}
+          <CheckoutAction checkout={checkout} allUnavailable={allUnavailable} />
           <Link href="/shop" className="mt-5 block text-center font-semibold underline underline-offset-4 hover:text-[#183247]">Continue shopping</Link>
         </aside>
       </div>

@@ -1,21 +1,22 @@
 import type { Metadata, Viewport } from "next";
-import { Cormorant_Garamond, DM_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import { CartProvider } from "@/components/shop/CartProvider";
 import { ANNOUNCEMENT_PREPAINT_SCRIPT } from "@/lib/announcement";
 import { getSiteUrl } from "@/lib/siteUrl";
 import "./globals.css";
 
-const cormorantGaramond = Cormorant_Garamond({
+// The fonts ship with the site (variable fonts, Latin subset, weights
+// 400–700) instead of being downloaded from Google Fonts on every build, so a
+// slow or failed font download can no longer break a deploy.
+const cormorantGaramond = localFont({
+  src: [{ path: "./fonts/CormorantGaramond-latin.woff2", weight: "400 700", style: "normal" }],
   variable: "--font-cormorant-garamond",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 
-const dmSans = DM_Sans({
+const dmSans = localFont({
+  src: [{ path: "./fonts/DMSans-latin.woff2", weight: "400 700", style: "normal" }],
   variable: "--font-dm-sans",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
   display: "swap",
 });
 

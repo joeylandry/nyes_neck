@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { NextResponse } from "next/server";
 import { getSanityWriteClient } from "@/sanity/writeClient";
 
@@ -31,7 +32,10 @@ function getFormspreeEndpoint() {
 type Inquiry = { name: string; email: string; inquiryType: string; message: string };
 
 async function saveToSanity(inquiry: Inquiry) {
+  // An ID with a "." keeps the document private: the dataset is public, and
+  // only Studio and token holders can read IDs in a path like this one.
   await getSanityWriteClient().create({
+    _id: `contactSubmission.${randomUUID()}`,
     _type: "contactSubmission",
     ...inquiry,
     submittedAt: new Date().toISOString(),

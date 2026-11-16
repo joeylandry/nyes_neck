@@ -3,8 +3,8 @@ import Link from "next/link";
 import { PageTitle } from "@/components/ui/PageTitle";
 
 export const metadata: Metadata = {
-  title: "Returns & Exchanges",
-  description: "How Nyes Neck handles damaged or misprinted items, sizing, cancellations and refunds.",
+  title: "Shipping & Returns",
+  description: "How long Nyes Neck orders take, and how we handle damaged or misprinted items, sizing, cancellations and refunds.",
 };
 
 // Every piece is printed or embroidered to order by our production partner,
@@ -12,6 +12,15 @@ export const metadata: Metadata = {
 // damaged, defective or misprinted items reported within 30 days of
 // delivery, and no returns for size, color or change of mind.
 const sections: Array<{ title: string; body: React.ReactNode }> = [
+  {
+    title: "Shipping",
+    body: (
+      <>
+        <p>Each order is made for you, which usually takes 2–5 business days (embroidered pieces can take a little longer). Then it ships, and you’ll get an email with tracking. Shipping options and costs are shown at checkout.</p>
+        <p><strong>Ordering for the holidays?</strong> Order early. Production and carriers slow down in December.</p>
+      </>
+    ),
+  },
   {
     title: "Made to order",
     body: (
@@ -50,13 +59,13 @@ const sections: Array<{ title: string; body: React.ReactNode }> = [
   },
 ];
 
-export default function ReturnsPage() {
+export default function ShippingReturnsPage() {
   return (
     <>
-      <PageTitle title="Returns" />
+      <PageTitle title="Shipping & Returns" />
       <div className="mx-auto max-w-3xl px-4 py-10 md:px-6 md:py-16">
         <p className="text-lg leading-8 text-black/70">
-          We want you to love what you get from Nyes Neck. Here’s how we handle anything that goes wrong.
+          We want you to love what you get from Nyes Neck. Here’s how shipping works, and how we handle anything that goes wrong.
         </p>
         <div className="mt-8 divide-y divide-black/10 border-y border-black/10">
           {sections.map(({ title, body }) => (

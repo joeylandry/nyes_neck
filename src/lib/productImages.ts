@@ -52,21 +52,32 @@ export function isPersonPhoto(image: Pick<ProductImage, "src"> & Partial<Pick<Pr
   return Boolean(image.alt && personAltPattern.test(image.alt));
 }
 
+const PLACEHOLDER_IMAGE = "/images/products/product-placeholder.svg";
+
+/**
+ * Removes every photo that shows a person, so product galleries only ever show
+ * the product by itself. A product whose only photos show people gets the
+ * plain placeholder instead.
+ */
+export function removePersonPhotos(images: ProductImage[]): ProductImage[] {
+  const kept = images.filter((image) => !isPersonPhoto(image));
+  if (kept.length || !images.length) return kept;
+  return [{ id: `${images[0].id}-placeholder`, src: PLACEHOLDER_IMAGE, alt: images[0].alt, role: "main" }];
+}
+
 const viewRank = (image: ProductImage) => {
-  // Photos of people always come last so they never become the front image.
-  if (isPersonPhoto(image)) return 4;
   const view = image.view ?? detectProductImageView(image.src);
   return view === "front" ? 0 : view === "angled-front" ? 1 : view === "other" ? 3 : 2;
 };
 
 /**
- * Puts each color's front mockup first so cards and product pages open on the
- * front of the garment, and moves photos of people to the end so the first
- * image always shows the product by itself. Images only move within the slots their own color
- * already occupies, so the published primary image keeps deciding which color
- * a product opens on.
+ * Drops photos of people, then puts each color's front mockup first so cards
+ * and product pages open on the front of the garment. Images only move within
+ * the slots their own color already occupies, so the published primary image
+ * keeps deciding which color a product opens on.
  */
-export function orderFrontViewsFirst(images: ProductImage[]): ProductImage[] {
+export function orderFrontViewsFirst(allImages: ProductImage[]): ProductImage[] {
+  const images = removePersonPhotos(allImages);
   const colorKey = (image: ProductImage) => [...(image.colors ?? [])].sort().join("\u0000");
   const groups = new Map<string, ProductImage[]>();
   for (const image of images) {
@@ -148,7 +159,7 @@ export function mergeSynchronizedProductImages(
     const matchesPrimaryColor = Boolean(shopifyMain?.colors?.some((color) => image.colors?.includes(color)));
     // Shopify's primary front and Printful's front for that color are the same
     // mockup, unless Shopify's shows a person: then Printful's is a different
-    // photo, and the one to open on.
+    // photo, and the one to open on (Shopify's is dropped below).
     if (shopifyMain && isFrontView(shopifyMain) && !isPersonPhoto(shopifyMain) && matchesPrimaryColor && !skippedMatchingPrintfulFront && isFrontView(image)) {
       skippedMatchingPrintfulFront = true;
       continue;

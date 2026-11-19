@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useState } from "react";
 
-export type FrontPhotoRow = { key: string; product: string; color: string; image: string; fileName: string; personPhoto: boolean };
+export type FrontPhotoRow = { key: string; product: string; color: string; image: string; fileName: string };
 
 /**
  * Every color's front photo, so photos that show a person can be ticked and
@@ -51,9 +51,6 @@ export function FrontPhotoPicker({ rows }: { rows: FrontPhotoRow[] }) {
               <span className="font-semibold leading-snug">{row.product}</span>
               {row.color ? <span className="text-black/60">{row.color}</span> : null}
               <span className="break-all text-[0.68rem] text-black/45">{row.fileName}</span>
-              {row.personPhoto ? (
-                <span className="font-semibold text-[#8a2a2a]">Only photos with people for this color</span>
-              ) : null}
               <span className="mt-auto flex items-center gap-2 font-semibold">
                 <input type="checkbox" className="size-4 accent-black" checked={selected.has(row.key)} onChange={() => toggle(row.key)} />
                 Shows a person

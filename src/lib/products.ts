@@ -2,7 +2,7 @@ import { collectionCategories, productTypeCategories, products as localProducts,
 import { productDetails } from "@/data/productDetails";
 import { fetchShopifyProducts } from "@/lib/commerce/shopify";
 import { fetchPrintfulProducts } from "@/lib/commerce/printful";
-import { mergeSynchronizedProductImages } from "@/lib/productImages";
+import { isPersonPhoto, mergeSynchronizedProductImages } from "@/lib/productImages";
 import { collectionTileLabel } from "@/lib/shopLabels";
 import { productMatchesSlug } from "@/lib/productSlugs";
 import { applyVariantAvailability, mergeShopifyVariantState } from "@/lib/variantAvailability";
@@ -143,7 +143,10 @@ function mapProduct(record: SanityProduct): Product | null {
     if (!item.image || !item.role) return [];
     const src = sanityImageUrl(item.image, 1200, 1500);
     if (!src) return [];
-    return [{ id: item._key ?? `${record._id}-image-${index}`, src, alt: item.alt ?? record.title, role: item.role }];
+    const image = { id: item._key ?? `${record._id}-image-${index}`, src, alt: item.alt ?? record.title, role: item.role };
+    // Product photos never show people.
+    if (isPersonPhoto(image)) return [];
+    return [image];
   });
   const mainImage = images.find((image) => image.role === "main");
   if (!mainImage) return null;

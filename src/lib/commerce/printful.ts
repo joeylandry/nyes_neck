@@ -297,9 +297,6 @@ function mapPrintfulProduct(
       alt: `${syncProduct.name}${color ? ` — ${color}` : ""}`,
       role: images.length ? "gallery" : "main", colors: color ? [color] : undefined, view });
   };
-  const hasImageForColor = (color?: string) => images.some((image) => (
-    color ? image.colors?.includes(color) : !image.colors?.length
-  ));
 
   // Printful's preview files are the generated, branded product mockups. They
   // are deliberately scoped to the variant color so switching colors never
@@ -314,14 +311,11 @@ function mapPrintfulProduct(
     }
   }
 
-  // Keep a scoped catalog fallback only for colors that do not yet have a
-  // branded Printful mockup. This preserves a usable product page while never
-  // showing that fallback under a different color selection.
-  for (const color of colors.length ? colors : [undefined]) {
-    if (hasImageForColor(color)) continue;
-    const colorVariant = (detail.sync_variants ?? []).find((variant) => parseVariantOptions(variant, syncProduct.name).color === color);
-    addImage(colorVariant?.product?.image ?? syncProduct.thumbnail_url, color);
-  }
+  // Printful's catalog photo of the blank item (`variant.product.image`) is
+  // never used: it is a stock photo that often shows a model, and its file name
+  // gives no sign of that. A color without a branded mockup shows the
+  // product's other photos instead.
+  if (!images.length) addImage(syncProduct.thumbnail_url);
   if (!images.length) addImage("/images/products/product-placeholder.svg");
 
   const catalogDescription = catalogProduct?.description?.trim();

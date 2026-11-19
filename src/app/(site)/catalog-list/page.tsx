@@ -4,7 +4,7 @@ import { FrontPhotoPicker, type FrontPhotoRow } from "./FrontPhotoPicker";
 import { getFavoriteProducts, productStyle } from "@/lib/favorites";
 import { productDetails } from "@/data/productDetails";
 import { getProducts } from "@/lib/products";
-import { imageFileName, isPersonPhoto } from "@/lib/productImages";
+import { imageFileName } from "@/lib/productImages";
 
 // An unlinked working page for choosing "Our Favorites". Kept out of search.
 export const metadata: Metadata = {
@@ -43,7 +43,6 @@ export default async function CatalogListPage() {
         color,
         image: front.src,
         fileName: imageFileName(front.src),
-        personPhoto: isPersonPhoto(front),
       }];
     });
   });
@@ -59,9 +58,9 @@ export default async function CatalogListPage() {
 
       <h2 id="front-photos" className="font-ui mt-16 text-2xl font-semibold tracking-[-0.03em] md:text-3xl">Front photos</h2>
       <p className="mt-3 max-w-2xl text-black/65">
-        The photo each product and color opens on. Photos of people are moved to the back of the gallery
-        automatically when their file name gives them away. Tick any front photo that still shows a person, then
-        use “Copy ticked” and send the list over.
+        The photo each product and color opens on. Photos of people are removed from every product automatically
+        when their file name or description gives them away. Tick any photo here that still shows a person, then
+        use “Copy ticked” and send the list over to have it removed.
       </p>
       <FrontPhotoPicker rows={frontPhotos} />
     </div>

@@ -109,7 +109,7 @@ test("each color opens on its front mockup without changing the primary color", 
   assert.deepEqual(images.map((image) => image.role), ["main", "gallery", "gallery", "gallery", "gallery"]);
 });
 
-test("photos of people never become a color's front image", () => {
+test("photos of people are removed from product images", () => {
   assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/classic-mens-columbia-jacket-black-front-65f1.png" }), false);
   assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/unisex-hoodie-navy-lifestyle-1-65f1.jpg" }), true);
   assert.equal(isPersonPhoto({ src: "https://cdn.shopify.com/s/files/1/tee-navy-front-65f1.jpg", alt: "Model wearing the navy tee" }), true);
@@ -120,8 +120,13 @@ test("photos of people never become a color's front image", () => {
     { id: "navy-back", src: "https://shopify.test/tee-navy-back-1.png", alt: "", role: "gallery", colors: ["Navy"] },
     { id: "navy-flat-front", src: "https://shopify.test/tee-navy-front-2-1.png", alt: "", role: "gallery", colors: ["Navy"] },
   ]);
-  assert.deepEqual(images.map((image) => image.id), ["navy-flat-front", "navy-back", "navy-model-front"]);
+  assert.deepEqual(images.map((image) => image.id), ["navy-flat-front", "navy-back"]);
   assert.equal(images[0].role, "main");
+
+  const onlyPeople = orderFrontViewsFirst([
+    { id: "model", src: "https://shopify.test/tee-navy-lifestyle-1.png", alt: "", role: "main", colors: ["Navy"] },
+  ]);
+  assert.deepEqual(onlyPeople.map((image) => image.src), ["/images/products/product-placeholder.svg"]);
 });
 
 test("a person-photo Shopify main does not hide Printful's product-only front", () => {
@@ -129,7 +134,7 @@ test("a person-photo Shopify main does not hide Printful's product-only front", 
     [{ id: "printful-front", src: "https://printful.test/tee-blue-front.png", alt: "", role: "main", colors: ["Blue"] }],
     [{ id: "shopify-model", src: "https://shopify.test/tee-blue-front-lifestyle.png", alt: "", role: "main", colors: ["Blue"] }],
   );
-  assert.deepEqual(images.map((image) => image.id), ["printful-front", "shopify-model"]);
+  assert.deepEqual(images.map((image) => image.id), ["printful-front"]);
 });
 
 test("products open on a color with a product-only photo", () => {
